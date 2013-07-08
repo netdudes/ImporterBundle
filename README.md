@@ -3,6 +3,8 @@ ImporterBundle
 
 Simplifing data imports (at the moment via csv)
 
+[![Build Status](https://travis-ci.org/netdudes/ImporterBundle.png?branch=master)](https://travis-ci.org/netdudes/ImporterBundle)
+
 ## Usage
 
 ...
