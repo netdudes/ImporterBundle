@@ -1,0 +1,6 @@
+parameters:
+
+services:
+  netdudes_importer:
+    class: Netdudes\ImporterBundle\Importer\Importer
+    arguments: ["@doctrine.orm.entity_manager"]

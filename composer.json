@@ -1,0 +1,32 @@
+{
+    "name": "netdudes/importer-bundle",
+    "type": "symfony-bundle",
+    "description": "Symfony ImporterBundle",
+    "keywords": ["import", "fixtures"],
+    "homepage": "https://github.com/netdudes/ImporterBundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Netdudes GmbH",
+            "homepage": "https://github.com/netdudes/ImporterBundle/contributors"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.4",
+        "symfony/symfony": ">=2.1,<3.0"
+    },
+    "require-dev": {
+    },
+    "autoload":{
+        "psr-0":{
+            "Netdudes\\ImporterBundle": ""
+        }
+    },
+    "target-dir": "Netdudes/ImporterBundle",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}
