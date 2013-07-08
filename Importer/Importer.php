@@ -253,7 +253,6 @@ class Importer
             $ownerColumnData = $row[$columnKeys[0]];
             $inversedColumnData = $row[$columnKeys[1]];
 
-
             /** Lookup the owner and if it was not cached, write it to the cache */
             $owner = null;
             if (array_key_exists($ownerColumnData, $internalOwnerLookupStorage)) {
@@ -528,6 +527,5 @@ class Importer
 
         return $fileContents;
     }
-
 
 }

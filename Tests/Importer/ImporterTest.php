@@ -36,7 +36,6 @@ class ImporterTest extends \PHPUnit_Framework_TestCase
             ],
         ];
 
-
         $importer = new Importer($entityManager);
 
         $entities = $importer->getEntitiesFromConfiguration($data, $headers, $configuration);

@@ -2,8 +2,8 @@
 
 namespace Netdudes\ImporterBundle\Tests\Importer;
 
-class Book {
-
+class Book
+{
     /** @var string */
     protected $title;
 
@@ -74,6 +74,5 @@ class Book {
     {
         return $this->year;
     }
-
 
 }

@@ -2,8 +2,6 @@
 
 namespace Netdudes\ImporterBundle\Command;
 
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
-use Metadata\MetadataFactory;
 use Sensio\Bundle\GeneratorBundle\Command\Validators;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Helper\DialogHelper;
@@ -64,7 +62,7 @@ class GenerateImportConfigCommand extends ContainerAwareCommand
             if (!in_array($propertyName, $identifiers)) {
                 $propertiesToGenerate[$index] = array();
                 $propertiesToGenerate[$index]['property'] = $propertyName;
-                if(in_array($classMetaData->getTypeOfField($propertyName), ['date','datetime'])) {
+                if (in_array($classMetaData->getTypeOfField($propertyName), ['date','datetime'])) {
                     $propertiesToGenerate[$index]['type'] = $classMetaData->getTypeOfField($propertyName);
                 }
                 if ($classMetaData->hasAssociation($propertyName)) {
