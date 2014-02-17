@@ -118,7 +118,7 @@ class Importer
         $file = new \SplFileObject($file);
         $csvData = array();
         while (!$file->eof()) {
-            $csvData[] = $file->fgetcsv(',', '"');
+            $csvData[] = array_map('stripslashes', $file->fgetcsv());
         }
 
         return $csvData;
