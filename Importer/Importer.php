@@ -309,6 +309,10 @@ class Importer
      */
     public function lookupEntity($entityName, $property, $value)
     {
+        if (is_null($value) || empty($value) || strtolower($value) === 'null') {
+            return null;
+        }
+
         $repo = $this->getEm()->getRepository($entityName);
         $entity = $repo->findOneBy(
             [
