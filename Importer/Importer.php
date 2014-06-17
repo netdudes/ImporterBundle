@@ -129,7 +129,7 @@ class Importer
      * @param array $data
      * @param array $configuration
      */
-    protected function importData($data, $configuration)
+    public function importData($data, $configuration)
     {
         /** Get the header row */
         $csvColumnHeaders = $this->parseDataForCsvHeaders($data, $configuration);
