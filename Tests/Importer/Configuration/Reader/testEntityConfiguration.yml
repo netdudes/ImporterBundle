@@ -1,0 +1,13 @@
+test_entity:
+  entity: \Namespace\To\TestEntity
+  columns:
+    Test Lookup Column:
+      property: 'lookupProperty'
+      lookupProperty: 'name'
+      type: '\Path\To\Another\TestEntity'
+    Test Literal Column:
+      property: literalColumn
+    Test DateTime Column:
+      property: datetimeColumn
+      type: datetime
+      format: 'd.m.Y H:i:s'

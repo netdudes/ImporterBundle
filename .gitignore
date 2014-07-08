@@ -4,3 +4,5 @@ Tests/autoload.php
 .idea
 vendor/*
 phpunit.phar
+bin
+bin/*

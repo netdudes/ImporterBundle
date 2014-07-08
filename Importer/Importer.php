@@ -3,6 +3,7 @@
 namespace Netdudes\ImporterBundle\Importer;
 
 use Doctrine\ORM\EntityManager;
+use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 
 class Importer
@@ -11,7 +12,8 @@ class Importer
     /**
      * @var \Doctrine\ORM\EntityManager
      */
-    protected $em;
+    protected $entityManager;
+
     /**
      * The current working directory for looking up files
      * @var string
@@ -19,39 +21,46 @@ class Importer
     protected $cwd;
 
     /**
-     * @param EntityManager $em
+     * @param EntityManager $entityManager
      */
-    public function __construct(EntityManager $em)
+    public function __construct(EntityManager $entityManager)
     {
-        $this->setEm($em);
+        $this->entityManager = $entityManager;
     }
 
     /**
      * You can pass either the filename, a configuration according to the file or an array of files and an array of
      * configurations for the files. Mention, that the files and the configurations have to be in the same order.
      * The last parameter is primary optional, but if set, every filepath in front of each file will NOT be recognised.
+     *
      * @param string|array $files
-     * @param array $configuration
-     * @param string $currentWorkingDirectory
+     * @param array        $arrayConfiguration
+     * @param string       $currentWorkingDirectory
+     *
      * @throws FileNotFoundException
      */
-    public function import($files, array $configuration, $currentWorkingDirectory = '')
+    public function import($files, array $arrayConfiguration, $currentWorkingDirectory = '')
     {
-        if (is_array($files)) {
-            for ($counter = 0; $counter < count($files); $counter++) {
-                $this->prepareAndRunImport($files[$counter], $configuration[$counter], $currentWorkingDirectory);
-            }
-        } else {
-            $this->prepareAndRunImport($files, $configuration, $currentWorkingDirectory);
+        $configurationReader = new YamlConfigurationReader();
+        $configurationReader->read($arrayConfiguration);
+        $configuration = $configurationReader->getConfigurationCollection();
+
+        $importer = new CsvImporter($configuration, $this->entityManager);
+
+        foreach ($files as $index => $file) {
+            $key = array_keys($configuration->all())[$index];
+            $importer->import($key, file_get_contents($file));
         }
     }
 
     /**
      * @param string $file
-     * @param array $configuration
+     * @param array  $configuration
      * @param string $currentWorkingDirectory
+     *
      * @return bool
      * @throws \Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException
+     * @deprecated
      */
     protected function prepareAndRunImport($file, array $configuration, $currentWorkingDirectory)
     {
@@ -84,6 +93,7 @@ class Importer
 
     /**
      * @return string
+     * @deprecated
      */
     public function getCwd()
     {
@@ -94,6 +104,7 @@ class Importer
      * @param string $cwd
      *
      * @return Importer
+     * @deprecated
      */
     public function setCwd($cwd)
     {
@@ -104,7 +115,9 @@ class Importer
 
     /**
      * @param string $file
+     *
      * @return array|bool
+     * @deprecated
      */
     protected function getCsvData($file)
     {
@@ -126,6 +139,7 @@ class Importer
 
     /**
      * The actual method, that gets all required information and then inserts the entities into the db
+     *
      * @param array $data
      * @param array $configuration
      */
@@ -164,8 +178,10 @@ class Importer
     /**
      * @param array $data
      * @param array $configuration
+     *
      * @return boolean|array
      * @throws \Exception
+     * @deprecated
      */
     public function parseDataForCsvHeaders($data, $configuration)
     {
@@ -212,8 +228,10 @@ class Importer
      * @param $data
      * @param $csvColumnHeaders
      * @param $configuration
+     *
      * @return array
      * @throws \Exception
+     * @deprecated
      */
     public function getJoinedEntitiesFromConfiguration($data, $csvColumnHeaders, $configuration)
     {
@@ -271,8 +289,7 @@ class Importer
                 /** Call the ownerCallback method on the owner with the inversed entity as parameter */
                 $owner->{$ownerCallbackMethod}($inversedEntity);
             } else {
-                throw new \Exception("Class '{$entityReflectionClass->getName(
-                )}' has no method '$ownerCallbackMethod' (ownerCallback).");
+                throw new \Exception("Class '{$entityReflectionClass->getName()}' has no method '$ownerCallbackMethod' (ownerCallback).");
             }
 
             $entities[] = $owner;
@@ -283,9 +300,12 @@ class Importer
 
     /**
      * Changes a numeric array into a named array
+     *
      * @param array $data
      * @param array $headers
+     *
      * @return array
+     * @deprecated
      */
     public function numericToNamed($data, $headers)
     {
@@ -301,11 +321,14 @@ class Importer
 
     /**
      * Returns an entity for the given property = value where statement
+     *
      * @param string $entityName
      * @param string $property
-     * @param mixed $value
+     * @param mixed  $value
+     *
      * @return object
      * @throws \Exception
+     * @deprecated
      */
     public function lookupEntity($entityName, $property, $value)
     {
@@ -329,30 +352,34 @@ class Importer
 
     /**
      * @return \Doctrine\ORM\EntityManager
+     * @deprecated
      */
     public function getEm()
     {
-        return $this->em;
+        return $this->entityManager;
     }
 
     /**
      * @param \Doctrine\ORM\EntityManager $em
      *
      * @return Importer
+     * @deprecated
      */
     public function setEm(EntityManager $em)
     {
-        $this->em = $em;
+        $this->entityManager = $em;
 
         return $this;
     }
 
     /**
-     * @param array $data
+     * @param array         $data
      * @param array|boolean $csvColumnHeaders
-     * @param array $configuration
+     * @param array         $configuration
+     *
      * @return array
      * @throws \Exception
+     * @deprecated
      */
     public function getEntitiesFromConfiguration($data, $csvColumnHeaders, $configuration)
     {
@@ -459,9 +486,9 @@ class Importer
                                     }
                                 } catch (\Exception $e) {
                                     throw new \Exception('Error in CSV line "' . ($rowNumber + 1) . '" with message "' .
-                                    $e->getMessage() . '". ColumnProperty: ' . json_encode(
-                                        $column
-                                    ) . '; Entity: ' . $entityClass);
+                                        $e->getMessage() . '". ColumnProperty: ' . json_encode(
+                                            $column
+                                        ) . '; Entity: ' . $entityClass);
                                 }
                             } else {
                                 $columnData = trim($columnData);
@@ -498,10 +525,13 @@ class Importer
 
     /**
      * Returns a DateTime object for the given value and format
+     *
      * @param string $value
      * @param string $readFormat
+     *
      * @return \DateTime
      * @throws \Exception
+     * @deprecated
      */
     public function getDateTimeObject($value, $readFormat = 'Y-m-d')
     {
@@ -515,10 +545,13 @@ class Importer
 
     /**
      * Reads the content of a given file
+     *
      * @param string $filename
      * @param string $pathPrefix
+     *
      * @return string
      * @throws \Exception
+     * @deprecated
      */
     public function getFileContent($filename, $pathPrefix = '')
     {
