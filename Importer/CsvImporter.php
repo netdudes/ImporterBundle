@@ -13,7 +13,7 @@ use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReade
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Exception\DatabaseException;
 use Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreter;
-use Netdudes\ImporterBundle\Importer\Interpreter\RelationshipInterpreter;
+use Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreter;
 use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
 
 class CsvImporter implements ImporterInterface
@@ -21,15 +21,12 @@ class CsvImporter implements ImporterInterface
     protected $configurationCollection;
     protected $parser;
     protected $entityManager;
-    protected $entityDataInterpreter;
-    protected $relationshipDataInterpreter;
 
     function __construct(ConfigurationCollectionInterface $configurationCollection, EntityManager $entityManager)
     {
         $this->configurationCollection = $configurationCollection;
         $this->parser = new CsvParser();
         $this->entityManager = $entityManager;
-        $this->relationshipDataInterpreter = new RelationshipInterpreter($entityManager);
     }
 
     public static function createFromYamlConfigurationFiles(array $configurationFiles, EntityManager $entityManager)
@@ -45,9 +42,10 @@ class CsvImporter implements ImporterInterface
     public function import($configurationKey, $data, $hasHeaders = true, $flush = true)
     {
         $configuration = $this->configurationCollection->get($configurationKey);
+        $parsedData = $this->parser->parse($data, $hasHeaders);
 
         if ($configuration instanceof EntityConfigurationInterface) {
-            $this->importEntityData($configuration, $data, $hasHeaders);
+            $this->importEntityData($configuration, $parsedData, $hasHeaders);
             if ($flush) {
                 $this->flush($configuration);
             }
@@ -55,7 +53,7 @@ class CsvImporter implements ImporterInterface
         }
 
         if ($configuration instanceof RelationshipConfigurationInterface) {
-            $this->importRelationshipData($configuration, $data, $hasHeaders);
+            $this->importRelationshipData($configuration, $parsedData, $hasHeaders);
             if ($flush) {
                 $this->flush($configuration);
             }
@@ -77,9 +75,8 @@ class CsvImporter implements ImporterInterface
         }
     }
 
-    private function importEntityData($configuration, $data, $hasHeaders)
+    private function importEntityData($configuration, $parsedData, $hasHeaders)
     {
-        $parsedData = $this->parser->parse($data, $hasHeaders);
         $entityDataInterpreter = new EntityDataInterpreter($configuration, $this->entityManager);
         $interpretedData = $entityDataInterpreter->interpret($parsedData, $hasHeaders);
         if (is_null($interpretedData)) {
@@ -95,8 +92,10 @@ class CsvImporter implements ImporterInterface
         }
     }
 
-    private function importRelationshipData($configuration, $data, $hasHeaders)
+    private function importRelationshipData($configuration, $parsedData, $hasHeaders)
     {
+        $relationshipDataInterpreter = new RelationshipDataInterpreter($configuration, $this->entityManager);
+        $relationshipDataInterpreter->interpret($parsedData, $hasHeaders);
     }
 
     protected function flush(ConfigurationInterface $configuration)

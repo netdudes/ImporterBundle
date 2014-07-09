@@ -17,7 +17,7 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Field\FileFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LiteralFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LookupFieldInterpreter;
 
-class EntityDataInterpreter
+class EntityDataInterpreter extends AbstractInterpreter
 {
     /**
      * @var \Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface

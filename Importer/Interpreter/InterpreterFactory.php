@@ -15,7 +15,7 @@ class InterpreterFactory
         }
 
         if ($configuration instanceof RelationshipConfigurationInterface) {
-            return new RelationshipInterpreter($configuration);
+            return new RelationshipDataInterpreter($configuration);
         }
 
         throw new \Exception();
