@@ -7,7 +7,6 @@ use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationColle
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfiguration;
-use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LiteralFieldConfiguration;
@@ -15,14 +14,13 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguratio
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\Exception\FieldConfigurationParseException;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\Exception\MissingParameterException;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\Exception\UndefinedConfigurationNodeTypeException;
-use Symfony\Component\Intl\Exception\NotImplementedException;
 use Symfony\Component\Yaml\Parser;
 
 class YamlConfigurationReader implements ConfigurationReaderInterface
 {
     protected $configurationCollection;
 
-    function __construct()
+    public function __construct()
     {
         $this->configurationCollection = new ConfigurationCollection();
     }
@@ -137,6 +135,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         $fieldConfiguration->setLookupField($lookupField);
         $fieldConfiguration->setClass($this->getChild($node, 'type'));
         $fieldConfiguration->setField($this->getChild($node, 'property'));
+
         return $fieldConfiguration;
     }
 
@@ -149,6 +148,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         if (!($type = $this->getChild($node, 'type'))) {
             $fieldConfiguration = new LiteralFieldConfiguration();
             $fieldConfiguration->setField($property);
+
             return $fieldConfiguration;
         }
 
@@ -180,6 +180,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
             $fieldConfiguration->setFormat($format);
         }
         $fieldConfiguration->setField($this->getChild($node, 'property'));
+
         return $fieldConfiguration;
     }
 
@@ -198,6 +199,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
             $fieldConfiguration->setFormat($format);
         }
         $fieldConfiguration->setField($this->getChild($node, 'property'));
+
         return $fieldConfiguration;
     }
 
@@ -205,6 +207,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     {
         $fieldConfiguration = new FileFieldConfiguration();
         $fieldConfiguration->setField($this->getChild($node, 'property'));
+
         return $fieldConfiguration;
     }
 }

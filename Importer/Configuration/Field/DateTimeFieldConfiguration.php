@@ -22,4 +22,4 @@ class DateTimeFieldConfiguration extends AbstractFieldConfiguration
         $this->format = $format;
     }
 
-} 
+}

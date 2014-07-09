@@ -3,14 +3,13 @@
 namespace Netdudes\ImporterBundle\Importer\Interpreter;
 
 use Doctrine\ORM\EntityManager;
-use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\MissingAssignementMethodException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\MissingColumnException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LookupFieldInterpreter;
 
-class RelationshipDataInterpreterInterface implements  InterpreterInterface
+class RelationshipDataInterpreter implements  InterpreterInterface
 {
     /**
      * @var \Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface
@@ -22,7 +21,7 @@ class RelationshipDataInterpreterInterface implements  InterpreterInterface
      */
     private $entityManager;
 
-    function __construct(RelationshipConfigurationInterface $configuration, EntityManager $entityManager)
+    public function __construct(RelationshipConfigurationInterface $configuration, EntityManager $entityManager)
     {
         $this->configuration = $configuration;
         $this->lookupFieldInterpreter = new LookupFieldInterpreter($entityManager);

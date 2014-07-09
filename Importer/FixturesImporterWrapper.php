@@ -4,10 +4,8 @@ namespace Netdudes\ImporterBundle\Importer;
 
 use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
-use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
-use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 
 class FixturesImporterWrapper
 {
@@ -103,6 +101,7 @@ class FixturesImporterWrapper
 
         /** Build up the filepath and filename */
         $filename = $this->getCwd() . DIRECTORY_SEPARATOR . $file;
+
         return $filename;
     }
 

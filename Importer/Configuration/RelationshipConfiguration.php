@@ -2,8 +2,6 @@
 
 namespace Netdudes\ImporterBundle\Importer\Configuration;
 
-use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
-
 class RelationshipConfiguration implements RelationshipConfigurationInterface
 {
 
@@ -56,7 +54,6 @@ class RelationshipConfiguration implements RelationshipConfigurationInterface
     {
         $this->relatedLookupFieldName = $relatedLookupFieldName;
     }
-
 
     public function getAssignmentMethod()
     {

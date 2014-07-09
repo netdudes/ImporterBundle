@@ -15,12 +15,12 @@ class DateTimeFormatException extends \Exception
     public function __toString()
     {
         $dateTimeErrorsPrettyPrint = print_r($this->dateTimeErrors, true);
+
         return
             $this->message . PHP_EOL .
             "Could not parse \"{$this->value}\" for format \"{$this->format}\". DateTime errors follow:" .PHP_EOL .
             $dateTimeErrorsPrettyPrint;
     }
-
 
     /**
      * @param array $dateTimeErrors
@@ -37,7 +37,6 @@ class DateTimeFormatException extends \Exception
     {
         return $this->dateTimeErrors;
     }
-
 
     /**
      * @param mixed $format

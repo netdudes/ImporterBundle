@@ -2,7 +2,6 @@
 
 namespace Netdudes\ImporterBundle\Tests\Importer\Configuration\Reader;
 
-
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader;
 
@@ -48,7 +47,6 @@ class YamlConfigurationReaderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('datetimeColumn', $testDateTimeField->getField());
         $this->assertEquals('d.m.Y H:i:s', $testDateTimeField->getFormat());
     }
-
 
     public function testReadJoinedImportConfigurationYaml()
     {

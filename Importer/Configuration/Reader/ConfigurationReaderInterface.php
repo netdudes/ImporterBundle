@@ -2,7 +2,6 @@
 
 namespace Netdudes\ImporterBundle\Importer\Configuration\Reader;
 
-
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 
 interface ConfigurationReaderInterface
@@ -12,4 +11,4 @@ interface ConfigurationReaderInterface
      */
     public function getConfigurationCollection();
     public function readFile($filename);
-} 
+}

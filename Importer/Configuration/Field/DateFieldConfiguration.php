@@ -4,7 +4,7 @@ namespace Netdudes\ImporterBundle\Importer\Configuration\Field;
 
 class DateFieldConfiguration extends DateTimeFieldConfiguration
 {
-    function __construct()
+    public function __construct()
     {
         $this->format = 'Y-m-d';
     }

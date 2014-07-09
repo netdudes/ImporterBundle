@@ -5,10 +5,8 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter\Field;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\ORMException;
-use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
-use Netdudes\ImporterBundle\Importer\Exception\DatabaseException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\LookupFieldException;
 
 class LookupFieldInterpreter implements FieldInterpreterInterface
@@ -20,7 +18,7 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
      */
     private $entityManager;
 
-    function __construct(EntityManager $entityManager)
+    public function __construct(EntityManager $entityManager)
     {
         $this->entityManager = $entityManager;
     }
@@ -60,4 +58,4 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
         return $this->repositories[$class];
     }
 
-} 
+}

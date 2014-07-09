@@ -40,5 +40,4 @@ class LookupFieldException extends \Exception
         return $this->value;
     }
 
-
 }

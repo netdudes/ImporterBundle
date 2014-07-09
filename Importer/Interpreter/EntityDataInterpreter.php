@@ -3,12 +3,10 @@
 namespace Netdudes\ImporterBundle\Importer\Interpreter;
 
 use Doctrine\ORM\EntityManager;
-use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
-use Netdudes\ImporterBundle\Importer\Configuration\Field\LiteralFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownOrInaccessibleFieldException;
@@ -17,7 +15,7 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Field\FileFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LiteralFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LookupFieldInterpreter;
 
-class EntityDataInterpreterInterface implements InterpreterInterface
+class EntityDataInterpreter implements InterpreterInterface
 {
     /**
      * @var \Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface
@@ -31,7 +29,7 @@ class EntityDataInterpreterInterface implements InterpreterInterface
     protected $datetimeFieldInterpreter;
     protected $lookupFieldInterpreter;
 
-    function __construct(EntityConfigurationInterface $configuration, EntityManager $entityManager)
+    public function __construct(EntityConfigurationInterface $configuration, EntityManager $entityManager)
     {
         $this->configuration = $configuration;
         $this->literalFieldInterpreter = new LiteralFieldInterpreter();
@@ -83,7 +81,7 @@ class EntityDataInterpreterInterface implements InterpreterInterface
         }
 
         /** @var $fieldConfiguration FieldConfigurationInterface */
-        foreach ($orderedFields as $index => $fieldConfiguration)  {
+        foreach ($orderedFields as $index => $fieldConfiguration) {
             $interpretedRow[$fieldConfiguration->getField()] = $this->interpretField($fieldConfiguration, $row[$index]);
         }
 
@@ -124,6 +122,7 @@ class EntityDataInterpreterInterface implements InterpreterInterface
     private function interpretField($fieldConfiguration, $value)
     {
         $interpreter = $this->getInterpreter($fieldConfiguration);
+
         return $interpreter->interpret($fieldConfiguration, $value);
     }
 
@@ -138,6 +137,7 @@ class EntityDataInterpreterInterface implements InterpreterInterface
         if ($fieldConfiguration instanceof FileFieldConfiguration) {
             return $this->fileFieldInterpreter;
         }
+
         return $this->literalFieldInterpreter;
     }
 }

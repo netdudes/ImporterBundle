@@ -3,24 +3,20 @@
 namespace Netdudes\ImporterBundle\Importer;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMException;
 use Mockery\Exception;
 use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollection;
 use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollectionInterface;
-use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Exception\DatabaseException;
-use Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreterInterface;
-use Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreterInterface;
 use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
 
 class CsvImporter extends AbstractImporter
 {
     protected $parser;
 
-    function __construct(ConfigurationCollectionInterface $configurationCollection, EntityManager $entityManager)
+    public function __construct(ConfigurationCollectionInterface $configurationCollection, EntityManager $entityManager)
     {
         $this->parser = new CsvParser();
         parent::__construct($configurationCollection, $entityManager);
@@ -32,9 +28,9 @@ class CsvImporter extends AbstractImporter
         foreach ($configurationFiles as $file) {
             $configurationReader->readFile($file);
         }
+
         return new static($configurationReader->getConfigurationCollection(), $entityManager);
     }
-
 
     public function import($configurationKey, $data, $hasHeaders = true, $flush = true)
     {
@@ -46,6 +42,7 @@ class CsvImporter extends AbstractImporter
             if ($flush) {
                 $this->flush($configuration);
             }
+
             return;
         }
 
@@ -54,6 +51,7 @@ class CsvImporter extends AbstractImporter
             if ($flush) {
                 $this->flush($configuration);
             }
+
             return;
         }
 

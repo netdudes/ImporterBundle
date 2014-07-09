@@ -16,7 +16,7 @@ abstract class AbstractImporter implements ImporterInterface
 
     protected $entityManager;
 
-    function __construct(ConfigurationCollectionInterface $configurationCollection, EntityManager $entityManager)
+    public function __construct(ConfigurationCollectionInterface $configurationCollection, EntityManager $entityManager)
     {
         $this->configurationCollection = $configurationCollection;
         $this->entityManager = $entityManager;

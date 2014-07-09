@@ -2,7 +2,6 @@
 
 namespace Netdudes\ImporterBundle\Importer\Configuration;
 
-
 interface RelationshipConfigurationInterface extends ConfigurationInterface
 {
     public function getAssignmentMethod();

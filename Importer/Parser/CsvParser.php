@@ -43,6 +43,7 @@ class CsvParser implements ParserInterface
     {
         $delimiter = ',';
         $enclosure = '"';
+
         return str_getcsv($row, $delimiter, $enclosure);
     }
 }
