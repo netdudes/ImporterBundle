@@ -10,7 +10,7 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Exception\MissingColumnExceptio
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LookupFieldInterpreter;
 
-class RelationshipDataInterpreter extends AbstractInterpreter
+class RelationshipDataInterpreterInterface implements  InterpreterInterface
 {
     /**
      * @var \Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface
@@ -38,7 +38,7 @@ class RelationshipDataInterpreter extends AbstractInterpreter
 
     private function interpretRow($row, $associative)
     {
-        return $associative ? $this->interpretAssociativeRow($row) : $this->interpretOrderedRow($row);
+        $associative ? $this->interpretAssociativeRow($row) : $this->interpretOrderedRow($row);
     }
 
     private function interpretAssociativeRow($row)

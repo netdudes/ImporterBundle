@@ -12,21 +12,18 @@ use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Exception\DatabaseException;
-use Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreter;
-use Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreter;
+use Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreterInterface;
+use Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreterInterface;
 use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
 
-class CsvImporter implements ImporterInterface
+class CsvImporter extends AbstractImporter
 {
-    protected $configurationCollection;
     protected $parser;
-    protected $entityManager;
 
     function __construct(ConfigurationCollectionInterface $configurationCollection, EntityManager $entityManager)
     {
-        $this->configurationCollection = $configurationCollection;
         $this->parser = new CsvParser();
-        $this->entityManager = $entityManager;
+        parent::__construct($configurationCollection, $entityManager);
     }
 
     public static function createFromYamlConfigurationFiles(array $configurationFiles, EntityManager $entityManager)
@@ -75,36 +72,4 @@ class CsvImporter implements ImporterInterface
         }
     }
 
-    private function importEntityData($configuration, $parsedData, $hasHeaders)
-    {
-        $entityDataInterpreter = new EntityDataInterpreter($configuration, $this->entityManager);
-        $interpretedData = $entityDataInterpreter->interpret($parsedData, $hasHeaders);
-        if (is_null($interpretedData)) {
-            return;
-        }
-        foreach ($interpretedData as $entity) {
-            try {
-                $this->entityManager->persist($entity);
-            } catch (ORMException $exception) {
-                $exception = new DatabaseException("Error when persisting for entity {$configuration->getClass()}.", 0, $exception);
-                throw $exception;
-            }
-        }
-    }
-
-    private function importRelationshipData($configuration, $parsedData, $hasHeaders)
-    {
-        $relationshipDataInterpreter = new RelationshipDataInterpreter($configuration, $this->entityManager);
-        $relationshipDataInterpreter->interpret($parsedData, $hasHeaders);
-    }
-
-    protected function flush(ConfigurationInterface $configuration)
-    {
-        try {
-            $this->entityManager->flush();
-        } catch (ORMException $exception) {
-            $exception = new DatabaseException("Error when flushing for entity {$configuration->getClass()}.", 0, $exception);
-            throw $exception;
-        }
-    }
 }

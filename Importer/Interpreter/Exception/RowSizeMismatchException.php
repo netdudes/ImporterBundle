@@ -4,21 +4,21 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
 class RowSizeMismatchException extends \Exception
 {
-    protected $row;
+    protected $row = [];
 
-    protected $rowNumber;
+    protected $rowNumber = -1;
 
-    protected $expectedSize;
+    protected $expectedSize = -1;
 
-    protected $foundSize;
+    protected $foundSize = -1;
 
-    protected $dataFile;
+    protected $dataFile = 'UNKNOWN';
 
     public function __toString()
     {
         return
             $this->message . PHP_EOL .
-            "Expected {$this->expectedSize} field, {$this->foundSize} found in {$this->file}, row {$this->rowNumber}" . PHP_EOL .
+            "Expected {$this->expectedSize} field, {$this->foundSize} found in {$this->dataFile}, row {$this->rowNumber}" . PHP_EOL .
             $this->row;
     }
 

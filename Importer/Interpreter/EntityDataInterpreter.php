@@ -17,7 +17,7 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Field\FileFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LiteralFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LookupFieldInterpreter;
 
-class EntityDataInterpreter extends AbstractInterpreter
+class EntityDataInterpreterInterface implements InterpreterInterface
 {
     /**
      * @var \Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface
@@ -77,7 +77,7 @@ class EntityDataInterpreter extends AbstractInterpreter
         if (count($orderedFields) !== count($row)) {
             $exception = new RowSizeMismatchException();
             $exception->setExpectedSize(count($orderedFields));
-            $exception->setFoundSize($orderedFields);
+            $exception->setFoundSize(count($row));
             $exception->setRow(implode(',', $row));
             throw $exception;
         }

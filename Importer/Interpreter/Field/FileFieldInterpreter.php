@@ -7,7 +7,6 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 
 class FileFieldInterpreter implements FieldInterpreterInterface
 {
-
     public function interpret(FieldConfigurationInterface $configuration, $value)
     {
         if (!($configuration instanceof FileFieldConfiguration)) {

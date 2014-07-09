@@ -4,7 +4,12 @@ namespace Netdudes\ImporterBundle\Importer\Parser;
 
 class CsvParser implements ParserInterface
 {
-
+    /**
+     * @param      $data
+     * @param bool $hasHeaders
+     *
+     * @return array
+     */
     public function parse($data, $hasHeaders = true)
     {
         $rows = explode("\n", $data);
@@ -29,6 +34,11 @@ class CsvParser implements ParserInterface
         return $data;
     }
 
+    /**
+     * @param $row
+     *
+     * @return array
+     */
     private function parseCsvRow($row)
     {
         $delimiter = ',';

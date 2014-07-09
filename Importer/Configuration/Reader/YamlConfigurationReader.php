@@ -18,7 +18,7 @@ use Netdudes\ImporterBundle\Importer\Configuration\Reader\Exception\UndefinedCon
 use Symfony\Component\Intl\Exception\NotImplementedException;
 use Symfony\Component\Yaml\Parser;
 
-class YamlConfigurationReader extends AbstractConfigurationReader
+class YamlConfigurationReader implements ConfigurationReaderInterface
 {
     protected $configurationCollection;
 

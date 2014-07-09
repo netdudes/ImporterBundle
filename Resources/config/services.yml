@@ -1,6 +1,6 @@
 parameters:
 
 services:
-  netdudes_importer:
-    class: Netdudes\ImporterBundle\Importer\Importer
+  netdudes_fixtures_importer:
+    class: Netdudes\ImporterBundle\Importer\FixturesImporterWrapper
     arguments: ["@doctrine.orm.entity_manager"]
