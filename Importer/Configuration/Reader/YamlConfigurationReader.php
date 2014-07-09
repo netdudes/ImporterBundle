@@ -4,6 +4,8 @@ namespace Netdudes\ImporterBundle\Importer\Configuration\Reader;
 
 use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollection;
 use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollectionInterface;
+use Netdudes\ImporterBundle\Importer\Configuration\Field\DateFieldConfiguration;
+use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfiguration;
@@ -70,6 +72,7 @@ class YamlConfigurationReader extends AbstractConfigurationReader
         }
 
         $entityConfiguration = new EntityConfiguration();
+        $entityConfiguration->setClass($entity);
         $entityConfiguration->setFields($fieldConfigurations);
 
         return $entityConfiguration;
@@ -153,11 +156,20 @@ class YamlConfigurationReader extends AbstractConfigurationReader
             return $this->readDatetimeFieldConfiguration($node);
         }
 
+        if ($type == 'date') {
+            return $this->readDateFieldConfiguration($node);
+        }
+
+        if ($type == 'file') {
+            return $this->readFileFieldConfiguration($node);
+        }
+
         if ($this->hasChild($node, 'lookupProperty')) {
             return $this->readLookupFieldConfiguration($node);
         }
 
-        throw new FieldConfigurationParseException();
+        $prettyPrintNode = print_r($node, true);
+        throw new FieldConfigurationParseException("Could not identify the type of field:\n{$prettyPrintNode}");
 
     }
 
@@ -177,5 +189,22 @@ class YamlConfigurationReader extends AbstractConfigurationReader
     public function getConfigurationCollection()
     {
         return $this->configurationCollection;
+    }
+
+    private function readDateFieldConfiguration($node)
+    {
+        $fieldConfiguration = new DateFieldConfiguration();
+        if ($format = $this->getChild($node, 'format')) {
+            $fieldConfiguration->setFormat($format);
+        }
+        $fieldConfiguration->setField($this->getChild($node, 'property'));
+        return $fieldConfiguration;
+    }
+
+    private function readFileFieldConfiguration($node)
+    {
+        $fieldConfiguration = new FileFieldConfiguration();
+        $fieldConfiguration->setField($this->getChild($node, 'property'));
+        return $fieldConfiguration;
     }
 }

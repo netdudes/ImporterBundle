@@ -7,9 +7,13 @@ use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
+use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LiteralFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownOrInaccessibleFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\DatetimeFieldInterpreter;
+use Netdudes\ImporterBundle\Importer\Interpreter\Field\FileFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LiteralFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LookupFieldInterpreter;
 
@@ -22,12 +26,18 @@ class EntityDataInterpreter
 
     protected $affectedEntities;
 
+    protected $fileFieldInterpreter;
+    protected $literalFieldInterpreter;
+    protected $datetimeFieldInterpreter;
+    protected $lookupFieldInterpreter;
+
     function __construct(EntityConfigurationInterface $configuration, EntityManager $entityManager)
     {
         $this->configuration = $configuration;
         $this->literalFieldInterpreter = new LiteralFieldInterpreter();
         $this->lookupFieldInterpreter = new LookupFieldInterpreter($entityManager);
         $this->datetimeFieldInterpreter = new DatetimeFieldInterpreter();
+        $this->fileFieldInterpreter = new FileFieldInterpreter();
     }
 
     public function interpret($data, $associative = true)
@@ -63,9 +73,13 @@ class EntityDataInterpreter
     protected function interpretOrderedRow($row)
     {
         $interpretedRow = [];
-        $orderedFields = array_keys($this->configuration->getFields());
+        $orderedFields = array_values($this->configuration->getFields());
         if (count($orderedFields) !== count($row)) {
-            throw new \Exception("Number of columns in data differs from number of fields");
+            $exception = new RowSizeMismatchException();
+            $exception->setExpectedSize(count($orderedFields));
+            $exception->setFoundSize($orderedFields);
+            $exception->setRow(implode(',', $row));
+            throw $exception;
         }
 
         /** @var $fieldConfiguration FieldConfigurationInterface */
@@ -91,10 +105,11 @@ class EntityDataInterpreter
                 if (!($reflectionAttribute->isPublic())) {
                     $reflectionAttribute->setAccessible(true);
                 }
-                $reflectionAttribute->setValue($value);
+                $reflectionAttribute->setValue($entity, $value);
                 continue;
             }
-            throw new \Exception("Unknown or inaccessible field $field");
+            $class = get_class($entity);
+            throw new UnknownOrInaccessibleFieldException("Could not find or it is not accessible field \"$field\" for class \"{$class}\"");
         }
     }
 
@@ -115,10 +130,13 @@ class EntityDataInterpreter
     private function getInterpreter($fieldConfiguration)
     {
         if ($fieldConfiguration instanceof LookupFieldConfiguration) {
-            return $this->literalFieldInterpreter;
+            return $this->lookupFieldInterpreter;
         }
         if ($fieldConfiguration instanceof DateTimeFieldConfiguration) {
             return $this->datetimeFieldInterpreter;
+        }
+        if ($fieldConfiguration instanceof FileFieldConfiguration) {
+            return $this->fileFieldInterpreter;
         }
         return $this->literalFieldInterpreter;
     }

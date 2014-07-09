@@ -26,4 +26,14 @@ class EntityConfiguration implements EntityConfigurationInterface
     {
         return $this->fields[$name];
     }
+
+    public function setClass($class)
+    {
+        $this->class = $class;
+    }
+
+    public function getFieldNames()
+    {
+        return array_keys($this->fields);
+    }
 }

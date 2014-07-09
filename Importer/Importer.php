@@ -3,7 +3,10 @@
 namespace Netdudes\ImporterBundle\Importer;
 
 use Doctrine\ORM\EntityManager;
+use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
+use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 
 class Importer
@@ -48,8 +51,14 @@ class Importer
         $importer = new CsvImporter($configuration, $this->entityManager);
 
         foreach ($files as $index => $file) {
+            $file = $this->performCwdWizardry($file, $currentWorkingDirectory);
             $key = array_keys($configuration->all())[$index];
-            $importer->import($key, file_get_contents($file));
+            $data = file_get_contents($file);
+            try {
+                $importer->import($key, $data, $this->areThereAnyHeadersThere($configuration->get($key), $data));
+            } catch (RowSizeMismatchException $e) {
+                $e->setDataFile($file);
+            }
         }
     }
 
@@ -64,18 +73,7 @@ class Importer
      */
     protected function prepareAndRunImport($file, array $configuration, $currentWorkingDirectory)
     {
-        /** Check if the "master" working directory is set and if yes, set it */
-        if (!empty($currentWorkingDirectory)) {
-            $this->setCwd($currentWorkingDirectory);
-        } else {
-            /** Set the "master" working directory from the filepath */
-            $this->setCwd(dirname($file));
-            /** Remove the path from the filename */
-            $file = str_replace(dirname($file) . DIRECTORY_SEPARATOR, '', $file);
-        }
-
-        /** Build up the filepath and filename */
-        $filename = $this->getCwd() . DIRECTORY_SEPARATOR . $file;
+        $filename = $this->performCwdWizardry($file, $currentWorkingDirectory);
 
         /**
          * If the file exists, get the CSV-Data from it, otherwise return false and ignore the file
@@ -565,4 +563,48 @@ class Importer
         return $fileContents;
     }
 
+    /**
+     * @param $file
+     * @param $currentWorkingDirectory
+     *
+     * @return string
+     * @deprecated This is a provisional function
+     */
+    protected function performCwdWizardry($file, $currentWorkingDirectory)
+    {
+        /** Check if the "master" working directory is set and if yes, set it */
+        if (!empty($currentWorkingDirectory)) {
+            $this->setCwd($currentWorkingDirectory);
+        } else {
+            /** Set the "master" working directory from the filepath */
+            $this->setCwd(dirname($file));
+            /** Remove the path from the filename */
+            $file = str_replace(dirname($file) . DIRECTORY_SEPARATOR, '', $file);
+        }
+
+        /** Build up the filepath and filename */
+        $filename = $this->getCwd() . DIRECTORY_SEPARATOR . $file;
+        return $filename;
+    }
+
+    /**
+     * @param $configuration
+     * @param $data
+     *
+     * @return bool
+     * @deprecated This is a provisional function
+     */
+    protected function areThereAnyHeadersThere(ConfigurationInterface $configuration, $data)
+    {
+        $firstRow = str_getcsv(explode("\n", $data)[0]);
+        $fieldNames = $configuration->getFieldNames();
+
+        foreach ($firstRow as $header) {
+            if (!in_array($header, $fieldNames, true)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

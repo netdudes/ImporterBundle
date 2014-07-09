@@ -3,5 +3,7 @@
 namespace Netdudes\ImporterBundle\Importer\Configuration;
 
 
-interface ConfigurationInterface {
+interface ConfigurationInterface
+{
+    public function getFieldNames();
 }

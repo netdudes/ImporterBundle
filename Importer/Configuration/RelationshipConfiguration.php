@@ -82,4 +82,12 @@ class RelationshipConfiguration implements RelationshipConfigurationInterface
     {
         return $this->relatedLookupConfigurationField;
     }
+
+    public function getFieldNames()
+    {
+        return [
+            $this->getOwnerLookupFieldName(),
+            $this->getRelatedLookupFieldName()
+        ];
+    }
 }
