@@ -4,6 +4,7 @@ namespace Netdudes\ImporterBundle\Tests\Importer\Configuration\Reader;
 
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader;
+use Symfony\Component\Yaml\Parser;
 
 class YamlConfigurationReaderTest extends \PHPUnit_Framework_TestCase
 {
@@ -19,7 +20,7 @@ class YamlConfigurationReaderTest extends \PHPUnit_Framework_TestCase
 
     public function testReadEntityConfigurationYaml()
     {
-        $reader = new YamlConfigurationReader();
+        $reader = new YamlConfigurationReader(new Parser());
         $reader->readFile($this->getTestEntityConfigurationFileName());
         $configurationCollection = $reader->getConfigurationCollection();
 
@@ -50,7 +51,7 @@ class YamlConfigurationReaderTest extends \PHPUnit_Framework_TestCase
 
     public function testReadJoinedImportConfigurationYaml()
     {
-        $reader = new YamlConfigurationReader();
+        $reader = new YamlConfigurationReader(new Parser());
         $reader->readFile($this->getTestJoinedImportConfigurationFileName());
         $configurationCollection = $reader->getConfigurationCollection();
 
