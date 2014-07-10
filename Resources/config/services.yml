@@ -1,6 +1,16 @@
 parameters:
 
 services:
-  netdudes_fixtures_importer:
-    class: Netdudes\ImporterBundle\Importer\FixturesImporterWrapper
-    arguments: ["@doctrine.orm.entity_manager"]
+  netdudes_importer.yaml_parser_factory:
+    class: Netdudes\ImporterBundle\Yaml\YamlParserFactory
+  netdudes_importer.yaml_parser:
+    class: Symfony\Component\Yaml\Parser
+    factory_service: netdudes_importer.yaml_parser_factory
+    factory_method: create
+
+  netdudes_importer.csv_parser:
+    class: Netdudes\ImporterBundle\Importer\Parser\CsvParser
+
+  netdudes_importer.legacy_fixtures_wrapper:
+    class: Netdudes\ImporterBundle\Importer\LegacyFixturesImporterWrapper
+    arguments: ["@doctrine.orm.entity_manager", "@netdudes_importer.csv_parser", "@netdudes_importer.yaml_parser"]

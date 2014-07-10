@@ -20,9 +20,15 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
 {
     protected $configurationCollection;
 
-    public function __construct()
+    /**
+     * @var \Symfony\Component\Yaml\Parser
+     */
+    private $yamlParser;
+
+    public function __construct(Parser $yamlParser)
     {
         $this->configurationCollection = new ConfigurationCollection();
+        $this->yamlParser = $yamlParser;
     }
 
     public function readFile($file)
@@ -32,8 +38,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
 
     public function read($yaml)
     {
-        $parser = new Parser();
-        $parsedYamlArray = $parser->parse($yaml);
+        $parsedYamlArray = $this->yamlParser->parse($yaml);
 
         $this->readParsedYamlArray($parsedYamlArray);
     }

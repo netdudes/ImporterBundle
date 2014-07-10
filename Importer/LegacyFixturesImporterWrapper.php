@@ -6,8 +6,10 @@ use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
+use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
+use Symfony\Component\Yaml\Parser;
 
-class FixturesImporterWrapper
+class LegacyFixturesImporterWrapper
 {
 
     /**
@@ -22,11 +24,23 @@ class FixturesImporterWrapper
     protected $cwd;
 
     /**
+     * @var Parser\CsvParser
+     */
+    private $csvParser;
+
+    /**
+     * @var \Symfony\Component\Yaml\Parser
+     */
+    private $yamlParser;
+
+    /**
      * @param EntityManager $entityManager
      */
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManager $entityManager, CsvParser $parser, Parser $yamlParser)
     {
         $this->entityManager = $entityManager;
+        $this->csvParser = $parser;
+        $this->yamlParser = $yamlParser;
     }
 
     /**
@@ -39,11 +53,11 @@ class FixturesImporterWrapper
      */
     public function import($files, array $arrayConfiguration, $currentWorkingDirectory = '')
     {
-        $configurationReader = new YamlConfigurationReader();
+        $configurationReader = new YamlConfigurationReader($this->yamlParser);
         $configurationReader->readParsedYamlArray($arrayConfiguration);
         $configuration = $configurationReader->getConfigurationCollection();
 
-        $importer = new CsvImporter($configuration, $this->entityManager);
+        $importer = new CsvImporter($configuration, $this->entityManager, $this->csvParser, $this->yamlParser);
 
         foreach ($files as $index => $file) {
             $file = $this->fixWorkingDirectory($file, $currentWorkingDirectory);
@@ -96,7 +110,7 @@ class FixturesImporterWrapper
     /**
      * @param string $cwd
      *
-     * @return FixturesImporterWrapper
+     * @return LegacyFixturesImporterWrapper
      */
     public function setCwd($cwd)
     {
