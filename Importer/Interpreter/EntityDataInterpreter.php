@@ -8,12 +8,16 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfigurat
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownOrInaccessibleFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\DatetimeFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\FileFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LiteralFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LookupFieldInterpreter;
+use Symfony\Component\PropertyAccess\Exception\AccessException;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 class EntityDataInterpreter implements InterpreterInterface
 {
@@ -21,8 +25,6 @@ class EntityDataInterpreter implements InterpreterInterface
      * @var \Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface
      */
     protected $configuration;
-
-    protected $affectedEntities;
 
     protected $fileFieldInterpreter;
 
@@ -43,20 +45,26 @@ class EntityDataInterpreter implements InterpreterInterface
 
     public function interpret($data, $associative = true)
     {
-        $class = $this->configuration->getClass();
-        foreach ($data as $row) {
-            $entity = new $class;
-            $interpretedData = $this->interpretRow($row, $associative);
-            $this->injectInterpretedDataIntoEntity($entity, $interpretedData);
-            $this->affectedEntities[] = $entity;
+        $entities = [];
+        foreach ($data as $index => $row) {
+            try {
+                $entities[$index] = $this->interpretRow($row, $associative);
+            } catch (InterpreterException $exception) {
+                $this->handleInterpreterError($exception, $index, $row);
+            }
         }
 
-        return $this->affectedEntities;
+        return $entities;
     }
 
-    protected function interpretRow(array $row, $associative = true)
+    protected function interpretRow(array $row, $associative)
     {
-        return $associative ? $this->interpretAssociativeRow($row) : $this->interpretOrderedRow($row);
+        $class = $this->configuration->getClass();
+        $entity = new $class;
+        $interpretedData = $associative ? $this->interpretAssociativeRow($row) : $this->interpretOrderedRow($row);
+        $this->injectInterpretedDataIntoEntity($entity, $interpretedData);
+        return $entity;
+
     }
 
     protected function interpretAssociativeRow($columns)
@@ -115,32 +123,19 @@ class EntityDataInterpreter implements InterpreterInterface
 
     private function injectInterpretedDataIntoEntity($entity, $interpretedData)
     {
-        $reflection = new \ReflectionClass($entity);
+        $accessor = PropertyAccess::createPropertyAccessor();
         foreach ($interpretedData as $field => $value) {
-            $setterName = 'set' . ucfirst($field);
-            if ($reflection->hasMethod($setterName)) {
-                $entity->{$setterName}($value);
-                continue;
+            try {
+                $accessor->setValue($entity, $field, $value);
+            } catch (AccessException $exception) {
+                $class = get_class($entity);
+                throw new UnknownOrInaccessibleFieldException("Could not find or it is not accessible field \"$field\" for class \"{$class}\"", 0, $exception);
             }
-
-            if ($reflection->hasProperty($field)) {
-                $reflectionAttribute = new \ReflectionProperty($entity, $field);
-                if (!($reflectionAttribute->isPublic())) {
-                    $reflectionAttribute->setAccessible(true);
-                }
-                $reflectionAttribute->setValue($entity, $value);
-                continue;
-            }
-            $class = get_class($entity);
-            throw new UnknownOrInaccessibleFieldException("Could not find or it is not accessible field \"$field\" for class \"{$class}\"");
         }
     }
 
-    /**
-     * @return mixed
-     */
-    public function getAffectedEntities()
+    private function handleInterpreterError($exception, $index, $row)
     {
-        return $this->affectedEntities;
+        throw $exception;
     }
 }

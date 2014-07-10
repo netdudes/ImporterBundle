@@ -2,7 +2,7 @@
 
 namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
-class LookupFieldException extends \Exception
+class LookupFieldException extends InterpreterException
 {
     protected $fieldConfiguration;
 

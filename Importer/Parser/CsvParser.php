@@ -19,7 +19,7 @@ class CsvParser implements ParserInterface
             $headers = range(0, count($this->parseCsvRow($rows[0])));
         }
         $data = [];
-        foreach ($rows as $row) {
+        foreach ($rows as $lineNumber => $row) {
             if (!($row = trim($row))) {
                 continue;
             }
@@ -28,7 +28,7 @@ class CsvParser implements ParserInterface
             foreach ($row as $index => $cell) {
                 $dataRow[$headers[$index]] = $cell;
             }
-            $data[] = $dataRow;
+            $data[$lineNumber] = $dataRow;
         }
 
         return $data;

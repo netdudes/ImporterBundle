@@ -2,6 +2,6 @@
 
 namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
-class MissingAssignementMethodException extends \Exception
+class MissingAssignementMethodException extends InterpreterException
 {
 }

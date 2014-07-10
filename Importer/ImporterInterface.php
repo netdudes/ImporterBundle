@@ -4,7 +4,7 @@ namespace Netdudes\ImporterBundle\Importer;
 
 interface ImporterInterface
 {
-    public function import($configurationKey, $data);
+    public function import($configurationId, $data);
 
-    public function importFile($configurationKey, $filename);
+    public function importFile($configurationId, $filename);
 }

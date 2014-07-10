@@ -2,7 +2,7 @@
 
 namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
-class UnknownOrInaccessibleFieldException extends \Exception
+class UnknownOrInaccessibleFieldException extends InterpreterException
 {
     protected $field;
 

@@ -4,7 +4,7 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
 use Behat\Gherkin\Exception\Exception;
 
-class DateTimeFormatException extends \Exception
+class DateTimeFormatException extends InterpreterException
 {
     protected $value;
 

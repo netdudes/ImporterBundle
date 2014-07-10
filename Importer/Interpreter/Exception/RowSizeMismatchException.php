@@ -2,7 +2,7 @@
 
 namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
-class RowSizeMismatchException extends \Exception
+class RowSizeMismatchException extends InterpreterException
 {
     protected $row = [];
 

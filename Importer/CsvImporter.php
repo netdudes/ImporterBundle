@@ -9,6 +9,8 @@ use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationColle
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Exception\DatabaseException;
+use Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreter;
+use Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreter;
 use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
 
 class CsvImporter extends AbstractImporter
@@ -21,42 +23,26 @@ class CsvImporter extends AbstractImporter
         parent::__construct($configurationCollection, $entityManager);
     }
 
-    public function importFile($configurationKey, $filename, $hasHeaders = true, $flush = true)
+    public function importFile($configurationId, $filename, $hasHeaders = true, $flush = true)
     {
         $data = file_get_contents($filename);
         try {
-            $this->import($configurationKey, $data, $flush);
+            $this->import($configurationId, $data, $hasHeaders, $flush);
         } catch (DatabaseException $exception) {
             $exception->setDataFile($filename);
-            echo $filename;
             throw $exception;
         }
     }
 
-    public function import($configurationKey, $data, $hasHeaders = true, $flush = true)
+    public function import($configurationId, $csv, $hasHeaders = true, $flush = true)
     {
-        $configuration = $this->configurationCollection->get($configurationKey);
-        $parsedData = $this->parser->parse($data, $hasHeaders);
+        $configuration = $this->configurationCollection->get($configurationId);
+        $parsedData = $this->parser->parse($csv, $hasHeaders);
+        $interpreter = $this->getInterpreterFromConfiguration($configuration);
 
-        if ($configuration instanceof EntityConfigurationInterface) {
-            $this->importEntityData($configuration, $parsedData, $hasHeaders);
-            if ($flush) {
-                $this->flush($configuration);
-            }
-
-            return;
+        $this->importData($configuration, $parsedData, $interpreter, $hasHeaders);
+        if ($flush) {
+            $this->flush($configuration);
         }
-
-        if ($configuration instanceof RelationshipConfigurationInterface) {
-            $this->importRelationshipData($configuration, $parsedData, $hasHeaders);
-            if ($flush) {
-                $this->flush($configuration);
-            }
-
-            return;
-        }
-
-        throw new \Exception("Unknown configuration type \"{get_class($configuration)}\"");
     }
-
 }
