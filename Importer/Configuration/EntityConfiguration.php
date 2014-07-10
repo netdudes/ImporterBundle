@@ -5,6 +5,7 @@ namespace Netdudes\ImporterBundle\Importer\Configuration;
 class EntityConfiguration implements EntityConfigurationInterface
 {
     private $fields = [];
+
     private $class = null;
 
     public function getFields()
@@ -22,14 +23,14 @@ class EntityConfiguration implements EntityConfigurationInterface
         return $this->class;
     }
 
-    public function getField($name)
-    {
-        return $this->fields[$name];
-    }
-
     public function setClass($class)
     {
         $this->class = $class;
+    }
+
+    public function getField($name)
+    {
+        return $this->fields[$name];
     }
 
     public function getFieldNames()

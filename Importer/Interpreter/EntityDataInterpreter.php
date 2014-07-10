@@ -25,8 +25,11 @@ class EntityDataInterpreter implements InterpreterInterface
     protected $affectedEntities;
 
     protected $fileFieldInterpreter;
+
     protected $literalFieldInterpreter;
+
     protected $datetimeFieldInterpreter;
+
     protected $lookupFieldInterpreter;
 
     public function __construct(EntityConfigurationInterface $configuration, EntityManager $entityManager)
@@ -66,6 +69,28 @@ class EntityDataInterpreter implements InterpreterInterface
 
         return $interpretedRow;
 
+    }
+
+    private function interpretField($fieldConfiguration, $value)
+    {
+        $interpreter = $this->getInterpreter($fieldConfiguration);
+
+        return $interpreter->interpret($fieldConfiguration, $value);
+    }
+
+    private function getInterpreter($fieldConfiguration)
+    {
+        if ($fieldConfiguration instanceof LookupFieldConfiguration) {
+            return $this->lookupFieldInterpreter;
+        }
+        if ($fieldConfiguration instanceof DateTimeFieldConfiguration) {
+            return $this->datetimeFieldInterpreter;
+        }
+        if ($fieldConfiguration instanceof FileFieldConfiguration) {
+            return $this->fileFieldInterpreter;
+        }
+
+        return $this->literalFieldInterpreter;
     }
 
     protected function interpretOrderedRow($row)
@@ -117,27 +142,5 @@ class EntityDataInterpreter implements InterpreterInterface
     public function getAffectedEntities()
     {
         return $this->affectedEntities;
-    }
-
-    private function interpretField($fieldConfiguration, $value)
-    {
-        $interpreter = $this->getInterpreter($fieldConfiguration);
-
-        return $interpreter->interpret($fieldConfiguration, $value);
-    }
-
-    private function getInterpreter($fieldConfiguration)
-    {
-        if ($fieldConfiguration instanceof LookupFieldConfiguration) {
-            return $this->lookupFieldInterpreter;
-        }
-        if ($fieldConfiguration instanceof DateTimeFieldConfiguration) {
-            return $this->datetimeFieldInterpreter;
-        }
-        if ($fieldConfiguration instanceof FileFieldConfiguration) {
-            return $this->fileFieldInterpreter;
-        }
-
-        return $this->literalFieldInterpreter;
     }
 }

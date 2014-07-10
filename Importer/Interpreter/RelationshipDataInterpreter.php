@@ -9,7 +9,7 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Exception\MissingColumnExceptio
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LookupFieldInterpreter;
 
-class RelationshipDataInterpreter implements  InterpreterInterface
+class RelationshipDataInterpreter implements InterpreterInterface
 {
     /**
      * @var \Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface
@@ -54,15 +54,6 @@ class RelationshipDataInterpreter implements  InterpreterInterface
         $this->interpretValues($row[$ownerLookupFieldName], $row[$relatedLookupFieldName]);
     }
 
-    private function interpretOrderedRow($row)
-    {
-        if (count($row) !== 2) {
-            throw new RowSizeMismatchException("Relationship association data must have two rows");
-        }
-
-        $this->interpretValues($row[0], $row[1]);
-    }
-
     private function interpretValues($ownerLookupFieldValue, $relatedLookupFieldValue)
     {
         $ownerEntity = $this->lookupFieldInterpreter->interpret($this->configuration->getOwnerLookupConfigurationField(), $ownerLookupFieldValue);
@@ -77,5 +68,14 @@ class RelationshipDataInterpreter implements  InterpreterInterface
         }
 
         $ownerEntity->{$assignmentMethod}($relatedEntity);
+    }
+
+    private function interpretOrderedRow($row)
+    {
+        if (count($row) !== 2) {
+            throw new RowSizeMismatchException("Relationship association data must have two rows");
+        }
+
+        $this->interpretValues($row[0], $row[1]);
     }
 }

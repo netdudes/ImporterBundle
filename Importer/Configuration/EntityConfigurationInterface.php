@@ -10,6 +10,7 @@ interface EntityConfigurationInterface extends ConfigurationInterface
      * @return FieldConfigurationInterface[]
      */
     public function getFields();
+
     public function getClass();
 
     /**

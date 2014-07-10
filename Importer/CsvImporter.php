@@ -22,6 +22,18 @@ class CsvImporter extends AbstractImporter
         parent::__construct($configurationCollection, $entityManager);
     }
 
+    public function importFile($configurationKey, $filename, $hasHeaders = true, $flush = true)
+    {
+        $data = file_get_contents($filename);
+        try {
+            $this->import($configurationKey, $data, $flush);
+        } catch (DatabaseException $exception) {
+            $exception->setDataFile($filename);
+            echo $filename;
+            throw $exception;
+        }
+    }
+
     public function import($configurationKey, $data, $hasHeaders = true, $flush = true)
     {
         $configuration = $this->configurationCollection->get($configurationKey);
@@ -46,18 +58,6 @@ class CsvImporter extends AbstractImporter
         }
 
         throw new \Exception("Unknown configuration type \"{get_class($configuration)}\"");
-    }
-
-    public function importFile($configurationKey, $filename, $hasHeaders = true, $flush = true)
-    {
-        $data = file_get_contents($filename);
-        try {
-            $this->import($configurationKey, $data, $flush);
-        } catch (DatabaseException $exception) {
-            $exception->setDataFile($filename);
-            echo $filename;
-            throw $exception;
-        }
     }
 
 }

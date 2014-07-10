@@ -60,26 +60,6 @@ class FixturesImporterWrapper
     }
 
     /**
-     * @return string
-     */
-    public function getCwd()
-    {
-        return $this->cwd;
-    }
-
-    /**
-     * @param string $cwd
-     *
-     * @return FixturesImporterWrapper
-     */
-    public function setCwd($cwd)
-    {
-        $this->cwd = $cwd;
-
-        return $this;
-    }
-
-    /**
      * This is needed as a BC feature for existing fixture loading.
      *
      * @param $file
@@ -103,6 +83,26 @@ class FixturesImporterWrapper
         $filename = $this->getCwd() . DIRECTORY_SEPARATOR . $file;
 
         return $filename;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCwd()
+    {
+        return $this->cwd;
+    }
+
+    /**
+     * @param string $cwd
+     *
+     * @return FixturesImporterWrapper
+     */
+    public function setCwd($cwd)
+    {
+        $this->cwd = $cwd;
+
+        return $this;
     }
 
     /**

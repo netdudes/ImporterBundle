@@ -131,6 +131,19 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
 
     }
 
+    protected function readLookupFieldConfigurationNode(array $node)
+    {
+        $fieldConfiguration = new LookupFieldConfiguration();
+        if (!($lookupField = $this->getChild($node, 'lookupProperty'))) {
+            throw new MissingParameterException("Missing lookupProperty parameter in lookup field configuration");
+        }
+        $fieldConfiguration->setLookupField($lookupField);
+        $fieldConfiguration->setClass($this->getChild($node, 'type'));
+        $fieldConfiguration->setField($this->getChild($node, 'property'));
+
+        return $fieldConfiguration;
+    }
+
     /**
      * @return ConfigurationCollectionInterface
      */
@@ -177,19 +190,6 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
 
     }
 
-    protected function readLookupFieldConfigurationNode(array $node)
-    {
-        $fieldConfiguration = new LookupFieldConfiguration();
-        if (!($lookupField = $this->getChild($node, 'lookupProperty'))) {
-            throw new MissingParameterException("Missing lookupProperty parameter in lookup field configuration");
-        }
-        $fieldConfiguration->setLookupField($lookupField);
-        $fieldConfiguration->setClass($this->getChild($node, 'type'));
-        $fieldConfiguration->setField($this->getChild($node, 'property'));
-
-        return $fieldConfiguration;
-    }
-
     protected function readDatetimeFieldConfigurationNode(array $node)
     {
         $fieldConfiguration = new DateTimeFieldConfiguration();
@@ -212,7 +212,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         return $fieldConfiguration;
     }
 
-    protected  function readFileFieldConfigurationNode($node)
+    protected function readFileFieldConfigurationNode($node)
     {
         $fieldConfiguration = new FileFieldConfiguration();
         $fieldConfiguration->setField($this->getChild($node, 'property'));

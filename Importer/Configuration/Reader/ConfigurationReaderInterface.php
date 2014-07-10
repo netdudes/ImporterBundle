@@ -10,5 +10,6 @@ interface ConfigurationReaderInterface
      * @return ConfigurationInterface[]
      */
     public function getConfigurationCollection();
+
     public function readFile($filename);
 }

@@ -18,7 +18,7 @@ class DateTimeFormatException extends \Exception
 
         return
             $this->message . PHP_EOL .
-            "Could not parse \"{$this->value}\" for format \"{$this->format}\". DateTime errors follow:" .PHP_EOL .
+            "Could not parse \"{$this->value}\" for format \"{$this->format}\". DateTime errors follow:" . PHP_EOL .
             $dateTimeErrorsPrettyPrint;
     }
 

@@ -13,7 +13,9 @@ class Book
     /** @var string */
     protected $author;
 
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     /**
      * @param string $author

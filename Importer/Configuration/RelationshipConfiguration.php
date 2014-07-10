@@ -23,6 +23,16 @@ class RelationshipConfiguration implements RelationshipConfigurationInterface
         $this->assignementMethod = $assignementMethod;
     }
 
+    public function getAssignmentMethod()
+    {
+        return $this->assignementMethod;
+    }
+
+    public function getOwnerLookupConfigurationField()
+    {
+        return $this->ownerLookupConfigurationField;
+    }
+
     /**
      * @param mixed $ownerLookupConfigurationField
      */
@@ -31,12 +41,9 @@ class RelationshipConfiguration implements RelationshipConfigurationInterface
         $this->ownerLookupConfigurationField = $ownerLookupConfigurationField;
     }
 
-    /**
-     * @param mixed $ownerLookupFieldName
-     */
-    public function setOwnerLookupFieldName($ownerLookupFieldName)
+    public function getRelatedLookupConfigurationField()
     {
-        $this->ownerLookupFieldName = $ownerLookupFieldName;
+        return $this->relatedLookupConfigurationField;
     }
 
     /**
@@ -47,17 +54,12 @@ class RelationshipConfiguration implements RelationshipConfigurationInterface
         $this->relatedLookupConfigurationField = $relatedLookupConfigurationField;
     }
 
-    /**
-     * @param mixed $relatedLookupFieldName
-     */
-    public function setRelatedLookupFieldName($relatedLookupFieldName)
+    public function getFieldNames()
     {
-        $this->relatedLookupFieldName = $relatedLookupFieldName;
-    }
-
-    public function getAssignmentMethod()
-    {
-        return $this->assignementMethod;
+        return [
+            $this->getOwnerLookupFieldName(),
+            $this->getRelatedLookupFieldName()
+        ];
     }
 
     public function getOwnerLookupFieldName()
@@ -65,9 +67,12 @@ class RelationshipConfiguration implements RelationshipConfigurationInterface
         return $this->ownerLookupFieldName;
     }
 
-    public function getOwnerLookupConfigurationField()
+    /**
+     * @param mixed $ownerLookupFieldName
+     */
+    public function setOwnerLookupFieldName($ownerLookupFieldName)
     {
-        return $this->ownerLookupConfigurationField;
+        $this->ownerLookupFieldName = $ownerLookupFieldName;
     }
 
     public function getRelatedLookupFieldName()
@@ -75,16 +80,11 @@ class RelationshipConfiguration implements RelationshipConfigurationInterface
         return $this->relatedLookupFieldName;
     }
 
-    public function getRelatedLookupConfigurationField()
+    /**
+     * @param mixed $relatedLookupFieldName
+     */
+    public function setRelatedLookupFieldName($relatedLookupFieldName)
     {
-        return $this->relatedLookupConfigurationField;
-    }
-
-    public function getFieldNames()
-    {
-        return [
-            $this->getOwnerLookupFieldName(),
-            $this->getRelatedLookupFieldName()
-        ];
+        $this->relatedLookupFieldName = $relatedLookupFieldName;
     }
 }

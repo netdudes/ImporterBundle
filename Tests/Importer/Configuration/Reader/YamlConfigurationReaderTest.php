@@ -30,7 +30,7 @@ class YamlConfigurationReaderTest extends \PHPUnit_Framework_TestCase
         $entityConfiguration = $configurationCollection->get('test_entity');
         $this->assertInstanceOf('Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface', $entityConfiguration);
         $fields = $entityConfiguration->getFields();
-        $this->assertCount(3,  $fields, 'Three fields should be defined');
+        $this->assertCount(3, $fields, 'Three fields should be defined');
 
         $testLookupField = $fields['Test Lookup Column'];
         $testLiteralField = $fields['Test Literal Column'];
