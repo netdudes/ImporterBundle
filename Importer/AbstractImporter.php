@@ -8,9 +8,7 @@ use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationColle
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Exception\DatabaseException;
 use Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreter;
-use Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreterInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreter;
-use Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreterInterface;
 
 abstract class AbstractImporter implements ImporterInterface
 {

@@ -7,7 +7,6 @@ use Mockery\Exception;
 use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollection;
 use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollectionInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
-use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Exception\DatabaseException;
 use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
