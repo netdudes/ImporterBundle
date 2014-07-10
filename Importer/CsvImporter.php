@@ -22,16 +22,6 @@ class CsvImporter extends AbstractImporter
         parent::__construct($configurationCollection, $entityManager);
     }
 
-    public static function createFromYamlConfigurationFiles(array $configurationFiles, EntityManager $entityManager)
-    {
-        $configurationReader = new YamlConfigurationReader();
-        foreach ($configurationFiles as $file) {
-            $configurationReader->readFile($file);
-        }
-
-        return new static($configurationReader->getConfigurationCollection(), $entityManager);
-    }
-
     public function import($configurationKey, $data, $hasHeaders = true, $flush = true)
     {
         $configuration = $this->configurationCollection->get($configurationKey);

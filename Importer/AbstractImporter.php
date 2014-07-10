@@ -7,7 +7,9 @@ use Doctrine\ORM\ORMException;
 use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollectionInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Exception\DatabaseException;
+use Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreterInterface;
+use Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreterInterface;
 
 abstract class AbstractImporter implements ImporterInterface
@@ -24,7 +26,7 @@ abstract class AbstractImporter implements ImporterInterface
 
     protected function importEntityData($configuration, $parsedData, $dataIsAssociativeArray)
     {
-        $entityDataInterpreter = new EntityDataInterpreterInterface($configuration, $this->entityManager);
+        $entityDataInterpreter = new EntityDataInterpreter($configuration, $this->entityManager);
         $interpretedData = $entityDataInterpreter->interpret($parsedData, $dataIsAssociativeArray);
         if (is_null($interpretedData)) {
             return;
@@ -41,7 +43,7 @@ abstract class AbstractImporter implements ImporterInterface
 
     protected function importRelationshipData($configuration, $parsedData, $hasHeaders)
     {
-        $relationshipDataInterpreter = new RelationshipDataInterpreterInterface($configuration, $this->entityManager);
+        $relationshipDataInterpreter = new RelationshipDataInterpreter($configuration, $this->entityManager);
         $relationshipDataInterpreter->interpret($parsedData, $hasHeaders);
     }
 

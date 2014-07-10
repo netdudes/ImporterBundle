@@ -9,25 +9,25 @@ use Traversable;
 class ConfigurationCollection implements ConfigurationCollectionInterface
 {
 
-    protected $collection = [];
+    protected $configurationCollection = [];
 
-    public function get($key)
+    public function get($configurationId)
     {
-        if (array_key_exists($key, $this->collection)) {
-            return $this->collection[$key];
+        if (array_key_exists($configurationId, $this->configurationCollection)) {
+            return $this->configurationCollection[$configurationId];
         }
 
-        throw new UndefinedIndexException("No configuration for $key found");
+        throw new UndefinedIndexException("No configuration for $configurationId found");
     }
 
-    public function add($key, ConfigurationInterface $configuration)
+    public function add($configurationId, ConfigurationInterface $configuration)
     {
-        $this->collection[$key] = $configuration;
+        $this->configurationCollection[$configurationId] = $configuration;
     }
 
     public function all()
     {
-        return $this->collection;
+        return $this->configurationCollection;
     }
 
     /**
@@ -39,7 +39,7 @@ class ConfigurationCollection implements ConfigurationCollectionInterface
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->collection);
+        return new \ArrayIterator($this->configurationCollection);
     }
 
     /**
@@ -53,6 +53,6 @@ class ConfigurationCollection implements ConfigurationCollectionInterface
      */
     public function count()
     {
-        return count($this->collection);
+        return count($this->configurationCollection);
     }
 }

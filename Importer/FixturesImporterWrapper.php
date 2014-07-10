@@ -40,7 +40,7 @@ class FixturesImporterWrapper
     public function import($files, array $arrayConfiguration, $currentWorkingDirectory = '')
     {
         $configurationReader = new YamlConfigurationReader();
-        $configurationReader->read($arrayConfiguration);
+        $configurationReader->readParsedYamlArray($arrayConfiguration);
         $configuration = $configurationReader->getConfigurationCollection();
 
         $importer = new CsvImporter($configuration, $this->entityManager);
