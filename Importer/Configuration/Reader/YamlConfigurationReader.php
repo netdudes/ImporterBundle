@@ -89,13 +89,8 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      */
     protected function readEntityNode(array $node)
     {
-        if (!($entity = $this->getChild($node, 'entity'))) {
-            throw new MissingParameterException("Missing entity parameter in configuration node");
-        }
-
-        if (!($fields = $this->getChild($node, 'columns'))) {
-            throw new MissingParameterException("Missing columns array in configuration node");
-        }
+        $entity = $this->getChildOrThrowMissingParameterException($node, 'entity');
+        $fields = $this->getChildOrThrowMissingParameterException($node, 'columns');
 
         $fieldConfigurations = [];
         foreach ($fields as $fieldName => $field) {
@@ -109,11 +104,27 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         return $entityConfiguration;
     }
 
+    /**
+     * @param array $node
+     *
+     * @param       $child
+     *
+     * @throws Exception\MissingParameterException
+     * @return mixed
+     */
+    protected function getChildOrThrowMissingParameterException(array $node, $child)
+    {
+        if (!($lookupField = $this->getChild($node, $child))) {
+            $exception = new MissingParameterException("Missing $child parameter in field configuration");
+            $exception->setParameter($child);
+            throw $exception;
+        }
+        return $lookupField;
+    }
+
     protected function readFieldConfigurationNode(array $fieldConfigurationNode)
     {
-        if (!($property = $this->getChild($fieldConfigurationNode, 'property'))) {
-            throw new MissingParameterException("Missing property in field definition");
-        }
+        $property = $this->getChildOrThrowMissingParameterException($fieldConfigurationNode, 'property');
 
         if (!($type = $this->getChild($fieldConfigurationNode, 'type'))) {
             $fieldConfiguration = new LiteralFieldConfiguration();
@@ -122,13 +133,14 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
             return $fieldConfiguration;
         }
 
-        if ($this->hasChild($fieldConfigurationNode, 'lookupProperty')) {
-            return $this->readLookupFieldConfigurationNode($fieldConfigurationNode);
-        }
-
         $expectedReadFieldMethod = 'read' . ucfirst($type) . 'FieldConfigurationNode';
         if (method_exists($this, $expectedReadFieldMethod)) {
             return $this->{$expectedReadFieldMethod}($fieldConfigurationNode);
+        }
+
+        // Pick up fields with type not matching any method, but with lookupProperty, as old-style lookup field configs.
+        if ($this->hasChild($fieldConfigurationNode, 'lookupProperty')) {
+            return $this->readLegacyLookupFieldConfigurationNode($fieldConfigurationNode);
         }
 
         $prettyPrintNode = print_r($fieldConfigurationNode, true);
@@ -136,14 +148,13 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
 
     }
 
-    protected function readLookupFieldConfigurationNode(array $node)
+    protected function readLegacyLookupFieldConfigurationNode(array $node)
     {
         $fieldConfiguration = new LookupFieldConfiguration();
-        if (!($lookupField = $this->getChild($node, 'lookupProperty'))) {
-            throw new MissingParameterException("Missing lookupProperty parameter in lookup field configuration");
-        }
-        $fieldConfiguration->setLookupField($lookupField);
-        $fieldConfiguration->setClass($this->getChild($node, 'type'));
+        $lookupProperty = $this->getChildOrThrowMissingParameterException($node, 'lookupProperty');
+        $class = $this->getChildOrThrowMissingParameterException($node, 'type');
+        $fieldConfiguration->setLookupField($lookupProperty);
+        $fieldConfiguration->setClass($class);
         $fieldConfiguration->setField($this->getChild($node, 'property'));
 
         return $fieldConfiguration;
@@ -159,13 +170,8 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
 
     protected function readJoinedImportNode(array $node)
     {
-        if (!($ownerClass = $this->getChild($node, 'owner'))) {
-            throw new MissingParameterException("Missing owner node in joined import");
-        }
-
-        if (!($fields = $this->getChild($node, 'columns'))) {
-            throw new MissingParameterException("Missing columns node in joined import");
-        }
+        $ownerClass = $this->getChildOrThrowMissingParameterException($node, 'owner');
+        $fields = $this->getChildOrThrowMissingParameterException($node, 'columns');
 
         if (count($fields) !== 2) {
             throw new FieldConfigurationParseException("A joinedImport configuration node must have two columns");
@@ -173,7 +179,16 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
 
         $joinedImportConfiguration = new RelationshipConfiguration();
         foreach ($fields as $fieldName => $field) {
-            $lookupFieldConfiguration = $this->readLookupFieldConfigurationNode($field);
+            try {
+                $lookupFieldConfiguration = $this->readLookupConfigurationNode($field);
+            } catch (MissingParameterException $exception) {
+                if (!($exception->getParameter() === 'entity')) {
+                    throw $exception;
+                }
+
+                // Finally, try to run it through the legacy reader
+                $lookupFieldConfiguration = $this->readLegacyLookupFieldConfigurationNode($field);
+            }
             if ($lookupFieldConfiguration->getClass() == $ownerClass) {
                 $joinedImportConfiguration->setOwnerLookupConfigurationField($lookupFieldConfiguration);
                 $joinedImportConfiguration->setOwnerLookupFieldName($fieldName);
@@ -193,6 +208,18 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
 
         return $joinedImportConfiguration;
 
+    }
+
+    protected function readLookupConfigurationNode(array $node)
+    {
+        $fieldConfiguration = new LookupFieldConfiguration();
+        $lookupProperty = $this->getChildOrThrowMissingParameterException($node, 'lookupProperty');
+        $fieldConfiguration->setLookupField($lookupProperty);
+        $entity = $this->getChildOrThrowMissingParameterException($node, 'entity');
+        $fieldConfiguration->setClass($entity);
+        $fieldConfiguration->setField($this->getChild($node, 'property'));
+
+        return $fieldConfiguration;
     }
 
     protected function readDatetimeFieldConfigurationNode(array $node)
