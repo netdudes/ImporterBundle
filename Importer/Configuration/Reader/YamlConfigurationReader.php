@@ -139,6 +139,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         }
 
         // Pick up fields with type not matching any method, but with lookupProperty, as old-style lookup field configs.
+        // TODO: Remove this functionality when no longer necessary
         if ($this->hasChild($fieldConfigurationNode, 'lookupProperty')) {
             return $this->readLegacyLookupFieldConfigurationNode($fieldConfigurationNode);
         }
@@ -187,6 +188,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
                 }
 
                 // Finally, try to run it through the legacy reader
+                // TODO: Remove this functionality when no longer necessary
                 $lookupFieldConfiguration = $this->readLegacyLookupFieldConfigurationNode($field);
             }
             if ($lookupFieldConfiguration->getClass() == $ownerClass) {
