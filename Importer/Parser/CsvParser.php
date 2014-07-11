@@ -14,16 +14,16 @@ class CsvParser implements ParserInterface
     {
         $rows = explode("\n", $data);
         if ($hasHeaders) {
-            $headers = $this->parseCsvRow(array_shift($rows));
+            $headers = $this->parseRow(array_shift($rows));
         } else {
-            $headers = range(0, count($this->parseCsvRow($rows[0])));
+            $headers = range(0, count($this->parseRow($rows[0])));
         }
         $data = [];
         foreach ($rows as $lineNumber => $row) {
             if (!($row = trim($row))) {
                 continue;
             }
-            $row = $this->parseCsvRow($row);
+            $row = $this->parseRow($row);
             $dataRow = [];
             foreach ($row as $index => $cell) {
                 $dataRow[$headers[$index]] = $cell;
@@ -39,7 +39,7 @@ class CsvParser implements ParserInterface
      *
      * @return array
      */
-    private function parseCsvRow($row)
+    public function parseRow($row)
     {
         $delimiter = ',';
         $enclosure = '"';

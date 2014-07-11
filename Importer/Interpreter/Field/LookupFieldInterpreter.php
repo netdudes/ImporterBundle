@@ -32,10 +32,16 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
         $class = $fieldConfiguration->getClass();
         $repository = $this->getRepository($class);
         try {
-            return $repository
-                ->findOneBy([
-                    $fieldConfiguration->getLookupField() => $value
-                ]);
+            $queryBuilder = $repository->createQueryBuilder('e');
+            $queryLookupField = $fieldConfiguration->getLookupField();
+            $entityId = $repository
+                ->createQueryBuilder('e')
+                ->select('e.id id')
+                ->where("e.$queryLookupField = :value")
+                ->setParameter("value", $value)
+                ->getQuery()
+                ->getSingleScalarResult();
+            return $this->entityManager->getReference($class, $entityId);
         } catch (ORMException $exception) {
             $exception = new LookupFieldException("Error when trying to find entity of class \"{$fieldConfiguration->getClass()}\" for property \"{$fieldConfiguration->getLookupField()}\" with value \"{$value}\"", 0, $exception);
             $exception->setValue($value);

@@ -2,6 +2,8 @@
 
 namespace Netdudes\ImporterBundle\Importer\Configuration;
 
+use Netdudes\ImporterBundle\Importer\Configuration\Exception\UnknownFieldException;
+
 class EntityConfiguration implements EntityConfigurationInterface
 {
     private $fields = [];
@@ -30,7 +32,13 @@ class EntityConfiguration implements EntityConfigurationInterface
 
     public function getField($name)
     {
-        return $this->fields[$name];
+        if (array_key_exists($name, $this->fields)) {
+            return $this->fields[$name];
+        }
+
+        $exception = new UnknownFieldException("Unknown field \"$name\"");
+        $exception->setField($name);
+        throw $exception;
     }
 
     public function getFieldNames()
