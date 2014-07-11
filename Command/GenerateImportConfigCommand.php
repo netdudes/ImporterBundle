@@ -62,7 +62,7 @@ class GenerateImportConfigCommand extends ContainerAwareCommand
             if (!in_array($propertyName, $identifiers)) {
                 $propertiesToGenerate[$index] = array();
                 $propertiesToGenerate[$index]['property'] = $propertyName;
-                if (in_array($classMetaData->getTypeOfField($propertyName), ['date','datetime'])) {
+                if (in_array($classMetaData->getTypeOfField($propertyName), ['date', 'datetime'])) {
                     $propertiesToGenerate[$index]['type'] = $classMetaData->getTypeOfField($propertyName);
                 }
                 if ($classMetaData->hasAssociation($propertyName)) {

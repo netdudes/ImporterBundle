@@ -1,0 +1,11 @@
+test_joint:
+  type: joinedImport
+  owner: \Namespace\Of\Owner\Class
+  columns:
+    Owner Class Column:
+      lookupProperty: lookupPropertyOwnerClass
+      type: \Namespace\Of\Owner\Class
+    Other Class Columns:
+      ownerCallback: theCallbackOnTheOwnerClass
+      lookupProperty: propertyOnTheOtherClass
+      type: \Namespace\To\Other\Class
