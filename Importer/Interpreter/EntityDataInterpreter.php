@@ -36,11 +36,13 @@ class EntityDataInterpreter implements InterpreterInterface
 
     protected $lookupFieldInterpreter;
 
+    protected $internalLookupCache = [];
+
     public function __construct(EntityConfigurationInterface $configuration, EntityManager $entityManager)
     {
         $this->configuration = $configuration;
         $this->literalFieldInterpreter = new LiteralFieldInterpreter();
-        $this->lookupFieldInterpreter = new LookupFieldInterpreter($entityManager);
+        $this->lookupFieldInterpreter = new LookupFieldInterpreter($entityManager, $this->internalLookupCache);
         $this->datetimeFieldInterpreter = new DatetimeFieldInterpreter();
         $this->fileFieldInterpreter = new FileFieldInterpreter();
     }
@@ -55,6 +57,7 @@ class EntityDataInterpreter implements InterpreterInterface
             } catch (InterpreterException $exception) {
                 $this->handleInterpreterError($exception, $index, $row);
             }
+            $this->internalLookupCache[] = $entities[$index];
         }
 
         return $entities;
