@@ -32,7 +32,7 @@ class EntityConfiguration implements EntityConfigurationInterface
 
     public function getField($name)
     {
-        if (array_key_exists($name, $this->fields)) {
+        if ($this->hasFieldName($name)) {
             return $this->fields[$name];
         }
 
@@ -44,5 +44,10 @@ class EntityConfiguration implements EntityConfigurationInterface
     public function getFieldNames()
     {
         return array_keys($this->fields);
+    }
+
+    public function hasFieldName($name)
+    {
+        return array_key_exists($name, $this->fields);
     }
 }
