@@ -40,9 +40,6 @@ class CsvImporter extends AbstractImporter
         $parsedData = $this->parser->parse($csv, $hasHeaders);
         $interpreter = $this->getInterpreterFromConfiguration($configuration);
 
-        $this->importData($configuration, $parsedData, $interpreter, $hasHeaders);
-        if ($flush) {
-            $this->flush($configuration);
-        }
+        $this->importData($configuration, $parsedData, $interpreter, $hasHeaders, $flush);
     }
 }

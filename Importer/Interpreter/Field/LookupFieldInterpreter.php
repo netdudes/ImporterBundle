@@ -4,6 +4,7 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter\Field;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\ORMException;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
@@ -18,9 +19,15 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
      */
     private $entityManager;
 
-    public function __construct(EntityManager $entityManager)
+    /**
+     * @var null
+     */
+    private $internalLookupCache;
+
+    public function __construct(EntityManager $entityManager, &$internalLookupCache = null)
     {
         $this->entityManager = $entityManager;
+        $this->internalLookupCache = &$internalLookupCache;
     }
 
     public function interpret(FieldConfigurationInterface $fieldConfiguration, $value)
@@ -29,13 +36,24 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
             throw new \InvalidArgumentException();
         }
 
+        if (empty(trim($value))) {
+            return null;
+        }
+
         $class = $fieldConfiguration->getClass();
         $repository = $this->getRepository($class);
         try {
-            return $repository
-                ->findOneBy([
-                    $fieldConfiguration->getLookupField() => $value
-                ]);
+            $queryLookupField = $fieldConfiguration->getLookupField();
+            $entityId = $repository
+                ->createQueryBuilder('e')
+                ->select('e.id id')
+                ->where("e.$queryLookupField = :value")
+                ->setParameter("value", $value)
+                ->getQuery()
+                ->getSingleScalarResult();
+            return $this->entityManager->getReference($class, $entityId);
+        } catch (NoResultException $exception) {
+            return $this->internalLookup($class, $queryLookupField, $value);
         } catch (ORMException $exception) {
             $exception = new LookupFieldException("Error when trying to find entity of class \"{$fieldConfiguration->getClass()}\" for property \"{$fieldConfiguration->getLookupField()}\" with value \"{$value}\"", 0, $exception);
             $exception->setValue($value);
@@ -56,6 +74,27 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
         }
 
         return $this->repositories[$class];
+    }
+
+    private function internalLookup($class, $lookupField, $value)
+    {
+        if (is_null($this->internalLookupCache)) {
+            return null;
+        }
+        foreach ($this->internalLookupCache as $entity) {
+            if (get_class($entity) !== $class) {
+                continue;
+            }
+            $getter = 'get' . ucfirst($lookupField);
+            if (!method_exists($entity, $getter)) {
+                return null;
+            }
+            if ($entity->{$getter}() == $value) {
+                return $entity;
+            }
+        }
+
+        return null;
     }
 
 }

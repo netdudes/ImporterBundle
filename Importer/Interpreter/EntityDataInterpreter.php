@@ -4,12 +4,14 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter;
 
 use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
+use Netdudes\ImporterBundle\Importer\Configuration\Exception\UnknownFieldException;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownColumnException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownOrInaccessibleFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\DatetimeFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\FileFieldInterpreter;
@@ -34,11 +36,13 @@ class EntityDataInterpreter implements InterpreterInterface
 
     protected $lookupFieldInterpreter;
 
+    protected $internalLookupCache = [];
+
     public function __construct(EntityConfigurationInterface $configuration, EntityManager $entityManager)
     {
         $this->configuration = $configuration;
         $this->literalFieldInterpreter = new LiteralFieldInterpreter();
-        $this->lookupFieldInterpreter = new LookupFieldInterpreter($entityManager);
+        $this->lookupFieldInterpreter = new LookupFieldInterpreter($entityManager, $this->internalLookupCache);
         $this->datetimeFieldInterpreter = new DatetimeFieldInterpreter();
         $this->fileFieldInterpreter = new FileFieldInterpreter();
     }
@@ -49,9 +53,11 @@ class EntityDataInterpreter implements InterpreterInterface
         foreach ($data as $index => $row) {
             try {
                 $entities[$index] = $this->interpretRow($row, $associative);
+                $this->handleInterpreterSuccess($entities[$index], $index, $row);
             } catch (InterpreterException $exception) {
                 $this->handleInterpreterError($exception, $index, $row);
             }
+            $this->internalLookupCache[] = $entities[$index];
         }
 
         return $entities;
@@ -71,7 +77,14 @@ class EntityDataInterpreter implements InterpreterInterface
     {
         $interpretedRow = [];
         foreach ($columns as $fieldName => $value) {
-            $fieldConfiguration = $this->configuration->getField($fieldName);
+            try {
+                $fieldConfiguration = $this->configuration->getField($fieldName);
+            } catch (UnknownFieldException $exception) {
+                $column = $exception->getField();
+                $exception = new UnknownColumnException("Unknown column $column", 0, $exception);
+                $exception->setColumn($column);
+                throw $exception;
+            }
             $interpretedRow[$fieldConfiguration->getField()] = $this->interpretField($fieldConfiguration, $value);
         }
 
@@ -86,7 +99,7 @@ class EntityDataInterpreter implements InterpreterInterface
         return $interpreter->interpret($fieldConfiguration, $value);
     }
 
-    private function getInterpreter($fieldConfiguration)
+    protected function getInterpreter($fieldConfiguration)
     {
         if ($fieldConfiguration instanceof LookupFieldConfiguration) {
             return $this->lookupFieldInterpreter;
@@ -134,8 +147,12 @@ class EntityDataInterpreter implements InterpreterInterface
         }
     }
 
-    private function handleInterpreterError($exception, $index, $row)
+    protected function handleInterpreterError($exception, $index, $row)
     {
         throw $exception;
+    }
+
+    protected function handleInterpreterSuccess($entity, $index, $row)
+    {
     }
 }

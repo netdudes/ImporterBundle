@@ -25,7 +25,7 @@ abstract class AbstractImporter implements ImporterInterface
         $this->entityManager = $entityManager;
     }
 
-    protected function importData($configuration, $parsedData, InterpreterInterface $interpreter, $dataIsAssociativeArray)
+    protected function importData($configuration, $parsedData, InterpreterInterface $interpreter, $dataIsAssociativeArray, $flush = true)
     {
         $entitiesToPersist = $interpreter->interpret($parsedData, $dataIsAssociativeArray);
         if (is_null($entitiesToPersist)) {
@@ -38,6 +38,9 @@ abstract class AbstractImporter implements ImporterInterface
                 $exception = new DatabaseException("Error when persisting for entity {$configuration->getClass()}.", 0, $exception);
                 throw $exception;
             }
+        }
+        if ($flush) {
+            $this->flush($configuration);
         }
     }
 
