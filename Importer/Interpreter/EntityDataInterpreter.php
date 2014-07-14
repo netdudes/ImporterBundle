@@ -52,12 +52,13 @@ class EntityDataInterpreter implements InterpreterInterface
         $entities = [];
         foreach ($data as $index => $row) {
             try {
-                $entities[$index] = $this->interpretRow($row, $associative);
+                $entity = $this->interpretRow($row, $associative);
+                $entities[$index] = $entity;
                 $this->handleInterpreterSuccess($entities[$index], $index, $row);
+                $this->internalLookupCache[] = $entity;
             } catch (InterpreterException $exception) {
                 $this->handleInterpreterError($exception, $index, $row);
             }
-            $this->internalLookupCache[] = $entities[$index];
         }
 
         return $entities;
