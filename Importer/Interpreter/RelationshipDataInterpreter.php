@@ -4,6 +4,7 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter;
 
 use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
+use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\MissingAssignementMethodException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\MissingColumnException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
@@ -77,5 +78,10 @@ class RelationshipDataInterpreter implements InterpreterInterface
         }
 
         $this->interpretValues($row[0], $row[1]);
+    }
+
+    public function registerErrorHandler(InterpreterErrorHandlerInterface $errorHandler)
+    {
+        trigger_error("Not implemented yet", E_USER_ERROR);
     }
 }

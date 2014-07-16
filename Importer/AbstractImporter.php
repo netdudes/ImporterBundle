@@ -8,26 +8,59 @@ use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationColle
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
+use Netdudes\ImporterBundle\Importer\Error\ImporterErrorInterface;
 use Netdudes\ImporterBundle\Importer\Exception\DatabaseException;
+use Netdudes\ImporterBundle\Importer\Exception\ImporterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreter;
+use Netdudes\ImporterBundle\Importer\Error\Handler\ImporterErrorHandlerInterface;
+use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\InterpreterInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreter;
 
 abstract class AbstractImporter implements ImporterInterface
 {
-    protected $configurationCollection;
+    protected $configuration;
 
     protected $entityManager;
 
-    public function __construct(ConfigurationCollectionInterface $configurationCollection, EntityManager $entityManager)
+    protected $importerErrorHandlers = [];
+
+    /**
+     * @var Interpreter\InterpreterInterface
+     */
+    private $interpreter;
+
+    public function __construct(ConfigurationInterface $configuration, InterpreterInterface $interpreter, EntityManager $entityManager)
     {
-        $this->configurationCollection = $configurationCollection;
+        $this->configuration = $configuration;
         $this->entityManager = $entityManager;
+        $this->interpreter = $interpreter;
     }
 
-    protected function importData($configuration, $parsedData, InterpreterInterface $interpreter, $dataIsAssociativeArray, $flush = true)
+    public function registerInterpreterErrorHandler(InterpreterErrorHandlerInterface $lineErrorHandler)
     {
-        $entitiesToPersist = $interpreter->interpret($parsedData, $dataIsAssociativeArray);
+        $this->interpreter->registerErrorHandler($lineErrorHandler);
+    }
+
+    public function registerImporterErrorHandler(ImporterErrorHandlerInterface $fileErrorHandler)
+    {
+        $this->importerErrorHandlers[] = $fileErrorHandler;
+    }
+
+    protected function handleImporterError(ImporterErrorInterface $error)
+    {
+        if (count($this->importerErrorHandlers) == 0) {
+            throw new ImporterException($error, "An error occurred when importing data, and no error handlers were defined.");
+        }
+
+        foreach ($this->importerErrorHandlers as $errorHandler) {
+            $errorHandler->handle($error);
+        }
+    }
+
+    protected function importData($parsedData, $dataIsAssociativeArray, $flush = true)
+    {
+        $entitiesToPersist = $this->interpreter->interpret($parsedData, $dataIsAssociativeArray);
         if (is_null($entitiesToPersist)) {
             return;
         }
@@ -35,42 +68,23 @@ abstract class AbstractImporter implements ImporterInterface
             try {
                 $this->entityManager->persist($entity);
             } catch (ORMException $exception) {
-                $exception = new DatabaseException("Error when persisting for entity {$configuration->getClass()}.", 0, $exception);
+                $exception = new DatabaseException("Error when persisting for entity {$this->configuration->getClass()}.", 0, $exception);
                 throw $exception;
             }
         }
         if ($flush) {
-            $this->flush($configuration);
+            $this->flush();
         }
+        return $entitiesToPersist;
     }
 
-    protected function flush(ConfigurationInterface $configuration)
+    public function flush()
     {
         try {
             $this->entityManager->flush();
         } catch (ORMException $exception) {
-            $exception = new DatabaseException("Error when flushing for entity {$configuration->getClass()}.", 0, $exception);
+            $exception = new DatabaseException("Error when flushing for entity {$this->configuration->getClass()}.", 0, $exception);
             throw $exception;
         }
-    }
-
-    /**
-     * @param $configuration
-     *
-     * @throws \Exception
-     * @return EntityDataInterpreter|RelationshipDataInterpreter
-     */
-    protected function getInterpreterFromConfiguration($configuration)
-    {
-        if ($configuration instanceof EntityConfigurationInterface) {
-            return new EntityDataInterpreter($configuration, $this->entityManager);
-        }
-
-        if ($configuration instanceof RelationshipConfigurationInterface) {
-            return new RelationshipDataInterpreter($configuration, $this->entityManager);
-        }
-
-        $configurationClass = get_class($configuration);
-        throw new \Exception("Unknown configuration type \"{{$configurationClass}}\"");
     }
 }

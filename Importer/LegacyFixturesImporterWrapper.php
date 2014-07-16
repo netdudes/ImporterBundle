@@ -11,36 +11,20 @@ use Symfony\Component\Yaml\Parser;
 
 class LegacyFixturesImporterWrapper
 {
+    /**
+     * @var MultipleFileCsvImportManager
+     */
+    private $multiFileCsvImportManager;
 
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var Configuration\Reader\YamlConfigurationReader
      */
-    protected $entityManager;
+    private $yamlConfigurationReader;
 
-    /**
-     * The current working directory for looking up files
-     * @var string
-     */
-    protected $cwd;
-
-    /**
-     * @var Parser\CsvParser
-     */
-    private $csvParser;
-
-    /**
-     * @var \Symfony\Component\Yaml\Parser
-     */
-    private $yamlParser;
-
-    /**
-     * @param EntityManager $entityManager
-     */
-    public function __construct(EntityManager $entityManager, CsvParser $parser, Parser $yamlParser)
+    public function __construct(MultipleFileCsvImportManager $multiFileCsvImportManager, YamlConfigurationReader $yamlConfigurationReader)
     {
-        $this->entityManager = $entityManager;
-        $this->csvParser = $parser;
-        $this->yamlParser = $yamlParser;
+        $this->multiFileCsvImportManager = $multiFileCsvImportManager;
+        $this->yamlConfigurationReader = $yamlConfigurationReader;
     }
 
     /**
@@ -53,23 +37,12 @@ class LegacyFixturesImporterWrapper
      */
     public function import($files, array $arrayConfiguration, $currentWorkingDirectory = '')
     {
-        $configurationReader = new YamlConfigurationReader($this->yamlParser);
-        $configurationReader->readParsedYamlArray($arrayConfiguration);
-        $configuration = $configurationReader->getConfigurationCollection();
-
-        $importer = new CsvImporter($configuration, $this->entityManager, $this->csvParser, $this->yamlParser);
-
-        foreach ($files as $index => $file) {
-            $file = $this->fixWorkingDirectory($file, $currentWorkingDirectory);
-            $key = array_keys($configuration->all())[$index];
-            $data = file_get_contents($file);
-            try {
-                $importer->import($key, $data, $this->areThereHeadersInTheData($configuration->get($key), $data));
-            } catch (RowSizeMismatchException $e) {
-                $e->setDataFile($file);
-                echo $e;
-                throw $e;
-            }
+        $this->multiFileCsvImportManager->resetConfigurationCollection();
+        foreach ($arrayConfiguration as $index => $configuration) {
+            $configuration = $this->yamlConfigurationReader->readParsedYamlArray($configuration);
+            $this->multiFileCsvImportManager->addConfiguration($index, $configuration);
+            $file = $this->fixWorkingDirectory($files[$index], $currentWorkingDirectory);
+            $this->multiFileCsvImportManager->importFile($index, $file);
         }
     }
 
@@ -117,25 +90,5 @@ class LegacyFixturesImporterWrapper
         $this->cwd = $cwd;
 
         return $this;
-    }
-
-    /**
-     * @param $configuration
-     * @param $data
-     *
-     * @return bool
-     */
-    protected function areThereHeadersInTheData(ConfigurationInterface $configuration, $data)
-    {
-        $firstRow = str_getcsv(explode("\n", $data)[0]);
-        $fieldNames = $configuration->getFieldNames();
-
-        foreach ($firstRow as $header) {
-            if (!in_array($header, $fieldNames, true)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

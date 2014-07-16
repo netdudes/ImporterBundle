@@ -9,6 +9,7 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfigurat
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
+use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownColumnException;
@@ -38,6 +39,11 @@ class EntityDataInterpreter implements InterpreterInterface
 
     protected $internalLookupCache = [];
 
+    /**
+     * @var InterpreterErrorHandlerInterface[]
+     */
+    protected $errorHandlers = [];
+
     public function __construct(EntityConfigurationInterface $configuration, EntityManager $entityManager)
     {
         $this->configuration = $configuration;
@@ -54,7 +60,6 @@ class EntityDataInterpreter implements InterpreterInterface
             try {
                 $entity = $this->interpretRow($row, $associative);
                 $entities[$index] = $entity;
-                $this->handleInterpreterSuccess($entities[$index], $index, $row);
                 $this->internalLookupCache[] = $entity;
             } catch (InterpreterException $exception) {
                 $this->handleInterpreterError($exception, $index, $row);
@@ -150,10 +155,17 @@ class EntityDataInterpreter implements InterpreterInterface
 
     protected function handleInterpreterError($exception, $index, $row)
     {
-        throw $exception;
+        if (count($this->errorHandlers) == 0) {
+            throw $exception;
+        }
+
+        foreach ($this->errorHandlers as $errorHandler) {
+            $errorHandler->handle($exception, $index, $row);
+        }
     }
 
-    protected function handleInterpreterSuccess($entity, $index, $row)
+    public function registerErrorHandler(InterpreterErrorHandlerInterface $errorHandler)
     {
+        $this->errorHandlers[] = $errorHandler;
     }
 }

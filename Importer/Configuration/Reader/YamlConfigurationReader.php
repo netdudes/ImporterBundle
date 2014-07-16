@@ -18,8 +18,6 @@ use Symfony\Component\Yaml\Parser;
 
 class YamlConfigurationReader implements ConfigurationReaderInterface
 {
-    protected $configurationCollection;
-
     /**
      * @var \Symfony\Component\Yaml\Parser
      */
@@ -27,20 +25,33 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
 
     public function __construct(Parser $yamlParser)
     {
-        $this->configurationCollection = new ConfigurationCollection();
         $this->yamlParser = $yamlParser;
     }
 
-    public function readFile($file)
+    public function readFile($file, $configurationKey = null)
     {
-        $this->read(file_get_contents($file));
+        return $this->read(file_get_contents($file));
     }
 
     public function read($yaml)
     {
         $parsedYamlArray = $this->yamlParser->parse($yaml);
 
-        $this->readParsedYamlArray($parsedYamlArray);
+        if (count($parsedYamlArray) == 0) {
+            return null;
+        }
+
+        $configurationCollection = new ConfigurationCollection();
+
+        foreach ($parsedYamlArray as $configurationKey => $configurationArray) {
+            $configurationCollection->add($configurationKey, $this->readParsedYamlArray($configurationArray));
+        }
+
+        if (count($configurationCollection) == 1) {
+            return $configurationCollection->get($configurationCollection->getConfigurationIds()[0]);
+        }
+
+        return $configurationCollection;
     }
 
     /**
@@ -48,12 +59,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      */
     public function readParsedYamlArray(array $parsedYamlArray)
     {
-        $configurationCollection = new ConfigurationCollection();
-        foreach ($parsedYamlArray as $entryName => $configurationNode) {
-            $configurationCollection->add($entryName, $this->readConfigurationNode($configurationNode));
-        }
-
-        $this->configurationCollection = $configurationCollection;
+        return $this->readConfigurationNode($parsedYamlArray);
     }
 
     protected function readConfigurationNode(array $rootConfigurationNode)
