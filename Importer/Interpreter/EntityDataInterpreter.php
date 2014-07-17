@@ -11,7 +11,9 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\SetterDoesNotAllowNullException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownColumnException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownOrInaccessibleFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\DatetimeFieldInterpreter;
@@ -21,6 +23,7 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Field\LookupFieldInterpreter;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class EntityDataInterpreter implements InterpreterInterface
 {
@@ -44,13 +47,19 @@ class EntityDataInterpreter implements InterpreterInterface
      */
     protected $errorHandlers = [];
 
-    public function __construct(EntityConfigurationInterface $configuration, EntityManager $entityManager)
+    /**
+     * @var Validator
+     */
+    private $validator;
+
+    public function __construct(EntityConfigurationInterface $configuration, EntityManager $entityManager, ValidatorInterface $validator)
     {
         $this->configuration = $configuration;
         $this->literalFieldInterpreter = new LiteralFieldInterpreter();
         $this->lookupFieldInterpreter = new LookupFieldInterpreter($entityManager, $this->internalLookupCache);
         $this->datetimeFieldInterpreter = new DatetimeFieldInterpreter();
         $this->fileFieldInterpreter = new FileFieldInterpreter();
+        $this->validator = $validator;
     }
 
     public function interpret($data, $associative = true)
@@ -75,6 +84,10 @@ class EntityDataInterpreter implements InterpreterInterface
         $entity = new $class;
         $interpretedData = $associative ? $this->interpretAssociativeRow($row) : $this->interpretOrderedRow($row);
         $this->injectInterpretedDataIntoEntity($entity, $interpretedData);
+        $validationViolations = $this->validator->validate($entity);
+        if ($validationViolations->count() > 0) {
+            throw new InvalidEntityException($validationViolations);
+        }
         return $entity;
 
     }
@@ -144,6 +157,9 @@ class EntityDataInterpreter implements InterpreterInterface
     {
         $accessor = PropertyAccess::createPropertyAccessor();
         foreach ($interpretedData as $field => $value) {
+            if (is_null($value) && !$this->setterAllowsNull($entity, $field)) {
+                throw new SetterDoesNotAllowNullException($entity, $field);
+            }
             try {
                 $accessor->setValue($entity, $field, $value);
             } catch (AccessException $exception) {
@@ -167,5 +183,19 @@ class EntityDataInterpreter implements InterpreterInterface
     public function registerErrorHandler(InterpreterErrorHandlerInterface $errorHandler)
     {
         $this->errorHandlers[] = $errorHandler;
+    }
+
+    /**
+     * @param $entity
+     * @param $field
+     *
+     * @return bool
+     */
+    private function setterAllowsNull($entity, $field)
+    {
+        $reflectionMethod = new \ReflectionMethod(get_class($entity), 'set' . ucfirst($field));
+        $parameters = $reflectionMethod->getParameters();
+        $firstParameter = $parameters[0];
+        return $firstParameter->allowsNull();
     }
 }

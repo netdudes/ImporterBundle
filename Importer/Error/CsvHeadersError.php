@@ -4,7 +4,7 @@ namespace Netdudes\ImporterBundle\Importer\Error;
 
 class CsvHeadersError implements ImporterErrorInterface
 {
-    private $invalidHeaders;
+    private $invalidHeaders = [];
 
     function __construct($invalidHeaders)
     {
@@ -14,5 +14,10 @@ class CsvHeadersError implements ImporterErrorInterface
     public function getInvalidHeaders()
     {
         return $this->invalidHeaders;
+    }
+
+    public function getMessage()
+    {
+        return "Invalid headers were found: " . implode(", ", $this->invalidHeaders);
     }
 }

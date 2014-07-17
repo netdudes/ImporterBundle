@@ -50,7 +50,7 @@ abstract class AbstractImporter implements ImporterInterface
     protected function handleImporterError(ImporterErrorInterface $error)
     {
         if (count($this->importerErrorHandlers) == 0) {
-            throw new ImporterException($error, "An error occurred when importing data, and no error handlers were defined.");
+            throw new ImporterException($error, $error->getMessage());
         }
 
         foreach ($this->importerErrorHandlers as $errorHandler) {

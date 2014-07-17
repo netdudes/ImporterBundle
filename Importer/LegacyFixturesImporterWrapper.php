@@ -5,26 +5,30 @@ namespace Netdudes\ImporterBundle\Importer;
 use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader;
+use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\FileLoggerErrorHandler;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
+use Netdudes\U2\TransferPricingBundle\Importer\Error\InterpreterErrorHandler;
+use Netdudes\U2\TransferPricingBundle\Importer\Statistics\TransactionImportStatistics;
 use Symfony\Component\Yaml\Parser;
 
 class LegacyFixturesImporterWrapper
 {
     /**
-     * @var MultipleFileCsvImportManager
-     */
-    private $multiFileCsvImportManager;
-
-    /**
      * @var Configuration\Reader\YamlConfigurationReader
      */
     private $yamlConfigurationReader;
 
-    public function __construct(MultipleFileCsvImportManager $multiFileCsvImportManager, YamlConfigurationReader $yamlConfigurationReader)
+    /**
+     * @var CsvImporterFactory
+     */
+    private $csvImporterFactory;
+
+    public function __construct(CsvImporterFactory $csvImporterFactory, YamlConfigurationReader $yamlConfigurationReader)
     {
-        $this->multiFileCsvImportManager = $multiFileCsvImportManager;
         $this->yamlConfigurationReader = $yamlConfigurationReader;
+        $this->csvImporterFactory = $csvImporterFactory;
     }
 
     /**
@@ -37,12 +41,22 @@ class LegacyFixturesImporterWrapper
      */
     public function import($files, array $arrayConfiguration, $currentWorkingDirectory = '')
     {
-        $this->multiFileCsvImportManager->resetConfigurationCollection();
+        $logFile = "demo_data_errors.txt";
+        $errorHandler = new FileLoggerErrorHandler(fopen($logFile, "a"));
         foreach ($arrayConfiguration as $index => $configuration) {
+            $errorHandler->setCurrentFile($files[$index]);
             $configuration = $this->yamlConfigurationReader->readParsedYamlArray($configuration);
-            $this->multiFileCsvImportManager->addConfiguration($index, $configuration);
+            $importer = $this->csvImporterFactory->create($configuration);
             $file = $this->fixWorkingDirectory($files[$index], $currentWorkingDirectory);
-            $this->multiFileCsvImportManager->importFile($index, $file);
+            $csv = file_get_contents($file);
+            $errorHandler->setCsv($csv);
+            $importer->registerInterpreterErrorHandler($errorHandler);
+            try {
+                $importer->import($csv, true, true);
+            } catch (\Exception $e) {
+                echo "\n\nException thrown when importing $file";
+                throw $e;
+            }
         }
     }
 

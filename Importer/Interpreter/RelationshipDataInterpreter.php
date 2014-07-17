@@ -82,6 +82,6 @@ class RelationshipDataInterpreter implements InterpreterInterface
 
     public function registerErrorHandler(InterpreterErrorHandlerInterface $errorHandler)
     {
-        trigger_error("Not implemented yet", E_USER_ERROR);
+        // TODO: Implement error handler functionality in relationship interpreters
     }
 }

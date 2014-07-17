@@ -18,7 +18,7 @@ services:
 
   netdudes_importer.interpreter.entity_data_factory:
     class: Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreterFactory
-    arguments: [@doctrine.orm.entity_manager]
+    arguments: [@doctrine.orm.entity_manager, @validator]
 
   netdudes_importer.interpreter.relationship_data_factory:
     class: Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreterFactory
@@ -48,4 +48,4 @@ services:
 
   netdudes_importer.legacy_fixtures_wrapper:
     class: Netdudes\ImporterBundle\Importer\LegacyFixturesImporterWrapper
-    arguments: [@netdudes_importer.multiple_file_csv_import_manager, @netdudes_importer.configuration_reader.yaml]
+    arguments: [@netdudes_importer.csv_importer_factory, @netdudes_importer.configuration_reader.yaml]
