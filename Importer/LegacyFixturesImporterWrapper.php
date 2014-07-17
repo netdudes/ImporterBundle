@@ -15,6 +15,8 @@ use Symfony\Component\Yaml\Parser;
 
 class LegacyFixturesImporterWrapper
 {
+    protected $cwd;
+
     /**
      * @var Configuration\Reader\YamlConfigurationReader
      */
@@ -25,8 +27,14 @@ class LegacyFixturesImporterWrapper
      */
     private $csvImporterFactory;
 
-    public function __construct(CsvImporterFactory $csvImporterFactory, YamlConfigurationReader $yamlConfigurationReader)
+    private $logFile = null;
+
+    private $logErrors = false;
+
+    public function __construct(CsvImporterFactory $csvImporterFactory, YamlConfigurationReader $yamlConfigurationReader, $logFile = "php://stderr")
     {
+        $this->logFile = $logFile;
+        $this->logErrors = !is_null($this->logFile);
         $this->yamlConfigurationReader = $yamlConfigurationReader;
         $this->csvImporterFactory = $csvImporterFactory;
     }
@@ -41,16 +49,19 @@ class LegacyFixturesImporterWrapper
      */
     public function import($files, array $arrayConfiguration, $currentWorkingDirectory = '')
     {
-        $logFile = "demo_data_errors.txt";
-        $errorHandler = new FileLoggerErrorHandler(fopen($logFile, "a"));
+        if ($this->logErrors) {
+            $errorHandler = new FileLoggerErrorHandler(fopen($this->logFile, "a"));
+        }
         foreach ($arrayConfiguration as $index => $configuration) {
-            $errorHandler->setCurrentFile($files[$index]);
             $configuration = $this->yamlConfigurationReader->readParsedYamlArray($configuration);
             $importer = $this->csvImporterFactory->create($configuration);
             $file = $this->fixWorkingDirectory($files[$index], $currentWorkingDirectory);
             $csv = file_get_contents($file);
-            $errorHandler->setCsv($csv);
-            $importer->registerInterpreterErrorHandler($errorHandler);
+            if ($this->logErrors) {
+                $errorHandler->setCurrentFile($files[$index]);
+                $errorHandler->setCsv($csv);
+                $importer->registerInterpreterErrorHandler($errorHandler);
+            }
             try {
                 $importer->import($csv, true, true);
             } catch (\Exception $e) {
@@ -104,5 +115,14 @@ class LegacyFixturesImporterWrapper
         $this->cwd = $cwd;
 
         return $this;
+    }
+
+    /**
+     * @param null $logFile
+     */
+    public function setLogFile($logFile)
+    {
+        $this->logFile = $logFile;
+        $this->logErrors = !is_null($this->logFile);
     }
 }
