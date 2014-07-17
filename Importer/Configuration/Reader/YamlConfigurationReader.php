@@ -28,7 +28,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         $this->yamlParser = $yamlParser;
     }
 
-    public function readFile($file, $configurationKey = null)
+    public function readFile($file)
     {
         return $this->read(file_get_contents($file));
     }
