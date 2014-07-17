@@ -30,6 +30,11 @@ class ConfigurationCollection implements ConfigurationCollectionInterface
         return $this->configurationCollection;
     }
 
+    public function getConfigurationIds()
+    {
+        return array_keys($this->configurationCollection);
+    }
+
     /**
      * (PHP 5 &gt;= 5.0.0)<br/>
      * Retrieve an external iterator

@@ -5,42 +5,38 @@ namespace Netdudes\ImporterBundle\Importer;
 use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader;
+use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\FileLoggerErrorHandler;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
+use Netdudes\U2\TransferPricingBundle\Importer\Error\InterpreterErrorHandler;
+use Netdudes\U2\TransferPricingBundle\Importer\Statistics\TransactionImportStatistics;
 use Symfony\Component\Yaml\Parser;
 
 class LegacyFixturesImporterWrapper
 {
-
-    /**
-     * @var \Doctrine\ORM\EntityManager
-     */
-    protected $entityManager;
-
-    /**
-     * The current working directory for looking up files
-     * @var string
-     */
     protected $cwd;
 
     /**
-     * @var Parser\CsvParser
+     * @var Configuration\Reader\YamlConfigurationReader
      */
-    private $csvParser;
+    private $yamlConfigurationReader;
 
     /**
-     * @var \Symfony\Component\Yaml\Parser
+     * @var CsvImporterFactory
      */
-    private $yamlParser;
+    private $csvImporterFactory;
 
-    /**
-     * @param EntityManager $entityManager
-     */
-    public function __construct(EntityManager $entityManager, CsvParser $parser, Parser $yamlParser)
+    private $logFile = null;
+
+    private $logErrors = false;
+
+    public function __construct(CsvImporterFactory $csvImporterFactory, YamlConfigurationReader $yamlConfigurationReader, $logFile = "php://stderr")
     {
-        $this->entityManager = $entityManager;
-        $this->csvParser = $parser;
-        $this->yamlParser = $yamlParser;
+        $this->logFile = $logFile;
+        $this->logErrors = !is_null($this->logFile);
+        $this->yamlConfigurationReader = $yamlConfigurationReader;
+        $this->csvImporterFactory = $csvImporterFactory;
     }
 
     /**
@@ -53,21 +49,23 @@ class LegacyFixturesImporterWrapper
      */
     public function import($files, array $arrayConfiguration, $currentWorkingDirectory = '')
     {
-        $configurationReader = new YamlConfigurationReader($this->yamlParser);
-        $configurationReader->readParsedYamlArray($arrayConfiguration);
-        $configuration = $configurationReader->getConfigurationCollection();
-
-        $importer = new CsvImporter($configuration, $this->entityManager, $this->csvParser, $this->yamlParser);
-
-        foreach ($files as $index => $file) {
-            $file = $this->fixWorkingDirectory($file, $currentWorkingDirectory);
-            $key = array_keys($configuration->all())[$index];
-            $data = file_get_contents($file);
+        if ($this->logErrors) {
+            $errorHandler = new FileLoggerErrorHandler(fopen($this->logFile, "a"));
+        }
+        foreach ($arrayConfiguration as $index => $configuration) {
+            $configuration = $this->yamlConfigurationReader->readParsedYamlArray($configuration);
+            $importer = $this->csvImporterFactory->create($configuration);
+            $file = $this->fixWorkingDirectory($files[$index], $currentWorkingDirectory);
+            $csv = file_get_contents($file);
+            if ($this->logErrors) {
+                $errorHandler->setCurrentFile($files[$index]);
+                $errorHandler->setCsv($csv);
+                $importer->registerInterpreterErrorHandler($errorHandler);
+            }
             try {
-                $importer->import($key, $data, $this->areThereHeadersInTheData($configuration->get($key), $data));
-            } catch (RowSizeMismatchException $e) {
-                $e->setDataFile($file);
-                echo $e;
+                $importer->import($csv, true, true);
+            } catch (\Exception $e) {
+                echo "\n\nException thrown when importing $file";
                 throw $e;
             }
         }
@@ -120,22 +118,11 @@ class LegacyFixturesImporterWrapper
     }
 
     /**
-     * @param $configuration
-     * @param $data
-     *
-     * @return bool
+     * @param null $logFile
      */
-    protected function areThereHeadersInTheData(ConfigurationInterface $configuration, $data)
+    public function setLogFile($logFile)
     {
-        $firstRow = str_getcsv(explode("\n", $data)[0]);
-        $fieldNames = $configuration->getFieldNames();
-
-        foreach ($firstRow as $header) {
-            if (!in_array($header, $fieldNames, true)) {
-                return false;
-            }
-        }
-
-        return true;
+        $this->logFile = $logFile;
+        $this->logErrors = !is_null($this->logFile);
     }
 }

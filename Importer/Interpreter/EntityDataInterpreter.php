@@ -9,8 +9,11 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfigurat
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
+use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\SetterDoesNotAllowNullException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownColumnException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownOrInaccessibleFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\DatetimeFieldInterpreter;
@@ -20,6 +23,7 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Field\LookupFieldInterpreter;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class EntityDataInterpreter implements InterpreterInterface
 {
@@ -38,13 +42,24 @@ class EntityDataInterpreter implements InterpreterInterface
 
     protected $internalLookupCache = [];
 
-    public function __construct(EntityConfigurationInterface $configuration, EntityManager $entityManager)
+    /**
+     * @var InterpreterErrorHandlerInterface[]
+     */
+    protected $errorHandlers = [];
+
+    /**
+     * @var Validator
+     */
+    private $validator;
+
+    public function __construct(EntityConfigurationInterface $configuration, EntityManager $entityManager, ValidatorInterface $validator)
     {
         $this->configuration = $configuration;
         $this->literalFieldInterpreter = new LiteralFieldInterpreter();
         $this->lookupFieldInterpreter = new LookupFieldInterpreter($entityManager, $this->internalLookupCache);
         $this->datetimeFieldInterpreter = new DatetimeFieldInterpreter();
         $this->fileFieldInterpreter = new FileFieldInterpreter();
+        $this->validator = $validator;
     }
 
     public function interpret($data, $associative = true)
@@ -54,7 +69,6 @@ class EntityDataInterpreter implements InterpreterInterface
             try {
                 $entity = $this->interpretRow($row, $associative);
                 $entities[$index] = $entity;
-                $this->handleInterpreterSuccess($entities[$index], $index, $row);
                 $this->internalLookupCache[] = $entity;
             } catch (InterpreterException $exception) {
                 $this->handleInterpreterError($exception, $index, $row);
@@ -70,6 +84,10 @@ class EntityDataInterpreter implements InterpreterInterface
         $entity = new $class;
         $interpretedData = $associative ? $this->interpretAssociativeRow($row) : $this->interpretOrderedRow($row);
         $this->injectInterpretedDataIntoEntity($entity, $interpretedData);
+        $validationViolations = $this->validator->validate($entity);
+        if ($validationViolations->count() > 0) {
+            throw new InvalidEntityException($validationViolations);
+        }
         return $entity;
 
     }
@@ -139,6 +157,9 @@ class EntityDataInterpreter implements InterpreterInterface
     {
         $accessor = PropertyAccess::createPropertyAccessor();
         foreach ($interpretedData as $field => $value) {
+            if (is_null($value) && !$this->setterAllowsNull($entity, $field)) {
+                throw new SetterDoesNotAllowNullException($entity, $field);
+            }
             try {
                 $accessor->setValue($entity, $field, $value);
             } catch (AccessException $exception) {
@@ -150,10 +171,31 @@ class EntityDataInterpreter implements InterpreterInterface
 
     protected function handleInterpreterError($exception, $index, $row)
     {
-        throw $exception;
+        if (count($this->errorHandlers) == 0) {
+            throw $exception;
+        }
+
+        foreach ($this->errorHandlers as $errorHandler) {
+            $errorHandler->handle($exception, $index, $row);
+        }
     }
 
-    protected function handleInterpreterSuccess($entity, $index, $row)
+    public function registerErrorHandler(InterpreterErrorHandlerInterface $errorHandler)
     {
+        $this->errorHandlers[] = $errorHandler;
+    }
+
+    /**
+     * @param $entity
+     * @param $field
+     *
+     * @return bool
+     */
+    private function setterAllowsNull($entity, $field)
+    {
+        $reflectionMethod = new \ReflectionMethod(get_class($entity), 'set' . ucfirst($field));
+        $parameters = $reflectionMethod->getParameters();
+        $firstParameter = $parameters[0];
+        return $firstParameter->allowsNull();
     }
 }
