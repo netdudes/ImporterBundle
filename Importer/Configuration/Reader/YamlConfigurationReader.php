@@ -167,14 +167,6 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         return $fieldConfiguration;
     }
 
-    /**
-     * @return ConfigurationCollectionInterface
-     */
-    public function getConfigurationCollection()
-    {
-        return $this->configurationCollection;
-    }
-
     protected function readJoinedImportNode(array $node)
     {
         $ownerClass = $this->getChildOrThrowMissingParameterException($node, 'owner');
