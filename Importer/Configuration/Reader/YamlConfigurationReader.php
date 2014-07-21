@@ -47,10 +47,6 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
             $configurationCollection->add($configurationKey, $this->readParsedYamlArray($configurationArray));
         }
 
-        if (count($configurationCollection) == 1) {
-            return $configurationCollection->get($configurationCollection->getConfigurationIds()[0]);
-        }
-
         return $configurationCollection;
     }
 
