@@ -9,8 +9,8 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\FileLoggerErrorHa
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
-use Netdudes\U2\TransferPricingBundle\Importer\Error\InterpreterErrorHandler;
-use Netdudes\U2\TransferPricingBundle\Importer\Statistics\TransactionImportStatistics;
+use Netdudes\U2\CoreBundle\Importer\Error\InterpreterErrorHandler;
+use Netdudes\U2\CoreBundle\Importer\Statistics\TransactionImportStatistics;
 use Symfony\Component\Yaml\Parser;
 
 class LegacyFixturesImporterWrapper

@@ -47,9 +47,9 @@ class CsvImporterFactory
         $this->dataInterpreterFactory = $dataInterpreterFactory;
     }
 
-    public function create(ConfigurationInterface $configuration)
+    public function create(ConfigurationInterface $configuration, $delimiter)
     {
         $interpreter = $this->dataInterpreterFactory->create($configuration);
-        return new CsvImporter($configuration, $interpreter, $this->entityManager, $this->csvParser);
+        return new CsvImporter($configuration, $interpreter, $this->entityManager, $this->csvParser, $delimiter);
     }
 }

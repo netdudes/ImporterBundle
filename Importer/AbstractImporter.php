@@ -47,6 +47,11 @@ abstract class AbstractImporter implements ImporterInterface
         $this->importerErrorHandlers[] = $fileErrorHandler;
     }
 
+    public function registerPostProcess(callable $callable)
+    {
+        $this->interpreter->registerPostProcess($callable);
+    }
+
     protected function handleImporterError(ImporterErrorInterface $error)
     {
         if (count($this->importerErrorHandlers) == 0) {

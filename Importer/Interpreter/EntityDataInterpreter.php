@@ -47,6 +47,8 @@ class EntityDataInterpreter implements InterpreterInterface
      */
     protected $errorHandlers = [];
 
+    protected $postProcessCallables = [];
+
     /**
      * @var Validator
      */
@@ -84,6 +86,7 @@ class EntityDataInterpreter implements InterpreterInterface
         $entity = new $class;
         $interpretedData = $associative ? $this->interpretAssociativeRow($row) : $this->interpretOrderedRow($row);
         $this->injectInterpretedDataIntoEntity($entity, $interpretedData);
+        $this->postProcess($entity);
         $validationViolations = $this->validator->validate($entity);
         if ($validationViolations->count() > 0) {
             throw new InvalidEntityException($validationViolations);
@@ -197,5 +200,17 @@ class EntityDataInterpreter implements InterpreterInterface
         $parameters = $reflectionMethod->getParameters();
         $firstParameter = $parameters[0];
         return $firstParameter->allowsNull();
+    }
+
+    public function registerPostProcess(callable $callable)
+    {
+        $this->postProcessCallables[] = $callable;
+    }
+
+    protected function postProcess($entity)
+    {
+        foreach ($this->postProcessCallables as $callable) {
+            $callable($entity);
+        }
     }
 }
