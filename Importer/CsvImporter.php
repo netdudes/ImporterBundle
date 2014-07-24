@@ -27,7 +27,7 @@ class CsvImporter extends AbstractImporter
      */
     private $delimiter;
 
-    public function __construct(ConfigurationInterface $configuration, InterpreterInterface $interpreter, EntityManager $entityManager, CsvParser $parser, $delimiter)
+    public function __construct(ConfigurationInterface $configuration, InterpreterInterface $interpreter, EntityManager $entityManager, CsvParser $parser, $delimiter = ',')
     {
         $this->parser = $parser;
         parent::__construct($configuration, $interpreter, $entityManager);
