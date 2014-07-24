@@ -20,6 +20,10 @@ services:
     class: Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreterFactory
     arguments: [@doctrine.orm.entity_manager, @validator]
 
+  netdudes_importer.interpreter.updating_entity_data_factory:
+      class: Netdudes\ImporterBundle\Importer\Interpreter\UpdatingEntityDataInterpreterFactory
+      arguments: [@doctrine.orm.entity_manager, @validator]
+
   netdudes_importer.interpreter.relationship_data_factory:
     class: Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreterFactory
     arguments: [@doctrine.orm.entity_manager]
@@ -28,6 +32,7 @@ services:
     class: Netdudes\ImporterBundle\Importer\Interpreter\DataInterpreterFactory
     arguments:
       - @netdudes_importer.interpreter.entity_data_factory
+      - @netdudes_importer.interpreter.updating_entity_data_factory
       - @netdudes_importer.interpreter.relationship_data_factory
 
   netdudes_importer.csv_importer_factory:
