@@ -3,6 +3,7 @@
 namespace Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler;
 
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\DateTimeFormatException;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\LookupFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
@@ -35,7 +36,7 @@ class FileLoggerErrorHandler implements InterpreterErrorHandlerInterface
         $this->lineNumberOffset = $lineNumberOffset;
     }
 
-    public function handle($exception, $index, $rowData)
+    public function handle(InterpreterException $exception, $index, $rowData)
     {
         $line = is_null($this->csv) ? implode(', ', $rowData) : $this->csv[$index];
         $lineNo = $index + $this->lineNumberOffset;

@@ -10,7 +10,7 @@ class CsvParser implements ParserInterface
      *
      * @return array
      */
-    public function parse($data, $hasHeaders = true)
+    public function parse($data, $hasHeaders = true, $delimiter = ',')
     {
         $rows = explode("\n", $data);
         if ($hasHeaders) {
@@ -23,7 +23,7 @@ class CsvParser implements ParserInterface
             if (!($row = trim($row))) {
                 continue;
             }
-            $row = $this->parseLine($row);
+            $row = $this->parseLine($row, $delimiter);
             $dataRow = [];
             foreach ($row as $index => $cell) {
                 $dataRow[$headers[$index]] = $cell;
@@ -39,9 +39,8 @@ class CsvParser implements ParserInterface
      *
      * @return array
      */
-    public function parseLine($row)
+    public function parseLine($row, $delimiter = ',')
     {
-        $delimiter = ',';
         $enclosure = '"';
 
         return str_getcsv($row, $delimiter, $enclosure);

@@ -22,10 +22,16 @@ class CsvImporter extends AbstractImporter
 {
     protected $parser;
 
-    public function __construct(ConfigurationInterface $configuration, InterpreterInterface $interpreter, EntityManager $entityManager, CsvParser $parser)
+    /**
+     * @var
+     */
+    private $delimiter;
+
+    public function __construct(ConfigurationInterface $configuration, InterpreterInterface $interpreter, EntityManager $entityManager, CsvParser $parser, $delimiter = ',')
     {
         $this->parser = $parser;
         parent::__construct($configuration, $interpreter, $entityManager);
+        $this->delimiter = $delimiter;
     }
 
     public function importFile($filename, $hasHeaders = true, $flush = true)
@@ -45,7 +51,7 @@ class CsvImporter extends AbstractImporter
             return [];
         }
 
-        $parsedData = $this->parser->parse($csv, $hasHeaders);
+        $parsedData = $this->parser->parse($csv, $hasHeaders, $this->delimiter);
 
         return $this->importData($parsedData, $hasHeaders, $flush);
     }

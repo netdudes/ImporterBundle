@@ -8,4 +8,5 @@ interface InterpreterInterface
 {
     public function interpret($data, $associative = true);
     public function registerErrorHandler(InterpreterErrorHandlerInterface $errorHandler);
+    public function registerPostProcess(callable $callable);
 }
