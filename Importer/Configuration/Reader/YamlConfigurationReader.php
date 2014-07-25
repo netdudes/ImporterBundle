@@ -14,6 +14,7 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguratio
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\Exception\FieldConfigurationParseException;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\Exception\MissingParameterException;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\Exception\UndefinedConfigurationNodeTypeException;
+use Netdudes\ImporterBundle\Importer\Configuration\UpdatingEntityConfiguration;
 use Symfony\Component\Yaml\Parser;
 
 class YamlConfigurationReader implements ConfigurationReaderInterface
@@ -104,6 +105,17 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         $entityConfiguration->setFields($fieldConfigurations);
 
         return $entityConfiguration;
+    }
+
+    protected function readUpdateNode(array $node)
+    {
+        $entityConfiguration = $this->readEntityNode($node);
+        $updateEntityConfiguration = UpdatingEntityConfiguration::createFromEntityConfiguration($entityConfiguration);
+
+        $updateMatchFields = $this->getChildOrThrowMissingParameterException($node, 'update_match_fields');
+        $updateEntityConfiguration->setUpdateMatchFields($updateMatchFields);
+
+        return $updateEntityConfiguration;
     }
 
     /**

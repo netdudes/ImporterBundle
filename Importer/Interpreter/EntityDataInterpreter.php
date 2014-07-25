@@ -54,6 +54,11 @@ class EntityDataInterpreter implements InterpreterInterface
      */
     private $validator;
 
+    /**
+     * @var \Doctrine\ORM\EntityManager
+     */
+    protected $entityManager;
+
     public function __construct(EntityConfigurationInterface $configuration, EntityManager $entityManager, ValidatorInterface $validator)
     {
         $this->configuration = $configuration;
@@ -62,6 +67,7 @@ class EntityDataInterpreter implements InterpreterInterface
         $this->datetimeFieldInterpreter = new DatetimeFieldInterpreter();
         $this->fileFieldInterpreter = new FileFieldInterpreter();
         $this->validator = $validator;
+        $this->entityManager = $entityManager;
     }
 
     public function interpret($data, $associative = true)
@@ -82,9 +88,8 @@ class EntityDataInterpreter implements InterpreterInterface
 
     protected function interpretRow(array $row, $associative)
     {
-        $class = $this->configuration->getClass();
-        $entity = new $class;
         $interpretedData = $associative ? $this->interpretAssociativeRow($row) : $this->interpretOrderedRow($row);
+        $entity = $this->getEntity($interpretedData);
         $this->injectInterpretedDataIntoEntity($entity, $interpretedData);
         $this->postProcess($entity);
         $validationViolations = $this->validator->validate($entity);
@@ -212,5 +217,17 @@ class EntityDataInterpreter implements InterpreterInterface
         foreach ($this->postProcessCallables as $callable) {
             $callable($entity);
         }
+    }
+
+    /**
+     * @param array $interpretedData
+     *
+     * @return mixed
+     */
+    protected function getEntity(array $interpretedData)
+    {
+        $class = $this->configuration->getClass();
+        $entity = new $class;
+        return $entity;
     }
 }
