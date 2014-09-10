@@ -7,4 +7,6 @@ interface ImporterInterface
     public function import($data);
 
     public function importFile($filename);
+
+    public function getConfiguration();
 }

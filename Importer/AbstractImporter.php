@@ -52,6 +52,11 @@ abstract class AbstractImporter implements ImporterInterface
         $this->interpreter->registerPostProcess($callable);
     }
 
+    public function getConfiguration()
+    {
+        return $this->configuration;
+    }
+
     protected function handleImporterError(ImporterErrorInterface $error)
     {
         if (count($this->importerErrorHandlers) == 0) {
