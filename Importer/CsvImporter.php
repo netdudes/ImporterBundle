@@ -59,7 +59,7 @@ class CsvImporter extends AbstractImporter
     protected function checkHeadersAreValid($csv)
     {
         $fieldNames = $this->configuration->getFieldNames();
-        $headers = $this->parser->parseLine(explode("\n", $csv)[0]);
+        $headers = $this->parser->parseLine(explode("\n", $csv)[0], $this->delimiter);
 
         if (count($invalidHeaders = array_diff($headers, $fieldNames))) {
             $this->handleImporterError(new CsvHeadersError($invalidHeaders));

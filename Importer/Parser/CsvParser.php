@@ -14,9 +14,9 @@ class CsvParser implements ParserInterface
     {
         $rows = explode("\n", $data);
         if ($hasHeaders) {
-            $headers = $this->parseLine(array_shift($rows));
+            $headers = $this->parseLine(array_shift($rows), $delimiter);
         } else {
-            $headers = range(0, count($this->parseLine($rows[0])));
+            $headers = range(0, count($this->parseLine($rows[0], $delimiter)));
         }
         $data = [];
         foreach ($rows as $lineNumber => $row) {
