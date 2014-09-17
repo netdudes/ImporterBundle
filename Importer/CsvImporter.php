@@ -68,4 +68,12 @@ class CsvImporter extends AbstractImporter
 
         return true;
     }
+
+    /**
+     * @param mixed $delimiter
+     */
+    public function setDelimiter($delimiter)
+    {
+        $this->delimiter = $delimiter;
+    }
 }
