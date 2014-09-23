@@ -39,7 +39,7 @@ class UpdatingEntityDataInterpreter extends EntityDataInterpreter
             ->findOneBy($queryParameters);
     }
 
-    private function getEntityPropertyByFieldName($fieldName)
+    private function getEntityPropertyByFieldName($fieldNameToGetPropertyFrom)
     {
         if (!count($this->propertyCache)) {
             /** @var $configurationField FieldConfigurationInterface */
@@ -48,7 +48,7 @@ class UpdatingEntityDataInterpreter extends EntityDataInterpreter
             }
         }
 
-        return $this->propertyCache[$fieldName];
+        return $this->propertyCache[$fieldNameToGetPropertyFrom];
     }
 
 }
