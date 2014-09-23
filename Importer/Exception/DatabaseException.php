@@ -2,16 +2,15 @@
 
 namespace Netdudes\ImporterBundle\Importer\Exception;
 
+use Exception;
+
 class DatabaseException extends \Exception
 {
     protected $dataFile;
 
-    /**
-     * @param mixed $dataFile
-     */
-    public function setDataFile($dataFile)
+    public function __construct($message, Exception $previous)
     {
-        $this->dataFile = $dataFile;
+        parent::__construct($message, 0, $previous);
     }
 
     /**
@@ -20,5 +19,13 @@ class DatabaseException extends \Exception
     public function getDataFile()
     {
         return $this->dataFile;
+    }
+
+    /**
+     * @param mixed $dataFile
+     */
+    public function setDataFile($dataFile)
+    {
+        $this->dataFile = $dataFile;
     }
 }
