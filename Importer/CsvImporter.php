@@ -52,7 +52,6 @@ class CsvImporter extends AbstractImporter
         }
 
         $parsedData = $this->parser->parse($csv, $hasHeaders, $this->delimiter);
-        $parsedData = $this->removeDuplicates($parsedData);
 
         return $this->importData($parsedData, $hasHeaders, $flush);
     }
@@ -76,12 +75,5 @@ class CsvImporter extends AbstractImporter
     public function setDelimiter($delimiter)
     {
         $this->delimiter = $delimiter;
-    }
-
-    private function removeDuplicates(array $parsedData)
-    {
-        $serialized = array_map('serialize', $parsedData);
-        $unique = array_unique($serialized);
-        return array_intersect_key($parsedData, $unique);
     }
 }
