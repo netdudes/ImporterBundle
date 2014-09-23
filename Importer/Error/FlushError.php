@@ -12,12 +12,12 @@ class FlushError implements ImporterErrorInterface
     /**
      * @var DBALException
      */
-    private $DBALException;
+    private $causingException;
 
-    function __construct($readableMessage, DBALException $DBALException)
+    function __construct($readableMessage, \Exception $causingException)
     {
         $this->message = $readableMessage;
-        $this->DBALException = $DBALException;
+        $this->causingException = $causingException;
     }
 
     public function getMessage()
@@ -25,11 +25,8 @@ class FlushError implements ImporterErrorInterface
         return $this->message;
     }
 
-    /**
-     * @return DBALException
-     */
-    public function getDBALException()
+    public function getCausingException()
     {
-        return $this->DBALException;
+        return $this->causingException;
     }
 }
