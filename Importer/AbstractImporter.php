@@ -94,10 +94,12 @@ abstract class AbstractImporter implements ImporterInterface
         try {
             $this->entityManager->flush();
         } catch (ORMException $exception) {
-            $exception = new DatabaseException("Error when flushing for entity {$this->configuration->getClass()}.", 0, $exception);
+            $message = "ORM Error when flushing for entity {$this->configuration->getClass()}.";
+            $exception = new DatabaseException($message, $exception);
             throw $exception;
         } catch (DBALException $exception) {
-            $exception = new DatabaseException("Error when inserting the entities in the database. Please make sure the uploaded data is valid and there are no duplicate entries for unique values");
+            $message = "DBAL Error when flushing for entity {$this->configuration->getClass()}.";
+            $exception = new DatabaseException($message, $exception);
             throw $exception;
         }
     }
