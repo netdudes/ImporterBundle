@@ -2,6 +2,7 @@
 
 namespace Netdudes\ImporterBundle\Importer;
 
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollectionInterface;
@@ -94,6 +95,9 @@ abstract class AbstractImporter implements ImporterInterface
             $this->entityManager->flush();
         } catch (ORMException $exception) {
             $exception = new DatabaseException("Error when flushing for entity {$this->configuration->getClass()}.", 0, $exception);
+            throw $exception;
+        } catch (DBALException $exception) {
+            $exception = new DatabaseException("Error when inserting the entities in the database. Please make sure the uploaded data is valid and there are no duplicate entries for unique values");
             throw $exception;
         }
     }
