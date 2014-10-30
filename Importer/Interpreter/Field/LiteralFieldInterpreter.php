@@ -8,7 +8,7 @@ class LiteralFieldInterpreter implements FieldInterpreterInterface
 {
     public function interpret(FieldConfigurationInterface $configuration, $value)
     {
-        if (empty(trim($value))) {
+        if (trim($value) === "") {
             return null;
         }
         
