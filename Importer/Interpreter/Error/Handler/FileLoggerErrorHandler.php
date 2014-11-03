@@ -7,7 +7,6 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\LookupFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
-use Netdudes\ImporterBundle\Importer\Interpreter\Exception\SetterDoesNotAllowNullException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownColumnException;
 use Symfony\Component\Validator\ConstraintViolation;
 
@@ -64,10 +63,6 @@ class FileLoggerErrorHandler implements InterpreterErrorHandlerInterface
                 foreach ($violationMessages as $message) {
                     $this->log($message, 2);
                 }
-                break;
-            case $exception instanceof SetterDoesNotAllowNullException:
-                $field = $exception->getProperty();
-                $this->log("Property \"$field\" cannot be empty.", 1);
                 break;
             default:
                 $this->log("An internal error occurred when uploading the data", 1);

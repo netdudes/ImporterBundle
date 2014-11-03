@@ -13,7 +13,6 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorH
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
-use Netdudes\ImporterBundle\Importer\Interpreter\Exception\SetterDoesNotAllowNullException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownColumnException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownOrInaccessibleFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\DatetimeFieldInterpreter;
@@ -165,8 +164,8 @@ class EntityDataInterpreter implements InterpreterInterface
     {
         $accessor = PropertyAccess::createPropertyAccessor();
         foreach ($interpretedData as $field => $value) {
-            if (is_null($value) && !$this->setterAllowsNull($entity, $field)) {
-                throw new SetterDoesNotAllowNullException($entity, $field);
+            if (is_null($value)) {
+                continue;
             }
             try {
                 $accessor->setValue($entity, $field, $value);
@@ -191,20 +190,6 @@ class EntityDataInterpreter implements InterpreterInterface
     public function registerErrorHandler(InterpreterErrorHandlerInterface $errorHandler)
     {
         $this->errorHandlers[] = $errorHandler;
-    }
-
-    /**
-     * @param $entity
-     * @param $field
-     *
-     * @return bool
-     */
-    private function setterAllowsNull($entity, $field)
-    {
-        $reflectionMethod = new \ReflectionMethod(get_class($entity), 'set' . ucfirst($field));
-        $parameters = $reflectionMethod->getParameters();
-        $firstParameter = $parameters[0];
-        return $firstParameter->allowsNull();
     }
 
     public function registerPostProcess(callable $callable)
