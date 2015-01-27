@@ -14,7 +14,7 @@ class FlushError implements ImporterErrorInterface
      */
     private $causingException;
 
-    function __construct($readableMessage, \Exception $causingException)
+    public function __construct($readableMessage, \Exception $causingException)
     {
         $this->message = $readableMessage;
         $this->causingException = $causingException;

@@ -10,6 +10,10 @@ class PostInterpretImportEvent extends AbstractImportEvent
      */
     public $entity;
 
+    /**
+     * @param ImporterInterface $entity
+     * @param ImporterInterface $importer
+     */
     public function __construct($entity, ImporterInterface $importer)
     {
         parent::__construct($importer);

@@ -39,5 +39,4 @@ class LookupFieldException extends InterpreterException
     {
         return $this->value;
     }
-
 }

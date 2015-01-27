@@ -13,7 +13,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class CsvImporter extends AbstractImporter
 {
-
     protected $parser;
 
     /**
@@ -57,6 +56,7 @@ class CsvImporter extends AbstractImporter
 
         if (count($invalidHeaders = array_diff($headers, $fieldNames))) {
             $this->handleImporterError(new CsvHeadersError($invalidHeaders));
+
             return false;
         }
 

@@ -12,7 +12,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class CsvImporterFactory
 {
-
     /**
      * @var EventDispatcherInterface
      */
@@ -38,7 +37,7 @@ class CsvImporterFactory
      * @param CsvParser              $csvParser
      * @param DataInterpreterFactory $dataInterpreterFactory
      */
-    function __construct(EntityManager $entityManager, CsvParser $csvParser, DataInterpreterFactory $dataInterpreterFactory)
+    public function __construct(EntityManager $entityManager, CsvParser $csvParser, DataInterpreterFactory $dataInterpreterFactory)
     {
         $this->entityManager = $entityManager;
         $this->csvParser = $csvParser;
@@ -55,6 +54,7 @@ class CsvImporterFactory
     public function create(ConfigurationInterface $configuration, $delimiter = ',')
     {
         $interpreter = $this->dataInterpreterFactory->create($configuration);
+
         return new CsvImporter($configuration, $interpreter, $this->entityManager, $this->csvParser, clone $this->eventDispatcher, $delimiter);
     }
 

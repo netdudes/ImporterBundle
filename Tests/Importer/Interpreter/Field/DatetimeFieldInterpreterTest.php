@@ -41,5 +41,4 @@ class DatetimeFieldInterpreterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('22', $dateTime->format('i'));
         $this->assertEquals('33', $dateTime->format('s'));
     }
-
 }

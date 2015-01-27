@@ -22,7 +22,6 @@ class UpdatingEntityConfiguration extends EntityConfiguration implements Updatin
         $this->updateMatchFields = $updateMatchFields;
     }
 
-
     /**
      * @param EntityConfiguration $entityConfiguration
      *
@@ -30,10 +29,10 @@ class UpdatingEntityConfiguration extends EntityConfiguration implements Updatin
      */
     public static function createFromEntityConfiguration(EntityConfiguration $entityConfiguration)
     {
-        $self = new self;
+        $self = new self();
         $self->setClass($entityConfiguration->getClass());
         $self->setFields($entityConfiguration->getFields());
+
         return $self;
     }
-
-} 
+}

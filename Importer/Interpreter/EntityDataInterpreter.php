@@ -21,7 +21,6 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Field\LiteralFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LookupFieldInterpreter;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class EntityDataInterpreter implements InterpreterInterface
@@ -95,8 +94,8 @@ class EntityDataInterpreter implements InterpreterInterface
         if ($validationViolations->count() > 0) {
             throw new InvalidEntityException($validationViolations);
         }
-        return $entity;
 
+        return $entity;
     }
 
     protected function interpretAssociativeRow($columns)
@@ -115,7 +114,6 @@ class EntityDataInterpreter implements InterpreterInterface
         }
 
         return $interpretedRow;
-
     }
 
     private function interpretField($fieldConfiguration, $value)
@@ -212,7 +210,8 @@ class EntityDataInterpreter implements InterpreterInterface
     protected function getEntity(array $interpretedData)
     {
         $class = $this->configuration->getClass();
-        $entity = new $class;
+        $entity = new $class();
+
         return $entity;
     }
 }

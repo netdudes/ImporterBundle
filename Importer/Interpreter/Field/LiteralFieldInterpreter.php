@@ -11,7 +11,7 @@ class LiteralFieldInterpreter implements FieldInterpreterInterface
         if (trim($value) === "") {
             return null;
         }
-        
+
         return $value;
     }
 }

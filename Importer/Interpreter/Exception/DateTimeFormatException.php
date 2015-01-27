@@ -2,7 +2,6 @@
 
 namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
-use Behat\Gherkin\Exception\Exception;
 
 class DateTimeFormatException extends InterpreterException
 {
@@ -69,5 +68,4 @@ class DateTimeFormatException extends InterpreterException
     {
         return $this->value;
     }
-
 }

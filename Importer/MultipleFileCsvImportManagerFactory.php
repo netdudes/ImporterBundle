@@ -9,7 +9,7 @@ class MultipleFileCsvImportManagerFactory
      */
     private $csvImporterFactory;
 
-    function __construct(CsvImporterFactory $csvImporterFactory)
+    public function __construct(CsvImporterFactory $csvImporterFactory)
     {
         $this->csvImporterFactory = $csvImporterFactory;
     }
@@ -18,5 +18,4 @@ class MultipleFileCsvImportManagerFactory
     {
         return new MultipleFileCsvImportManager($this->csvImporterFactory);
     }
-
-} 
+}

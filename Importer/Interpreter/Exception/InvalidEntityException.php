@@ -25,6 +25,4 @@ class InvalidEntityException extends InterpreterException
     {
         return $this->violations;
     }
-
-
 }

@@ -50,5 +50,4 @@ class UpdatingEntityDataInterpreter extends EntityDataInterpreter
 
         return $this->propertyCache[$fieldNameToGetPropertyFrom];
     }
-
 }

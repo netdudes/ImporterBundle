@@ -8,7 +8,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class EntityDataInterpreterFactory
 {
-
     /**
      * @var \Doctrine\ORM\EntityManager
      */
@@ -19,7 +18,7 @@ class EntityDataInterpreterFactory
      */
     private $validator;
 
-    function __construct(EntityManager $entityManager, ValidatorInterface $validator)
+    public function __construct(EntityManager $entityManager, ValidatorInterface $validator)
     {
         $this->entityManager = $entityManager;
         $this->validator = $validator;
@@ -29,5 +28,4 @@ class EntityDataInterpreterFactory
     {
         return new EntityDataInterpreter($configuration, $this->entityManager, $this->validator);
     }
-
-} 
+}

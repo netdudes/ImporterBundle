@@ -5,7 +5,6 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
-use Netdudes\ImporterBundle\Importer\Configuration\UpdatingEntityConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\UpdatingEntityConfigurationInterface;
 
 class DataInterpreterFactory
@@ -25,7 +24,7 @@ class DataInterpreterFactory
      */
     private $updatingEntityDataInterpreterFactory;
 
-    function __construct(
+    public function __construct(
         EntityDataInterpreterFactory $entityDataInterpreterFactory,
         UpdatingEntityDataInterpreterFactory $updatingEntityDataInterpreterFactory,
         RelationshipDataInterpreterFactory $relationshipDataInterpreterFactory)

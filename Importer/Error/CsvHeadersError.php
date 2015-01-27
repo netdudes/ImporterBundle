@@ -6,7 +6,7 @@ class CsvHeadersError implements ImporterErrorInterface
 {
     private $invalidHeaders = [];
 
-    function __construct($invalidHeaders)
+    public function __construct($invalidHeaders)
     {
         $this->invalidHeaders = $invalidHeaders;
     }

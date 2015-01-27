@@ -22,6 +22,4 @@ class ImporterException extends \Exception
     {
         return $this->error;
     }
-
-
-} 
+}

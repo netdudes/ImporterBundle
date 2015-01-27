@@ -33,7 +33,7 @@ class GenerateImportConfigCommand extends ContainerAwareCommand
             }
         }
 
-        foreach (array('name', 'entity') as $option) {
+        foreach (['name', 'entity'] as $option) {
             if (null === $input->getOption($option)) {
                 throw new \RuntimeException(sprintf('The "%s" option must be provided.', $option));
             }
@@ -56,11 +56,11 @@ class GenerateImportConfigCommand extends ContainerAwareCommand
         $properties = $classMetaData->getReflectionClass()->getProperties();
         $identifiers = $classMetaData->getIdentifierFieldNames();
 
-        $propertiesToGenerate = array();
+        $propertiesToGenerate = [];
         foreach ($properties as $index => $property) {
             $propertyName = $property->getName();
             if (!in_array($propertyName, $identifiers)) {
-                $propertiesToGenerate[$index] = array();
+                $propertiesToGenerate[$index] = [];
                 $propertiesToGenerate[$index]['property'] = $propertyName;
                 if (in_array($classMetaData->getTypeOfField($propertyName), ['date', 'datetime'])) {
                     $propertiesToGenerate[$index]['type'] = $classMetaData->getTypeOfField($propertyName);
@@ -81,7 +81,7 @@ class GenerateImportConfigCommand extends ContainerAwareCommand
             $newConfigName => [
                 'entity' => $entityClass,
                 'columns' => $propertiesToGenerate,
-            ]
+            ],
         ];
 
         $configurationPath = $bundle->getPath() .
@@ -115,7 +115,7 @@ class GenerateImportConfigCommand extends ContainerAwareCommand
 
         if ($dialog->askConfirmation($output, '<question>Do you want to preview your configuration? Y/[N]</question>', true)) {
             $formatter = $this->getHelperSet()->get('formatter');
-            $configPreview = array($newConfigurationYaml);
+            $configPreview = [$newConfigurationYaml];
             $formattedBlock = $formatter->formatBlock($configPreview, 'info', true);
             $output->writeln($formattedBlock);
         }
@@ -129,7 +129,6 @@ class GenerateImportConfigCommand extends ContainerAwareCommand
         file_put_contents($configurationPath, Yaml::dump($newConfiguration, 4, 2));
 
         $output->writeln('<info>Configuration created.</info>');
-
     }
 
     protected function parseShortcutNotation($shortcut)
@@ -143,6 +142,6 @@ class GenerateImportConfigCommand extends ContainerAwareCommand
             ));
         }
 
-        return array(substr($entity, 0, $pos), substr($entity, $pos + 1));
+        return [substr($entity, 0, $pos), substr($entity, $pos + 1)];
     }
 }

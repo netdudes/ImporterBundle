@@ -11,6 +11,9 @@ abstract class AbstractImportEvent extends Event
      */
     public $importer;
 
+    /**
+     * @param ImporterInterface $importer
+     */
     public function __construct(ImporterInterface $importer)
     {
         $this->importer = $importer;

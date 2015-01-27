@@ -3,7 +3,6 @@
 namespace Netdudes\ImporterBundle\Importer;
 
 use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollection;
-use Netdudes\ImporterBundle\Importer\Configuration\Collection\Exception\UndefinedIndexException;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 
 class MultipleFileCsvImportManager
@@ -18,7 +17,7 @@ class MultipleFileCsvImportManager
      */
     private $configurationCollection;
 
-    function __construct(CsvImporterFactory $csvImporterFactory)
+    public function __construct(CsvImporterFactory $csvImporterFactory)
     {
         $this->csvImporterFactory = $csvImporterFactory;
         $this->configurationCollection = new ConfigurationCollection();

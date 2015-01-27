@@ -3,17 +3,16 @@
 namespace Netdudes\ImporterBundle\Importer\Configuration\Reader;
 
 use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollection;
-use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollectionInterface;
-use Netdudes\ImporterBundle\Importer\Configuration\Field\DateFieldConfiguration;
-use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
-use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfiguration;
+use Netdudes\ImporterBundle\Importer\Configuration\Field\DateFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfiguration;
+use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LiteralFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\Exception\FieldConfigurationParseException;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\Exception\MissingParameterException;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\Exception\UndefinedConfigurationNodeTypeException;
+use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\UpdatingEntityConfiguration;
 use Symfony\Component\Yaml\Parser;
 
@@ -133,6 +132,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
             $exception->setParameter($child);
             throw $exception;
         }
+
         return $lookupField;
     }
 
@@ -160,7 +160,6 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
 
         $prettyPrintNode = print_r($fieldConfigurationNode, true);
         throw new FieldConfigurationParseException("Could not identify the type of field:\n{$prettyPrintNode}");
-
     }
 
     protected function readLegacyLookupFieldConfigurationNode(array $node)
@@ -215,7 +214,6 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         }
 
         return $joinedImportConfiguration;
-
     }
 
     protected function readLookupConfigurationNode(array $node)

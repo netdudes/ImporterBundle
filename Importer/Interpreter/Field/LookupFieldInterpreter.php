@@ -54,12 +54,14 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
             if (count($entityId) == 0) {
                 throw new NoResultException();
             }
+
             return $this->entityManager->getReference($class, $entityId[0]);
         } catch (NoResultException $exception) {
             $internalLookupEntity = $this->internalLookup($class, $queryLookupField, $value);
             if (is_null($internalLookupEntity)) {
                 throw $this->buildLookupFieldException($fieldConfiguration, $value, $exception);
             }
+
             return $internalLookupEntity;
         } catch (ORMException $exception) {
             throw $this->buildLookupFieldException($fieldConfiguration, $value, $exception);
@@ -113,7 +115,7 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
         $exception = new LookupFieldException("Error when trying to find entity of class \"{$fieldConfiguration->getClass()}\" for property \"{$fieldConfiguration->getLookupField()}\" with value \"{$value}\"", 0, $exception);
         $exception->setValue($value);
         $exception->setFieldConfiguration($fieldConfiguration);
+
         return $exception;
     }
-
 }

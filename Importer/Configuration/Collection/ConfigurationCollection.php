@@ -8,7 +8,6 @@ use Traversable;
 
 class ConfigurationCollection implements ConfigurationCollectionInterface
 {
-
     protected $configurationCollection = [];
 
     public function get($configurationId)

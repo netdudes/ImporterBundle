@@ -2,16 +2,9 @@
 
 namespace Netdudes\ImporterBundle\Importer;
 
-use Doctrine\ORM\EntityManager;
-use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader;
 use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\FileLoggerErrorHandler;
-use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
-use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
-use Netdudes\U2\CoreBundle\Importer\Error\InterpreterErrorHandler;
-use Netdudes\U2\CoreBundle\Importer\Statistics\TransactionImportStatistics;
-use Symfony\Component\Yaml\Parser;
 
 class LegacyFixturesImporterWrapper
 {

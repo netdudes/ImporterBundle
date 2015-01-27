@@ -2,8 +2,8 @@
 
 namespace Netdudes\ImporterBundle\Tests\Importer\Configuration\Reader;
 
-use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader;
+use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfiguration;
 use Symfony\Component\Yaml\Parser;
 
 class YamlConfigurationReaderTest extends \PHPUnit_Framework_TestCase
@@ -71,5 +71,4 @@ class YamlConfigurationReaderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('propertyOnTheOtherClass', $relatedLookupConfigurationField->getLookupField());
         $this->assertEquals('\Namespace\To\Other\Class', $relatedLookupConfigurationField->getClass());
     }
-
 }

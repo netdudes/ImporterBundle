@@ -4,7 +4,6 @@ namespace Netdudes\ImporterBundle\Importer\Configuration;
 
 class RelationshipConfiguration implements RelationshipConfigurationInterface
 {
-
     protected $relatedLookupConfigurationField;
 
     protected $relatedLookupFieldName;

@@ -8,7 +8,6 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class ImportEventSubscribersCompilerPass implements CompilerPassInterface
 {
-
     /**
      * You can modify the container here before it is dumped to PHP code.
      *

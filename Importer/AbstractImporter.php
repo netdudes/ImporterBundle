@@ -5,27 +5,20 @@ namespace Netdudes\ImporterBundle\Importer;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
-use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollectionInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
-use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
-use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
+use Netdudes\ImporterBundle\Importer\Error\Handler\ImporterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Error\ImporterErrorInterface;
-use Netdudes\ImporterBundle\Importer\Event\AbstractImportEvent;
 use Netdudes\ImporterBundle\Importer\Event\ImportEvents;
 use Netdudes\ImporterBundle\Importer\Event\PostInterpretImportEvent;
 use Netdudes\ImporterBundle\Importer\Exception\DatabaseException;
 use Netdudes\ImporterBundle\Importer\Exception\ImporterException;
-use Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreter;
-use Netdudes\ImporterBundle\Importer\Error\Handler\ImporterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\InterpreterInterface;
-use Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 abstract class AbstractImporter implements ImporterInterface
 {
-
     /**
      * @var ConfigurationInterface
      */
@@ -58,7 +51,7 @@ abstract class AbstractImporter implements ImporterInterface
         $this->interpreter = $interpreter;
         $this->eventDispatcher = $eventDispatcher;
 
-        $this->interpreter->registerPostProcess(function($entity) {
+        $this->interpreter->registerPostProcess(function ($entity) {
             $this->eventDispatcher->dispatch(ImportEvents::POST_INTERPRET, new PostInterpretImportEvent($entity, $this));
         });
     }
@@ -125,6 +118,7 @@ abstract class AbstractImporter implements ImporterInterface
         if ($flush) {
             $this->flush();
         }
+
         return $entitiesToPersist;
     }
 

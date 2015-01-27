@@ -29,7 +29,7 @@ class FileLoggerErrorHandler implements InterpreterErrorHandlerInterface
      */
     private $lineNumberOffset;
 
-    function __construct($output = null, $lineNumberOffset = 2)
+    public function __construct($output = null, $lineNumberOffset = 2)
     {
         $this->output = is_null($output) ? fopen("php://stdout", "a") : $output;
         $this->lineNumberOffset = $lineNumberOffset;
@@ -68,7 +68,6 @@ class FileLoggerErrorHandler implements InterpreterErrorHandlerInterface
                 $this->log("An internal error occurred when uploading the data", 1);
                 break;
         }
-
     }
 
     protected function log($message, $indentation = 0)
@@ -80,15 +79,13 @@ class FileLoggerErrorHandler implements InterpreterErrorHandlerInterface
     public function setCurrentFile($file)
     {
         $this->file = $file;
-
     }
 
     protected function buildInvalidEntityViolationsMessages($exception)
     {
         $violationsArray = [];
         $violations = $exception->getViolations();
-        foreach ($violations as $violation)
-        {
+        foreach ($violations as $violation) {
             $violationsArray[] = $violation;
         }
 
@@ -100,6 +97,7 @@ class FileLoggerErrorHandler implements InterpreterErrorHandlerInterface
                     $message .= $violation->getPropertyPath() . ": ";
                 }
                 $messages[] = $message . $violation->getMessage();
+
                 return $messages;
             },
             []

@@ -14,5 +14,4 @@ class LiteralFieldInterpreterTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('SOME_TEST_STRING"}{"][PA98(&876\t[333*/-*', $interpreter->interpret($config, 'SOME_TEST_STRING"}{"][PA98(&876\t[333*/-*'));
     }
-
 }
