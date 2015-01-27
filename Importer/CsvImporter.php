@@ -4,22 +4,16 @@ namespace Netdudes\ImporterBundle\Importer;
 
 use Doctrine\ORM\EntityManager;
 use Mockery\Exception;
-use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollection;
-use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollectionInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
-use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
-use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Error\CsvHeadersError;
 use Netdudes\ImporterBundle\Importer\Exception\DatabaseException;
-use Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreter;
-use Netdudes\ImporterBundle\Importer\Error\Handler\ImporterErrorHandlerInterface;
-use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\InterpreterInterface;
-use Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreter;
 use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class CsvImporter extends AbstractImporter
 {
+
     protected $parser;
 
     /**
@@ -27,10 +21,10 @@ class CsvImporter extends AbstractImporter
      */
     private $delimiter;
 
-    public function __construct(ConfigurationInterface $configuration, InterpreterInterface $interpreter, EntityManager $entityManager, CsvParser $parser, $delimiter = ',')
+    public function __construct(ConfigurationInterface $configuration, InterpreterInterface $interpreter, EntityManager $entityManager, CsvParser $parser, EventDispatcherInterface $eventDispatcher, $delimiter = ',')
     {
         $this->parser = $parser;
-        parent::__construct($configuration, $interpreter, $entityManager);
+        parent::__construct($configuration, $interpreter, $entityManager, $eventDispatcher);
         $this->delimiter = $delimiter;
     }
 

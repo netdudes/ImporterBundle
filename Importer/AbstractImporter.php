@@ -10,6 +10,9 @@ use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Error\ImporterErrorInterface;
+use Netdudes\ImporterBundle\Importer\Event\AbstractImportEvent;
+use Netdudes\ImporterBundle\Importer\Event\ImportEvents;
+use Netdudes\ImporterBundle\Importer\Event\PostInterpretImportEvent;
 use Netdudes\ImporterBundle\Importer\Exception\DatabaseException;
 use Netdudes\ImporterBundle\Importer\Exception\ImporterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreter;
@@ -17,13 +20,25 @@ use Netdudes\ImporterBundle\Importer\Error\Handler\ImporterErrorHandlerInterface
 use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\InterpreterInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreter;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 abstract class AbstractImporter implements ImporterInterface
 {
+
+    /**
+     * @var ConfigurationInterface
+     */
     protected $configuration;
 
+    /**
+     * @var EntityManager
+     */
     protected $entityManager;
 
+    /**
+     * @var ImporterErrorHandlerInterface[]
+     */
     protected $importerErrorHandlers = [];
 
     /**
@@ -31,11 +46,21 @@ abstract class AbstractImporter implements ImporterInterface
      */
     private $interpreter;
 
-    public function __construct(ConfigurationInterface $configuration, InterpreterInterface $interpreter, EntityManager $entityManager)
+    /**
+     * @var EventDispatcherInterface
+     */
+    protected $eventDispatcher;
+
+    public function __construct(ConfigurationInterface $configuration, InterpreterInterface $interpreter, EntityManager $entityManager, EventDispatcherInterface $eventDispatcher)
     {
         $this->configuration = $configuration;
         $this->entityManager = $entityManager;
         $this->interpreter = $interpreter;
+        $this->eventDispatcher = $eventDispatcher;
+
+        $this->interpreter->registerPostProcess(function($entity) {
+            $this->eventDispatcher->dispatch(ImportEvents::POST_INTERPRET, new PostInterpretImportEvent($entity, $this));
+        });
     }
 
     public function registerInterpreterErrorHandler(InterpreterErrorHandlerInterface $lineErrorHandler)
@@ -48,6 +73,10 @@ abstract class AbstractImporter implements ImporterInterface
         $this->importerErrorHandlers[] = $fileErrorHandler;
     }
 
+    /**
+     * @param callable $callable
+     * @deprecated Use events. The interpreter post processes should not be set directly.
+     */
     public function registerPostProcess(callable $callable)
     {
         $this->interpreter->registerPostProcess($callable);
@@ -69,12 +98,22 @@ abstract class AbstractImporter implements ImporterInterface
         }
     }
 
+    /**
+     * @param      $parsedData
+     * @param      $dataIsAssociativeArray
+     * @param bool $flush
+     *
+     * @return null
+     * @throws DatabaseException
+     */
     protected function importData($parsedData, $dataIsAssociativeArray, $flush = true)
     {
         $entitiesToPersist = $this->interpreter->interpret($parsedData, $dataIsAssociativeArray);
+
         if (is_null($entitiesToPersist)) {
-            return;
+            return null;
         }
+
         foreach ($entitiesToPersist as $entity) {
             try {
                 $this->entityManager->persist($entity);
@@ -102,5 +141,22 @@ abstract class AbstractImporter implements ImporterInterface
             $exception = new DatabaseException($message, $exception);
             throw $exception;
         }
+    }
+
+    /**
+     * @param          $event
+     * @param callable $eventListener
+     */
+    public function addEventListener($event, callable $eventListener)
+    {
+        $this->eventDispatcher->addListener($event, $eventListener);
+    }
+
+    /**
+     * @param EventSubscriberInterface $eventSubscriber
+     */
+    public function addEventSubscriber(EventSubscriberInterface $eventSubscriber)
+    {
+        $this->eventDispatcher->addSubscriber($eventSubscriber);
     }
 }
