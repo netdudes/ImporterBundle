@@ -81,7 +81,8 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      */
     protected function readConfigurationNode(array $rootConfigurationNode)
     {
-        if ($type = $this->getChild($rootConfigurationNode, 'type')) {
+        $type = $this->getChild($rootConfigurationNode, 'type');
+        if (!is_null($type)) {
             $expectedReaderMethod = 'read' . ucfirst($type) . 'Node';
             if (method_exists($this, $expectedReaderMethod)) {
                 return $this->{$expectedReaderMethod}($rootConfigurationNode);
@@ -103,6 +104,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         if ($this->hasChild($node, $childName)) {
             return $node[$childName];
         }
+        return null;
     }
 
     /**
@@ -137,7 +139,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         $entityConfiguration->setFields($fieldConfigurations);
 
         $help = $this->getHelp($node);
-        if(!empty($help)){
+        if(!is_null($help)){
             $entityConfiguration->setHelp($help);
         }
 
@@ -151,9 +153,11 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      */
     private function getHelp(array $node)
     {
-        if (!($lookupField = $this->getChild($node, 'help'))) {
+        $lookupField = $this->getChild($node, 'help');
+        if (is_null($lookupField)) {
             return null;
         }
+
         return $lookupField;
     }
 
@@ -184,7 +188,8 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      */
     protected function getChildOrThrowMissingParameterException(array $node, $child)
     {
-        if (!($lookupField = $this->getChild($node, $child))) {
+        $lookupField = $this->getChild($node, $child);
+        if (is_null($lookupField)) {
             $exception = new MissingParameterException("Missing $child parameter in field configuration");
             $exception->setParameter($child);
             throw $exception;
@@ -204,7 +209,8 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     {
         $property = $this->getChildOrThrowMissingParameterException($fieldConfigurationNode, 'property');
 
-        if (!($type = $this->getChild($fieldConfigurationNode, 'type'))) {
+        $type = $this->getChild($fieldConfigurationNode, 'type');
+        if (is_null($type)) {
             $fieldConfiguration = new LiteralFieldConfiguration();
             $fieldConfiguration->setField($property);
 
@@ -320,7 +326,8 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     protected function readDatetimeFieldConfigurationNode(array $node)
     {
         $fieldConfiguration = new DateTimeFieldConfiguration();
-        if ($format = $this->getChild($node, 'format')) {
+        $format = $this->getChild($node, 'format');
+        if (!is_null($format)) {
             $fieldConfiguration->setFormat($format);
         }
         $fieldConfiguration->setField($this->getChild($node, 'property'));
@@ -336,7 +343,8 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     protected function readDateFieldConfigurationNode($node)
     {
         $fieldConfiguration = new DateFieldConfiguration();
-        if ($format = $this->getChild($node, 'format')) {
+        $format = $this->getChild($node, 'format');
+        if (!is_null($format)) {
             $fieldConfiguration->setFormat($format);
         }
         $fieldConfiguration->setField($this->getChild($node, 'property'));
