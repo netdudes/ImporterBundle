@@ -19,20 +19,32 @@ use Symfony\Component\Yaml\Parser;
 class YamlConfigurationReader implements ConfigurationReaderInterface
 {
     /**
-     * @var \Symfony\Component\Yaml\Parser
+     * @var Parser
      */
     private $yamlParser;
 
+    /**
+     * @param Parser $yamlParser
+     */
     public function __construct(Parser $yamlParser)
     {
         $this->yamlParser = $yamlParser;
     }
 
+    /**
+     * @param $file
+     *
+     * @return ConfigurationCollection|null
+     */
     public function readFile($file)
     {
         return $this->read(file_get_contents($file));
     }
 
+    /**
+     * @param $yaml
+     * @return ConfigurationCollection|null
+     */
     public function read($yaml)
     {
         $parsedYamlArray = $this->yamlParser->parse($yaml);
@@ -51,13 +63,22 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     }
 
     /**
-     * @param $parsedYamlArray
+     * @param array $parsedYamlArray
+     *
+     * @return EntityConfiguration
+     * @throws UndefinedConfigurationNodeTypeException
      */
     public function readParsedYamlArray(array $parsedYamlArray)
     {
         return $this->readConfigurationNode($parsedYamlArray);
     }
 
+    /**
+     * @param array $rootConfigurationNode
+     *
+     * @return EntityConfiguration
+     * @throws UndefinedConfigurationNodeTypeException
+     */
     protected function readConfigurationNode(array $rootConfigurationNode)
     {
         if ($type = $this->getChild($rootConfigurationNode, 'type')) {
@@ -71,6 +92,12 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         return $this->readEntityNode($rootConfigurationNode);
     }
 
+    /**
+     * @param array  $node
+     * @param string $childName
+     *
+     * @return mixed
+     */
     protected function getChild($node, $childName)
     {
         if ($this->hasChild($node, $childName)) {
@@ -78,6 +105,12 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         }
     }
 
+    /**
+     * @param array  $node
+     * @param string $childName
+     *
+     * @return bool
+     */
     protected function hasChild(array $node, $childName)
     {
         return array_key_exists($childName, $node);
@@ -103,9 +136,33 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         $entityConfiguration->setClass($entity);
         $entityConfiguration->setFields($fieldConfigurations);
 
+        $help = $this->getHelp($node);
+        if(!empty($help)){
+            $entityConfiguration->setHelp($help);
+        }
+
         return $entityConfiguration;
     }
 
+    /**
+     * @param array $node
+     *
+     * @return null|string
+     */
+    private function getHelp(array $node)
+    {
+        if (!($lookupField = $this->getChild($node, 'help'))) {
+            return null;
+        }
+        return $lookupField;
+    }
+
+    /**
+     * @param array $node
+     *
+     * @throws MissingParameterException
+     * @return UpdatingEntityConfiguration
+     */
     protected function readUpdateNode(array $node)
     {
         $entityConfiguration = $this->readEntityNode($node);
@@ -118,9 +175,9 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     }
 
     /**
-     * @param array $node
+     * @param array  $node
      *
-     * @param       $child
+     * @param string $child
      *
      * @throws Exception\MissingParameterException
      * @return mixed
@@ -136,6 +193,13 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         return $lookupField;
     }
 
+    /**
+     * @param array $fieldConfigurationNode
+     *
+     * @return LiteralFieldConfiguration|LookupFieldConfiguration
+     * @throws FieldConfigurationParseException
+     * @throws MissingParameterException
+     */
     protected function readFieldConfigurationNode(array $fieldConfigurationNode)
     {
         $property = $this->getChildOrThrowMissingParameterException($fieldConfigurationNode, 'property');
@@ -162,6 +226,12 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         throw new FieldConfigurationParseException("Could not identify the type of field:\n{$prettyPrintNode}");
     }
 
+    /**
+     * @param array $node
+     *
+     * @return LookupFieldConfiguration
+     * @throws MissingParameterException
+     */
     protected function readLegacyLookupFieldConfigurationNode(array $node)
     {
         $fieldConfiguration = new LookupFieldConfiguration();
@@ -174,6 +244,14 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         return $fieldConfiguration;
     }
 
+    /**
+     * @param array $node
+     *
+     * @return RelationshipConfiguration
+     * @throws FieldConfigurationParseException
+     * @throws MissingParameterException
+     * @throws \Exception
+     */
     protected function readJoinedImportNode(array $node)
     {
         $ownerClass = $this->getChildOrThrowMissingParameterException($node, 'owner');
@@ -216,6 +294,12 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         return $joinedImportConfiguration;
     }
 
+    /**
+     * @param array $node
+     *
+     * @return LookupFieldConfiguration
+     * @throws MissingParameterException
+     */
     protected function readLookupConfigurationNode(array $node)
     {
         $fieldConfiguration = new LookupFieldConfiguration();
@@ -228,6 +312,11 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         return $fieldConfiguration;
     }
 
+    /**
+     * @param array $node
+     *
+     * @return DateTimeFieldConfiguration
+     */
     protected function readDatetimeFieldConfigurationNode(array $node)
     {
         $fieldConfiguration = new DateTimeFieldConfiguration();
@@ -239,6 +328,11 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         return $fieldConfiguration;
     }
 
+    /**
+     * @param array $node
+     *
+     * @return DateFieldConfiguration
+     */
     protected function readDateFieldConfigurationNode($node)
     {
         $fieldConfiguration = new DateFieldConfiguration();
@@ -250,6 +344,11 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         return $fieldConfiguration;
     }
 
+    /**
+     * @param array $node
+     *
+     * @return FileFieldConfiguration
+     */
     protected function readFileFieldConfigurationNode($node)
     {
         $fieldConfiguration = new FileFieldConfiguration();

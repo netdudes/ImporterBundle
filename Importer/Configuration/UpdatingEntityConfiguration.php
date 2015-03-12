@@ -4,6 +4,9 @@ namespace Netdudes\ImporterBundle\Importer\Configuration;
 
 class UpdatingEntityConfiguration extends EntityConfiguration implements UpdatingEntityConfigurationInterface
 {
+    /**
+     * @var array
+     */
     protected $updateMatchFields = [];
 
     /**
@@ -32,6 +35,7 @@ class UpdatingEntityConfiguration extends EntityConfiguration implements Updatin
         $self = new self();
         $self->setClass($entityConfiguration->getClass());
         $self->setFields($entityConfiguration->getFields());
+        $self->setHelp($entityConfiguration->getHelp());
 
         return $self;
     }
