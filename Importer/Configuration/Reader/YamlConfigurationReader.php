@@ -97,7 +97,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      * @param array  $node
      * @param string $childName
      *
-     * @return mixed
+     * @return null|string
      */
     protected function getChild($node, $childName)
     {
@@ -153,12 +153,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      */
     private function getHelp(array $node)
     {
-        $lookupField = $this->getChild($node, 'help');
-        if (is_null($lookupField)) {
-            return null;
-        }
-
-        return $lookupField;
+        return $this->getChild($node, 'help');
     }
 
     /**
