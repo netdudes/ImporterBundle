@@ -6,51 +6,62 @@ services:
 
   netdudes_importer.yaml_parser:
     class: Symfony\Component\Yaml\Parser
-    factory_service: netdudes_importer.yaml_parser_factory
-    factory_method: create
+    factory:
+        - "@netdudes_importer.yaml_parser_factory"
+        - create
 
   netdudes_importer.configuration_reader.yaml:
     class: Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader
-    arguments: [@netdudes_importer.yaml_parser]
+    arguments:
+        - "@netdudes_importer.yaml_parser"
 
   netdudes_importer.csv_parser:
     class: Netdudes\ImporterBundle\Importer\Parser\CsvParser
 
   netdudes_importer.interpreter.entity_data_factory:
     class: Netdudes\ImporterBundle\Importer\Interpreter\EntityDataInterpreterFactory
-    arguments: [@doctrine.orm.entity_manager, @validator]
+    arguments:
+        - "@doctrine.orm.entity_manager"
+        - "@validator"
 
   netdudes_importer.interpreter.updating_entity_data_factory:
       class: Netdudes\ImporterBundle\Importer\Interpreter\UpdatingEntityDataInterpreterFactory
-      arguments: [@doctrine.orm.entity_manager, @validator]
+      arguments:
+        - "@doctrine.orm.entity_manager"
+        - "@validator"
 
   netdudes_importer.interpreter.relationship_data_factory:
     class: Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreterFactory
-    arguments: [@doctrine.orm.entity_manager]
+    arguments:
+        - "@doctrine.orm.entity_manager"
 
   netdudes_importer.interpreter.data_factory:
     class: Netdudes\ImporterBundle\Importer\Interpreter\DataInterpreterFactory
     arguments:
-      - @netdudes_importer.interpreter.entity_data_factory
-      - @netdudes_importer.interpreter.updating_entity_data_factory
-      - @netdudes_importer.interpreter.relationship_data_factory
+      - "@netdudes_importer.interpreter.entity_data_factory"
+      - "@netdudes_importer.interpreter.updating_entity_data_factory"
+      - "@netdudes_importer.interpreter.relationship_data_factory"
 
   netdudes_importer.csv_importer_factory:
     class: Netdudes\ImporterBundle\Importer\CsvImporterFactory
     arguments:
-      - @doctrine.orm.entity_manager
-      - @netdudes_importer.csv_parser
-      - @netdudes_importer.interpreter.data_factory
+      - "@doctrine.orm.entity_manager"
+      - "@netdudes_importer.csv_parser"
+      - "@netdudes_importer.interpreter.data_factory"
 
   netdudes_importer.multiple_file_csv_import_manager_factory:
     class: Netdudes\ImporterBundle\Importer\MultipleFileCsvImportManagerFactory
-    arguments: [@netdudes_importer.csv_importer_factory]
+    arguments:
+        - "@netdudes_importer.csv_importer_factory"
 
   netdudes_importer.multiple_file_csv_import_manager:
     class: Netdudes\ImporterBundle\Importer\MultipleFileCsvImportManager
-    factory_service: netdudes_importer.multiple_file_csv_import_manager_factory
-    factory_method: create
+    factory:
+        - "@netdudes_importer.multiple_file_csv_import_manager_factory"
+        - create
 
   netdudes_importer.legacy_fixtures_wrapper:
     class: Netdudes\ImporterBundle\Importer\LegacyFixturesImporterWrapper
-    arguments: [@netdudes_importer.csv_importer_factory, @netdudes_importer.configuration_reader.yaml]
+    arguments:
+        - "@netdudes_importer.csv_importer_factory"
+        - "@netdudes_importer.configuration_reader.yaml"
