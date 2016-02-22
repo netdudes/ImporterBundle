@@ -23,7 +23,7 @@ abstract class AbstractFieldConfiguration implements FieldConfigurationInterface
     }
 
     /**
-     * @param mixed $field
+     * @param string $field
      */
     public function setField($field)
     {
@@ -31,7 +31,7 @@ abstract class AbstractFieldConfiguration implements FieldConfigurationInterface
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getHelp()
     {
@@ -39,7 +39,7 @@ abstract class AbstractFieldConfiguration implements FieldConfigurationInterface
     }
 
     /**
-     * @param mixed $help
+     * @param string $help
      */
     public function setHelp($help)
     {

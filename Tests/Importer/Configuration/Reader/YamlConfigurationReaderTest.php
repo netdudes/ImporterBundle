@@ -2,6 +2,7 @@
 
 namespace Netdudes\ImporterBundle\Tests\Importer\Configuration\Reader;
 
+use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationFactory;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfiguration;
 use Symfony\Component\Yaml\Parser;
@@ -20,7 +21,7 @@ class YamlConfigurationReaderTest extends \PHPUnit_Framework_TestCase
 
     public function testReadEntityConfigurationYaml()
     {
-        $reader = new YamlConfigurationReader(new Parser());
+        $reader = new YamlConfigurationReader(new Parser(), new FieldConfigurationFactory());
         $configurationCollection = $reader->readFile($this->getTestEntityConfigurationFileName());
 
         $this->assertInstanceOf('Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollectionInterface', $configurationCollection, 'A reader should return a configuration collection');
@@ -50,7 +51,7 @@ class YamlConfigurationReaderTest extends \PHPUnit_Framework_TestCase
 
     public function testReadJoinedImportConfigurationYaml()
     {
-        $reader = new YamlConfigurationReader(new Parser());
+        $reader = new YamlConfigurationReader(new Parser(), new FieldConfigurationFactory());
         $configurationCollection = $reader->readFile($this->getTestJoinedImportConfigurationFileName());
 
         $this->assertInstanceOf('Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollectionInterface', $configurationCollection, 'A reader should return a configuration collection');
