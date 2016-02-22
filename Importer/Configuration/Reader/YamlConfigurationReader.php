@@ -6,6 +6,7 @@ use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationColle
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfiguration;
+use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationFactory;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LiteralFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
@@ -24,11 +25,18 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     private $yamlParser;
 
     /**
-     * @param Parser $yamlParser
+     * @var FieldConfigurationFactory
      */
-    public function __construct(Parser $yamlParser)
+    private $fieldConfigurationFactory;
+
+    /**
+     * @param Parser $yamlParser
+     * @param FieldConfigurationFactory $fieldConfigurationFactory
+     */
+    public function __construct(Parser $yamlParser, FieldConfigurationFactory $fieldConfigurationFactory)
     {
         $this->yamlParser = $yamlParser;
+        $this->fieldConfigurationFactory = $fieldConfigurationFactory;
     }
 
     /**
@@ -223,8 +231,9 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
             return $this->readLegacyLookupFieldConfigurationNode($fieldConfigurationNode);
         }
 
-        $prettyPrintNode = print_r($fieldConfigurationNode, true);
-        throw new FieldConfigurationParseException("Could not identify the type of field:\n{$prettyPrintNode}");
+        $fieldConfiguration = $this->fieldConfigurationFactory->create($fieldConfigurationNode);
+
+        return $fieldConfiguration;
     }
 
     /**
@@ -232,6 +241,8 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      *
      * @return LookupFieldConfiguration
      * @throws MissingParameterException
+     *
+     * @deprecated
      */
     protected function readLegacyLookupFieldConfigurationNode(array $node)
     {

@@ -9,6 +9,8 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfigurat
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
+use Netdudes\ImporterBundle\Importer\Event\ImportEvents;
+use Netdudes\ImporterBundle\Importer\Event\PostFieldInterpretImportEvent;
 use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
@@ -19,6 +21,7 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Field\DatetimeFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\FileFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LiteralFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LookupFieldInterpreter;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -48,17 +51,26 @@ class EntityDataInterpreter implements InterpreterInterface
     protected $postProcessCallables = [];
 
     /**
-     * @var Validator
+     * @var ValidatorInterface
      */
     private $validator;
 
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
     protected $entityManager;
 
-    public function __construct(EntityConfigurationInterface $configuration, EntityManager $entityManager, ValidatorInterface $validator)
-    {
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    public function __construct(
+        EntityConfigurationInterface $configuration,
+        EntityManager $entityManager,
+        ValidatorInterface $validator,
+        EventDispatcherInterface $eventDispatcher
+    ) {
         $this->configuration = $configuration;
         $this->literalFieldInterpreter = new LiteralFieldInterpreter();
         $this->lookupFieldInterpreter = new LookupFieldInterpreter($entityManager, $this->internalLookupCache);
@@ -66,6 +78,7 @@ class EntityDataInterpreter implements InterpreterInterface
         $this->fileFieldInterpreter = new FileFieldInterpreter();
         $this->validator = $validator;
         $this->entityManager = $entityManager;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function interpret($data, $associative = true)
@@ -120,7 +133,13 @@ class EntityDataInterpreter implements InterpreterInterface
     {
         $interpreter = $this->getInterpreter($fieldConfiguration);
 
-        return $interpreter->interpret($fieldConfiguration, $value);
+        $interpretedValue = $interpreter->interpret($fieldConfiguration, $value);
+
+        $event = new PostFieldInterpretImportEvent($fieldConfiguration, $interpretedValue);
+        $this->eventDispatcher->dispatch(ImportEvents::POST_FIELD_INTERPRET, $event);
+        $interpretedValue = $event->interpretedValue;
+
+        return $interpretedValue;
     }
 
     protected function getInterpreter($fieldConfiguration)

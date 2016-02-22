@@ -14,6 +14,10 @@ services:
     class: Netdudes\ImporterBundle\Importer\Configuration\Reader\YamlConfigurationReader
     arguments:
         - "@netdudes_importer.yaml_parser"
+        - "@netdudes_importer.configuration.factory"
+
+  netdudes_importer.configuration.factory:
+    class: Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationFactory
 
   netdudes_importer.csv_parser:
     class: Netdudes\ImporterBundle\Importer\Parser\CsvParser
@@ -23,6 +27,7 @@ services:
     arguments:
         - "@doctrine.orm.entity_manager"
         - "@validator"
+        - "@event_dispatcher"
 
   netdudes_importer.interpreter.updating_entity_data_factory:
       class: Netdudes\ImporterBundle\Importer\Interpreter\UpdatingEntityDataInterpreterFactory
