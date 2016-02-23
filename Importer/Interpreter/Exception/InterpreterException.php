@@ -2,6 +2,6 @@
 
 namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
-abstract class InterpreterException extends \Exception
+class InterpreterException extends \Exception
 {
 }
