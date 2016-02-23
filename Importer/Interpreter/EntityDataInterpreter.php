@@ -136,7 +136,12 @@ class EntityDataInterpreter implements InterpreterInterface
         $interpretedValue = $interpreter->interpret($fieldConfiguration, $value);
 
         $event = new PostFieldInterpretImportEvent($fieldConfiguration, $interpretedValue);
-        $this->eventDispatcher->dispatch(ImportEvents::POST_FIELD_INTERPRET, $event);
+        try {
+            $this->eventDispatcher->dispatch(ImportEvents::POST_FIELD_INTERPRET, $event);
+        } catch (\Exception $e) {
+            throw new InterpreterException("The '$value' value could not be interpreted", $e->getCode(), $e);
+        }
+
         $interpretedValue = $event->interpretedValue;
 
         return $interpretedValue;
