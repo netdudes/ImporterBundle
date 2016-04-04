@@ -34,6 +34,7 @@ services:
       arguments:
         - "@doctrine.orm.entity_manager"
         - "@validator"
+        - "@event_dispatcher"
 
   netdudes_importer.interpreter.relationship_data_factory:
     class: Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreterFactory
