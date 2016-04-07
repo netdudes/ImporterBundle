@@ -1,7 +1,7 @@
 <?php
 namespace Netdudes\ImporterBundle\Importer\Event;
 
-use Netdudes\ImporterBundle\Importer\ImporterInterface;
+use Netdudes\ImporterBundle\Importer\Interpreter\InterpreterInterface;
 
 class PostInterpretImportEvent extends AbstractImportEvent
 {
@@ -11,12 +11,12 @@ class PostInterpretImportEvent extends AbstractImportEvent
     public $entity;
 
     /**
-     * @param object            $entity
-     * @param ImporterInterface $importer
+     * @param object               $entity
+     * @param InterpreterInterface $interpreter
      */
-    public function __construct($entity, ImporterInterface $importer)
+    public function __construct($entity, InterpreterInterface $interpreter)
     {
-        parent::__construct($importer);
+        parent::__construct($interpreter);
         $this->entity = $entity;
     }
 }

@@ -4,5 +4,11 @@ namespace Netdudes\ImporterBundle\Importer\Parser;
 
 interface ParserInterface
 {
-    public function parse(array $data, $hasHeaders = true);
+    /**
+     * @param string $data
+     * @param bool   $hasHeaders
+     *
+     * @return array
+     */
+    public function parse($data, $hasHeaders = true);
 }
