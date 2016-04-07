@@ -6,8 +6,14 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguratio
 
 interface RelationshipConfigurationInterface extends ConfigurationInterface
 {
+    /**
+     * @return string
+     */
     public function getAssignmentMethod();
 
+    /**
+     * @return string
+     */
     public function getOwnerLookupFieldName();
 
     /**
@@ -15,6 +21,9 @@ interface RelationshipConfigurationInterface extends ConfigurationInterface
      */
     public function getOwnerLookupConfigurationField();
 
+    /**
+     * @return string
+     */
     public function getRelatedLookupFieldName();
 
     /**

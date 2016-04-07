@@ -5,12 +5,24 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
 class DateTimeFormatException extends InterpreterException
 {
+    /**
+     * @var mixed
+     */
     protected $value;
 
+    /**
+     * @var string
+     */
     protected $format;
 
+    /**
+     * @var array
+     */
     protected $dateTimeErrors = [];
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         $dateTimeErrorsPrettyPrint = print_r($this->dateTimeErrors, true);

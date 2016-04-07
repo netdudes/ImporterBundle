@@ -6,15 +6,22 @@ use Exception;
 
 class DatabaseException extends \Exception
 {
+    /**
+     * @var string
+     */
     protected $dataFile;
 
+    /**
+     * @param string    $message
+     * @param Exception $previous
+     */
     public function __construct($message, Exception $previous)
     {
         parent::__construct($message, 0, $previous);
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getDataFile()
     {
@@ -22,7 +29,7 @@ class DatabaseException extends \Exception
     }
 
     /**
-     * @param mixed $dataFile
+     * @param string $dataFile
      */
     public function setDataFile($dataFile)
     {

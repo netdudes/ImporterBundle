@@ -20,7 +20,7 @@ class UpdatingEntityConfiguration extends EntityConfiguration implements Updatin
     /**
      * @param array $updateMatchFields
      */
-    public function setUpdateMatchFields($updateMatchFields)
+    public function setUpdateMatchFields(array $updateMatchFields)
     {
         $this->updateMatchFields = $updateMatchFields;
     }

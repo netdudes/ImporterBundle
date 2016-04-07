@@ -7,7 +7,7 @@ interface UpdatingEntityConfigurationInterface extends EntityConfigurationInterf
     /**
      * @param array $updateMatchFields
      */
-    public function setUpdateMatchFields($updateMatchFields);
+    public function setUpdateMatchFields(array $updateMatchFields);
 
     /**
      * @return array

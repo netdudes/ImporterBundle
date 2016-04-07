@@ -35,16 +35,27 @@ abstract class AbstractImporter implements ImporterInterface
     protected $importerErrorHandlers = [];
 
     /**
-     * @var Interpreter\InterpreterInterface
-     */
-    private $interpreter;
-
-    /**
      * @var EventDispatcherInterface
      */
     protected $eventDispatcher;
 
-    public function __construct(ConfigurationInterface $configuration, InterpreterInterface $interpreter, EntityManager $entityManager, EventDispatcherInterface $eventDispatcher)
+    /**
+     * @var InterpreterInterface
+     */
+    private $interpreter;
+
+    /**
+     * @param ConfigurationInterface   $configuration
+     * @param InterpreterInterface     $interpreter
+     * @param EntityManager            $entityManager
+     * @param EventDispatcherInterface $eventDispatcher
+     */
+    public function __construct(
+        ConfigurationInterface $configuration,
+        InterpreterInterface $interpreter,
+        EntityManager $entityManager,
+        EventDispatcherInterface $eventDispatcher
+    )
     {
         $this->configuration = $configuration;
         $this->entityManager = $entityManager;
@@ -56,11 +67,17 @@ abstract class AbstractImporter implements ImporterInterface
         });
     }
 
+    /**
+     * @param InterpreterErrorHandlerInterface $lineErrorHandler
+     */
     public function registerInterpreterErrorHandler(InterpreterErrorHandlerInterface $lineErrorHandler)
     {
         $this->interpreter->registerErrorHandler($lineErrorHandler);
     }
 
+    /**
+     * @param ImporterErrorHandlerInterface $fileErrorHandler
+     */
     public function registerImporterErrorHandler(ImporterErrorHandlerInterface $fileErrorHandler)
     {
         $this->importerErrorHandlers[] = $fileErrorHandler;
@@ -68,6 +85,7 @@ abstract class AbstractImporter implements ImporterInterface
 
     /**
      * @param callable $callable
+     *
      * @deprecated Use events. The interpreter post processes should not be set directly.
      */
     public function registerPostProcess(callable $callable)
@@ -75,11 +93,54 @@ abstract class AbstractImporter implements ImporterInterface
         $this->interpreter->registerPostProcess($callable);
     }
 
+    /**
+     * @return ConfigurationInterface
+     */
     public function getConfiguration()
     {
         return $this->configuration;
     }
 
+    /**
+     * @throws DatabaseException
+     */
+    public function flush()
+    {
+        try {
+            $this->entityManager->flush();
+        } catch (ORMException $exception) {
+            $message = "ORM Error when flushing for entity {$this->configuration->getClass()}.";
+            $exception = new DatabaseException($message, $exception);
+            throw $exception;
+        } catch (DBALException $exception) {
+            $message = "DBAL Error when flushing for entity {$this->configuration->getClass()}.";
+            $exception = new DatabaseException($message, $exception);
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param string   $event
+     * @param callable $eventListener
+     */
+    public function addEventListener($event, callable $eventListener)
+    {
+        $this->eventDispatcher->addListener($event, $eventListener);
+    }
+
+    /**
+     * @param EventSubscriberInterface $eventSubscriber
+     */
+    public function addEventSubscriber(EventSubscriberInterface $eventSubscriber)
+    {
+        $this->eventDispatcher->addSubscriber($eventSubscriber);
+    }
+
+    /**
+     * @param ImporterErrorInterface $error
+     *
+     * @throws ImporterException
+     */
     protected function handleImporterError(ImporterErrorInterface $error)
     {
         if (count($this->importerErrorHandlers) == 0) {
@@ -92,14 +153,14 @@ abstract class AbstractImporter implements ImporterInterface
     }
 
     /**
-     * @param      $parsedData
-     * @param      $dataIsAssociativeArray
-     * @param bool $flush
+     * @param array $parsedData
+     * @param bool  $dataIsAssociativeArray
+     * @param bool  $flush
      *
-     * @return null
+     * @return null|object[]
      * @throws DatabaseException
      */
-    protected function importData($parsedData, $dataIsAssociativeArray, $flush = true)
+    protected function importData(array $parsedData, $dataIsAssociativeArray, $flush = true)
     {
         $entitiesToPersist = $this->interpreter->interpret($parsedData, $dataIsAssociativeArray);
 
@@ -120,37 +181,5 @@ abstract class AbstractImporter implements ImporterInterface
         }
 
         return $entitiesToPersist;
-    }
-
-    public function flush()
-    {
-        try {
-            $this->entityManager->flush();
-        } catch (ORMException $exception) {
-            $message = "ORM Error when flushing for entity {$this->configuration->getClass()}.";
-            $exception = new DatabaseException($message, $exception);
-            throw $exception;
-        } catch (DBALException $exception) {
-            $message = "DBAL Error when flushing for entity {$this->configuration->getClass()}.";
-            $exception = new DatabaseException($message, $exception);
-            throw $exception;
-        }
-    }
-
-    /**
-     * @param          $event
-     * @param callable $eventListener
-     */
-    public function addEventListener($event, callable $eventListener)
-    {
-        $this->eventDispatcher->addListener($event, $eventListener);
-    }
-
-    /**
-     * @param EventSubscriberInterface $eventSubscriber
-     */
-    public function addEventSubscriber(EventSubscriberInterface $eventSubscriber)
-    {
-        $this->eventDispatcher->addSubscriber($eventSubscriber);
     }
 }

@@ -11,10 +11,13 @@ interface EntityConfigurationInterface extends ConfigurationInterface
      */
     public function getFields();
 
+    /**
+     * @return string
+     */
     public function getClass();
 
     /**
-     * @param $name
+     * @param string $name
      *
      * @return FieldConfigurationInterface
      */

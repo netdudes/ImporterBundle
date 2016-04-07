@@ -25,15 +25,16 @@ class EntityDataInterpreterFactory
     private $eventDispatcher;
 
     /**
-     * @param EntityManager $entityManager
-     * @param ValidatorInterface $validator
+     * @param EntityManager            $entityManager
+     * @param ValidatorInterface       $validator
      * @param EventDispatcherInterface $eventDispatcher
      */
     public function __construct(
         EntityManager $entityManager,
         ValidatorInterface $validator,
         EventDispatcherInterface $eventDispatcher
-    ) {
+    )
+    {
         $this->entityManager = $entityManager;
         $this->validator = $validator;
         $this->eventDispatcher = $eventDispatcher;

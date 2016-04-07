@@ -29,18 +29,33 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class EntityDataInterpreter implements InterpreterInterface
 {
     /**
-     * @var \Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface
+     * @var EntityConfigurationInterface
      */
     protected $configuration;
 
+    /**
+     * @var FileFieldInterpreter
+     */
     protected $fileFieldInterpreter;
 
+    /**
+     * @var LiteralFieldInterpreter
+     */
     protected $literalFieldInterpreter;
 
+    /**
+     * @var DatetimeFieldInterpreter
+     */
     protected $datetimeFieldInterpreter;
 
+    /**
+     * @var LookupFieldInterpreter
+     */
     protected $lookupFieldInterpreter;
 
+    /**
+     * @var array
+     */
     protected $internalLookupCache = [];
 
     /**
@@ -48,12 +63,10 @@ class EntityDataInterpreter implements InterpreterInterface
      */
     protected $errorHandlers = [];
 
-    protected $postProcessCallables = [];
-
     /**
-     * @var ValidatorInterface
+     * @var callable[]
      */
-    private $validator;
+    protected $postProcessCallables = [];
 
     /**
      * @var EntityManager
@@ -61,16 +74,28 @@ class EntityDataInterpreter implements InterpreterInterface
     protected $entityManager;
 
     /**
+     * @var ValidatorInterface
+     */
+    private $validator;
+
+    /**
      * @var EventDispatcherInterface
      */
     private $eventDispatcher;
 
+    /**
+     * @param EntityConfigurationInterface $configuration
+     * @param EntityManager                $entityManager
+     * @param ValidatorInterface           $validator
+     * @param EventDispatcherInterface     $eventDispatcher
+     */
     public function __construct(
         EntityConfigurationInterface $configuration,
         EntityManager $entityManager,
         ValidatorInterface $validator,
         EventDispatcherInterface $eventDispatcher
-    ) {
+    )
+    {
         $this->configuration = $configuration;
         $this->literalFieldInterpreter = new LiteralFieldInterpreter();
         $this->lookupFieldInterpreter = new LookupFieldInterpreter($entityManager, $this->internalLookupCache);
@@ -81,7 +106,14 @@ class EntityDataInterpreter implements InterpreterInterface
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function interpret($data, $associative = true)
+    /**
+     * @param array $data
+     * @param bool  $associative
+     *
+     * @return object[]
+     * @throws InterpreterException
+     */
+    public function interpret(array $data, $associative = true)
     {
         $entities = [];
         foreach ($data as $index => $row) {
@@ -97,6 +129,33 @@ class EntityDataInterpreter implements InterpreterInterface
         return $entities;
     }
 
+    /**
+     * @param InterpreterErrorHandlerInterface $errorHandler
+     */
+    public function registerErrorHandler(InterpreterErrorHandlerInterface $errorHandler)
+    {
+        $this->errorHandlers[] = $errorHandler;
+    }
+
+    /**
+     * @param callable $callable
+     */
+    public function registerPostProcess(callable $callable)
+    {
+        $this->postProcessCallables[] = $callable;
+    }
+
+    /**
+     * @param array $row
+     * @param bool  $associative
+     *
+     * @return object
+     *
+     * @throws InvalidEntityException
+     * @throws RowSizeMismatchException
+     * @throws UnknownColumnException
+     * @throws UnknownOrInaccessibleFieldException
+     */
     protected function interpretRow(array $row, $associative)
     {
         $interpretedData = $associative ? $this->interpretAssociativeRow($row) : $this->interpretOrderedRow($row);
@@ -111,7 +170,15 @@ class EntityDataInterpreter implements InterpreterInterface
         return $entity;
     }
 
-    protected function interpretAssociativeRow($columns)
+    /**
+     * @param array $columns
+     *
+     * @return array
+     *
+     * @throws InterpreterException
+     * @throws UnknownColumnException
+     */
+    protected function interpretAssociativeRow(array $columns)
     {
         $interpretedRow = [];
         foreach ($columns as $fieldName => $value) {
@@ -129,25 +196,12 @@ class EntityDataInterpreter implements InterpreterInterface
         return $interpretedRow;
     }
 
-    private function interpretField($fieldConfiguration, $value)
-    {
-        $interpreter = $this->getInterpreter($fieldConfiguration);
-
-        $interpretedValue = $interpreter->interpret($fieldConfiguration, $value);
-
-        $event = new PostFieldInterpretImportEvent($fieldConfiguration, $interpretedValue);
-        try {
-            $this->eventDispatcher->dispatch(ImportEvents::POST_FIELD_INTERPRET, $event);
-        } catch (\Exception $e) {
-            throw new InterpreterException("The '$value' value could not be interpreted", $e->getCode(), $e);
-        }
-
-        $interpretedValue = $event->interpretedValue;
-
-        return $interpretedValue;
-    }
-
-    protected function getInterpreter($fieldConfiguration)
+    /**
+     * @param FieldConfigurationInterface $fieldConfiguration
+     *
+     * @return FieldConfigurationInterface
+     */
+    protected function getInterpreter(FieldConfigurationInterface $fieldConfiguration)
     {
         if ($fieldConfiguration instanceof LookupFieldConfiguration) {
             return $this->lookupFieldInterpreter;
@@ -162,7 +216,14 @@ class EntityDataInterpreter implements InterpreterInterface
         return $this->literalFieldInterpreter;
     }
 
-    protected function interpretOrderedRow($row)
+    /**
+     * @param array $row
+     *
+     * @return array
+     * @throws InterpreterException
+     * @throws RowSizeMismatchException
+     */
+    protected function interpretOrderedRow(array $row)
     {
         $interpretedRow = [];
         $orderedFields = array_values($this->configuration->getFields());
@@ -182,7 +243,81 @@ class EntityDataInterpreter implements InterpreterInterface
         return $interpretedRow;
     }
 
-    private function injectInterpretedDataIntoEntity($entity, $interpretedData)
+    /**
+     * @param \Exception $exception
+     * @param integer    $index
+     * @param array      $row
+     * 
+     * @throws
+     */
+    protected function handleInterpreterError($exception, $index, $row)
+    {
+        if (count($this->errorHandlers) == 0) {
+            throw $exception;
+        }
+
+        foreach ($this->errorHandlers as $errorHandler) {
+            $errorHandler->handle($exception, $index, $row);
+        }
+    }
+
+    /**
+     * @param object $entity
+     */
+    protected function postProcess($entity)
+    {
+        foreach ($this->postProcessCallables as $callable) {
+            $callable($entity);
+        }
+    }
+
+    /**
+     * @param array $interpretedData
+     *
+     * @return object
+     */
+    protected function getEntity(array $interpretedData)
+    {
+        $class = $this->configuration->getClass();
+        $entity = new $class();
+
+        return $entity;
+    }
+
+    /**
+     * @param FieldConfigurationInterface $fieldConfiguration
+     * @param mixed                       $value
+     *
+     * @return mixed
+     * @throws InterpreterException
+     */
+    private function interpretField(FieldConfigurationInterface $fieldConfiguration, $value)
+    {
+        $interpreter = $this->getInterpreter($fieldConfiguration);
+
+        $interpretedValue = $interpreter->interpret($fieldConfiguration, $value);
+
+        $event = new PostFieldInterpretImportEvent($fieldConfiguration, $interpretedValue);
+        try {
+            $this->eventDispatcher->dispatch(ImportEvents::POST_FIELD_INTERPRET, $event);
+        } catch (\Exception $e) {
+            throw new InterpreterException("The '$value' value could not be interpreted", $e->getCode(), $e);
+        }
+
+        $interpretedValue = $event->interpretedValue;
+
+        return $interpretedValue;
+    }
+
+    /**
+     * @param object $entity
+     * @param array  $interpretedData
+     *
+     * @throws UnknownOrInaccessibleFieldException
+     * @throws \Throwable
+     * @throws \TypeError
+     */
+    private function injectInterpretedDataIntoEntity($entity, array $interpretedData)
     {
         $accessor = PropertyAccess::createPropertyAccessor();
         foreach ($interpretedData as $field => $value) {
@@ -196,46 +331,5 @@ class EntityDataInterpreter implements InterpreterInterface
                 throw new UnknownOrInaccessibleFieldException("Could not find or it is not accessible field \"$field\" for class \"{$class}\"", 0, $exception);
             }
         }
-    }
-
-    protected function handleInterpreterError($exception, $index, $row)
-    {
-        if (count($this->errorHandlers) == 0) {
-            throw $exception;
-        }
-
-        foreach ($this->errorHandlers as $errorHandler) {
-            $errorHandler->handle($exception, $index, $row);
-        }
-    }
-
-    public function registerErrorHandler(InterpreterErrorHandlerInterface $errorHandler)
-    {
-        $this->errorHandlers[] = $errorHandler;
-    }
-
-    public function registerPostProcess(callable $callable)
-    {
-        $this->postProcessCallables[] = $callable;
-    }
-
-    protected function postProcess($entity)
-    {
-        foreach ($this->postProcessCallables as $callable) {
-            $callable($entity);
-        }
-    }
-
-    /**
-     * @param array $interpretedData
-     *
-     * @return mixed
-     */
-    protected function getEntity(array $interpretedData)
-    {
-        $class = $this->configuration->getClass();
-        $entity = new $class();
-
-        return $entity;
     }
 }

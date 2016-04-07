@@ -18,17 +18,17 @@ class CsvImporterFactory
     protected $eventDispatcher;
 
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
     private $entityManager;
 
     /**
-     * @var Parser\CsvParser
+     * @var CsvParser
      */
     private $csvParser;
 
     /**
-     * @var Interpreter\DataInterpreterFactory
+     * @var DataInterpreterFactory
      */
     private $dataInterpreterFactory;
 

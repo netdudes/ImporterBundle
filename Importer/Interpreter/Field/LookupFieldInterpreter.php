@@ -12,10 +12,13 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Exception\LookupFieldException;
 
 class LookupFieldInterpreter implements FieldInterpreterInterface
 {
+    /**
+     * @var EntityRepository[]
+     */
     protected $repositories = [];
 
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
     private $entityManager;
 
@@ -24,12 +27,23 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
      */
     private $internalLookupCache;
 
-    public function __construct(EntityManager $entityManager, &$internalLookupCache = null)
+    /**
+     * @param EntityManager $entityManager
+     * @param array|null    $internalLookupCache
+     */
+    public function __construct(EntityManager $entityManager, array &$internalLookupCache = null)
     {
         $this->entityManager = $entityManager;
         $this->internalLookupCache = &$internalLookupCache;
     }
 
+    /**
+     * @param FieldConfigurationInterface $fieldConfiguration
+     * @param mixed                       $value
+     * 
+     * @return mixed
+     * @throws LookupFieldException
+     */
     public function interpret(FieldConfigurationInterface $fieldConfiguration, $value)
     {
         if (!($fieldConfiguration instanceof LookupFieldConfiguration)) {
@@ -69,7 +83,7 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
     }
 
     /**
-     * @param $class
+     * @param string $class
      *
      * @return EntityRepository
      */
@@ -82,6 +96,13 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
         return $this->repositories[$class];
     }
 
+    /**
+     * @param string $class
+     * @param string $lookupField
+     * @param mixed  $value
+     * 
+     * @return null|object
+     */
     private function internalLookup($class, $lookupField, $value)
     {
         if (is_null($this->internalLookupCache)) {
@@ -105,9 +126,8 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
 
     /**
      * @param FieldConfigurationInterface $fieldConfiguration
-     * @param                             $value
-     * @param                             $exception
-     *
+     * @param mixed                            $value
+     * @param \Exception                            $exception
      * @return LookupFieldException
      */
     protected function buildLookupFieldException(FieldConfigurationInterface $fieldConfiguration, $value, $exception)

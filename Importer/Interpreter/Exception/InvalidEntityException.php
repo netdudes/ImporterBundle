@@ -8,10 +8,16 @@ use Symfony\Component\Validator\ConstraintViolationList;
 class InvalidEntityException extends InterpreterException
 {
     /**
-     * @var \Symfony\Component\Validator\ConstraintViolationList
+     * @var ConstraintViolationList
      */
     private $violations;
 
+    /**
+     * @param ConstraintViolationList $violations
+     * @param string                  $message
+     * @param int                     $code
+     * @param Exception|null          $previous
+     */
     public function __construct(ConstraintViolationList $violations, $message = "", $code = 0, Exception $previous = null)
     {
         parent::__construct($message, $code, $previous);
@@ -19,7 +25,7 @@ class InvalidEntityException extends InterpreterException
     }
 
     /**
-     * @return \Symfony\Component\Validator\ConstraintViolationList
+     * @return ConstraintViolationList
      */
     public function getViolations()
     {

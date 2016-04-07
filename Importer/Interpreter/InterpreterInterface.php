@@ -6,7 +6,21 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorH
 
 interface InterpreterInterface
 {
-    public function interpret($data, $associative = true);
+    /**
+     * @param array $data
+     * @param bool  $associative
+     * 
+     * @return object[]|null
+     */
+    public function interpret(array $data, $associative = true);
+
+    /**
+     * @param InterpreterErrorHandlerInterface $errorHandler
+     */
     public function registerErrorHandler(InterpreterErrorHandlerInterface $errorHandler);
+
+    /**
+     * @param callable $callable
+     */
     public function registerPostProcess(callable $callable);
 }

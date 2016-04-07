@@ -24,6 +24,11 @@ class DataInterpreterFactory
      */
     private $updatingEntityDataInterpreterFactory;
 
+    /**
+     * @param EntityDataInterpreterFactory         $entityDataInterpreterFactory
+     * @param UpdatingEntityDataInterpreterFactory $updatingEntityDataInterpreterFactory
+     * @param RelationshipDataInterpreterFactory   $relationshipDataInterpreterFactory
+     */
     public function __construct(
         EntityDataInterpreterFactory $entityDataInterpreterFactory,
         UpdatingEntityDataInterpreterFactory $updatingEntityDataInterpreterFactory,
@@ -34,18 +39,24 @@ class DataInterpreterFactory
         $this->updatingEntityDataInterpreterFactory = $updatingEntityDataInterpreterFactory;
     }
 
+    /**
+     * @param ConfigurationInterface $configuration
+     * @return EntityDataInterpreter|RelationshipDataInterpreter
+     * 
+     * @throws \Exception
+     */
     public function create(ConfigurationInterface $configuration)
     {
         return $this->getInterpreterFromConfiguration($configuration);
     }
 
     /**
-     * @param $configuration
-     *
+     * @param ConfigurationInterface $configuration
+     * @return EntityDataInterpreter|RelationshipDataInterpreter|UpdatingEntityDataInterpreter
+     * 
      * @throws \Exception
-     * @return EntityDataInterpreter|RelationshipDataInterpreter
      */
-    protected function getInterpreterFromConfiguration($configuration)
+    protected function getInterpreterFromConfiguration(ConfigurationInterface $configuration)
     {
         if ($configuration instanceof UpdatingEntityConfigurationInterface) {
             return $this->updatingEntityDataInterpreterFactory->create($configuration);

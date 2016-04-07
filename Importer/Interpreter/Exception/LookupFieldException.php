@@ -2,14 +2,22 @@
 
 namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
+use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
+
 class LookupFieldException extends InterpreterException
 {
+    /**
+     * @var FieldConfigurationInterface
+     */
     protected $fieldConfiguration;
 
+    /**
+     * @var mixed
+     */
     protected $value;
 
     /**
-     * @param mixed $fieldConfiguration
+     * @param FieldConfigurationInterface $fieldConfiguration
      */
     public function setFieldConfiguration($fieldConfiguration)
     {
@@ -17,7 +25,7 @@ class LookupFieldException extends InterpreterException
     }
 
     /**
-     * @return mixed
+     * @return FieldConfigurationInterface
      */
     public function getFieldConfiguration()
     {

@@ -8,15 +8,23 @@ use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInte
 class RelationshipDataInterpreterFactory
 {
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
     private $entityManager;
 
+    /**
+     * @param EntityManager $entityManager
+     */
     public function __construct(EntityManager $entityManager)
     {
         $this->entityManager = $entityManager;
     }
 
+    /**
+     * @param RelationshipConfigurationInterface $configuration
+     * 
+     * @return RelationshipDataInterpreter
+     */
     public function create(RelationshipConfigurationInterface $configuration)
     {
         return new RelationshipDataInterpreter($configuration, $this->entityManager);

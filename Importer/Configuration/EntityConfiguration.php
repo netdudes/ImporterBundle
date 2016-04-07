@@ -54,10 +54,9 @@ class EntityConfiguration implements EntityConfigurationInterface
     }
 
     /**
-     * @param $name
+     * @param string $name
      *
      * @return string
-     *
      * @throws UnknownFieldException
      */
     public function getField($name)

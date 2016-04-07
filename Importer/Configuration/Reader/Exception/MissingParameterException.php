@@ -4,10 +4,13 @@ namespace Netdudes\ImporterBundle\Importer\Configuration\Reader\Exception;
 
 class MissingParameterException extends \Exception
 {
+    /**
+     * @var string
+     */
     protected $parameter;
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getParameter()
     {
@@ -15,7 +18,7 @@ class MissingParameterException extends \Exception
     }
 
     /**
-     * @param mixed $parameter
+     * @param string $parameter
      */
     public function setParameter($parameter)
     {

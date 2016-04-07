@@ -18,7 +18,7 @@ class PostFieldInterpretImportEvent extends Event
 
     /**
      * @param FieldConfigurationInterface $fieldConfiguration
-     * @param mixed $interpretedValue
+     * @param mixed                       $interpretedValue
      */
     public function __construct(FieldConfigurationInterface $fieldConfiguration, $interpretedValue)
     {

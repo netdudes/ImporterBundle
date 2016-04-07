@@ -11,7 +11,7 @@ class PostInterpretImportEvent extends AbstractImportEvent
     public $entity;
 
     /**
-     * @param ImporterInterface $entity
+     * @param object            $entity
      * @param ImporterInterface $importer
      */
     public function __construct($entity, ImporterInterface $importer)

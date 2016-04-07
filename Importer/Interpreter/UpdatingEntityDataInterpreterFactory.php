@@ -5,17 +5,18 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter;
 use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Validator\Validator;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UpdatingEntityDataInterpreterFactory
 {
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
     private $entityManager;
 
     /**
-     * @var \Symfony\Component\Validator\Validator
+     * @var Validator
      */
     private $validator;
 

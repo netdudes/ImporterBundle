@@ -8,8 +8,17 @@ use Traversable;
 
 class ConfigurationCollection implements ConfigurationCollectionInterface
 {
+    /**
+     * @var array
+     */
     protected $configurationCollection = [];
 
+    /**
+     * @param string $configurationId
+     * @return ConfigurationInterface
+     *
+     * @throws UndefinedIndexException
+     */
     public function get($configurationId)
     {
         if (array_key_exists($configurationId, $this->configurationCollection)) {
@@ -19,16 +28,26 @@ class ConfigurationCollection implements ConfigurationCollectionInterface
         throw new UndefinedIndexException("No configuration for $configurationId found");
     }
 
+    /**
+     * @param string                 $configurationId
+     * @param ConfigurationInterface $configuration
+     */
     public function add($configurationId, ConfigurationInterface $configuration)
     {
         $this->configurationCollection[$configurationId] = $configuration;
     }
 
+    /**
+     * @return ConfigurationInterface[]
+     */
     public function all()
     {
         return $this->configurationCollection;
     }
 
+    /**
+     * @return string[]
+     */
     public function getConfigurationIds()
     {
         return array_keys($this->configurationCollection);

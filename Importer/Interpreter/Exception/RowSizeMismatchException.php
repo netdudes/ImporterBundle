@@ -4,16 +4,34 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
 class RowSizeMismatchException extends InterpreterException
 {
+    /**
+     * @var array
+     */
     protected $row = [];
 
+    /**
+     * @var int
+     */
     protected $rowNumber = -1;
 
+    /**
+     * @var int
+     */
     protected $expectedSize = -1;
 
+    /**
+     * @var int
+     */
     protected $foundSize = -1;
 
+    /**
+     * @var string
+     */
     protected $dataFile = 'UNKNOWN';
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return

@@ -30,7 +30,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     private $fieldConfigurationFactory;
 
     /**
-     * @param Parser $yamlParser
+     * @param Parser                    $yamlParser
      * @param FieldConfigurationFactory $fieldConfigurationFactory
      */
     public function __construct(Parser $yamlParser, FieldConfigurationFactory $fieldConfigurationFactory)
@@ -40,7 +40,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     }
 
     /**
-     * @param $file
+     * @param string $file
      *
      * @return ConfigurationCollection|null
      */
@@ -50,7 +50,8 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     }
 
     /**
-     * @param $yaml
+     * @param string $yaml
+     * 
      * @return ConfigurationCollection|null
      */
     public function read($yaml)
@@ -107,7 +108,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      *
      * @return null|string
      */
-    protected function getChild($node, $childName)
+    protected function getChild(array $node, $childName)
     {
         if ($this->hasChild($node, $childName)) {
             return $node[$childName];
@@ -147,21 +148,11 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         $entityConfiguration->setFields($fieldConfigurations);
 
         $help = $this->getHelp($node);
-        if(!is_null($help)){
+        if (!is_null($help)) {
             $entityConfiguration->setHelp($help);
         }
 
         return $entityConfiguration;
-    }
-
-    /**
-     * @param array $node
-     *
-     * @return null|string
-     */
-    private function getHelp(array $node)
-    {
-        return $this->getChild($node, 'help');
     }
 
     /**
@@ -183,10 +174,9 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
 
     /**
      * @param array  $node
-     *
      * @param string $child
      *
-     * @throws Exception\MissingParameterException
+     * @throws MissingParameterException
      * @return mixed
      */
     protected function getChildOrThrowMissingParameterException(array $node, $child)
@@ -346,7 +336,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      *
      * @return DateFieldConfiguration
      */
-    protected function readDateFieldConfigurationNode($node)
+    protected function readDateFieldConfigurationNode(array $node)
     {
         $fieldConfiguration = new DateFieldConfiguration();
         $format = $this->getChild($node, 'format');
@@ -363,11 +353,21 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      *
      * @return FileFieldConfiguration
      */
-    protected function readFileFieldConfigurationNode($node)
+    protected function readFileFieldConfigurationNode(array $node)
     {
         $fieldConfiguration = new FileFieldConfiguration();
         $fieldConfiguration->setField($this->getChild($node, 'property'));
 
         return $fieldConfiguration;
+    }
+
+    /**
+     * @param array $node
+     *
+     * @return null|string
+     */
+    private function getHelp(array $node)
+    {
+        return $this->getChild($node, 'help');
     }
 }

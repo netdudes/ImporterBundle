@@ -12,8 +12,16 @@ class UpdatingEntityDataInterpreter extends EntityDataInterpreter
      */
     protected $configuration;
 
+    /**
+     * @var array
+     */
     private $propertyCache = [];
 
+    /**
+     * @param array $interpretedData
+     * 
+     * @return object
+     */
     protected function getEntity(array $interpretedData)
     {
         if (!is_null($entity = $this->findEntity($interpretedData))) {
@@ -23,6 +31,11 @@ class UpdatingEntityDataInterpreter extends EntityDataInterpreter
         return parent::getEntity($interpretedData);
     }
 
+    /**
+     * @param array $interpretedData
+     * 
+     * @return null|object
+     */
     private function findEntity(array $interpretedData)
     {
         $queryParameters = [];
@@ -39,6 +52,11 @@ class UpdatingEntityDataInterpreter extends EntityDataInterpreter
             ->findOneBy($queryParameters);
     }
 
+    /**
+     * @param string $fieldNameToGetPropertyFrom
+     * 
+     * @return mixed
+     */
     private function getEntityPropertyByFieldName($fieldNameToGetPropertyFrom)
     {
         if (!count($this->propertyCache)) {

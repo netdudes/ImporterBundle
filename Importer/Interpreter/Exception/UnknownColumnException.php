@@ -4,10 +4,13 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
 class UnknownColumnException extends InterpreterException
 {
+    /**
+     * @var string
+     */
     private $column;
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getColumn()
     {
@@ -15,7 +18,7 @@ class UnknownColumnException extends InterpreterException
     }
 
     /**
-     * @param mixed $column
+     * @param string $column
      */
     public function setColumn($column)
     {

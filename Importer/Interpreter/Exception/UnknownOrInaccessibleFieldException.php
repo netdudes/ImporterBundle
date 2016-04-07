@@ -4,6 +4,9 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
 class UnknownOrInaccessibleFieldException extends InterpreterException
 {
+    /**
+     * @var mixed
+     */
     protected $field;
 
     /**

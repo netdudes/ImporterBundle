@@ -4,5 +4,5 @@ namespace Netdudes\ImporterBundle\Importer\Parser;
 
 interface ParserInterface
 {
-    public function parse($data, $hasHeaders = true);
+    public function parse(array $data, $hasHeaders = true);
 }

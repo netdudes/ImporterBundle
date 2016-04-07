@@ -20,10 +20,21 @@ class LegacyFixturesImporterWrapper
      */
     private $csvImporterFactory;
 
+    /**
+     * @var null|string
+     */
     private $logFile = null;
 
+    /**
+     * @var bool
+     */
     private $logErrors = false;
 
+    /**
+     * @param CsvImporterFactory      $csvImporterFactory
+     * @param YamlConfigurationReader $yamlConfigurationReader
+     * @param string                  $logFile
+     */
     public function __construct(CsvImporterFactory $csvImporterFactory, YamlConfigurationReader $yamlConfigurationReader, $logFile = "php://stderr")
     {
         $this->logFile = $logFile;
@@ -33,12 +44,12 @@ class LegacyFixturesImporterWrapper
     }
 
     /**
-     * @param        $files
+     * @param array  $files
      * @param array  $arrayConfiguration
      * @param string $currentWorkingDirectory
      *
      * @throws \Exception
-     * @throws Interpreter\Exception\RowSizeMismatchException
+     * @throws RowSizeMismatchException
      */
     public function import($files, array $arrayConfiguration, $currentWorkingDirectory = '')
     {
@@ -62,32 +73,6 @@ class LegacyFixturesImporterWrapper
                 throw $e;
             }
         }
-    }
-
-    /**
-     * This is needed as a BC feature for existing fixture loading.
-     *
-     * @param $file
-     * @param $currentWorkingDirectory
-     *
-     * @return string
-     */
-    protected function fixWorkingDirectory($file, $currentWorkingDirectory)
-    {
-        /** Check if the "master" working directory is set and if yes, set it */
-        if (!empty($currentWorkingDirectory)) {
-            $this->setCwd($currentWorkingDirectory);
-        } else {
-            /** Set the "master" working directory from the filepath */
-            $this->setCwd(dirname($file));
-            /** Remove the path from the filename */
-            $file = str_replace(dirname($file) . DIRECTORY_SEPARATOR, '', $file);
-        }
-
-        /** Build up the filepath and filename */
-        $filename = $this->getCwd() . DIRECTORY_SEPARATOR . $file;
-
-        return $filename;
     }
 
     /**
@@ -117,5 +102,31 @@ class LegacyFixturesImporterWrapper
     {
         $this->logFile = $logFile;
         $this->logErrors = !is_null($this->logFile);
+    }
+
+    /**
+     * This is needed as a BC feature for existing fixture loading.
+     *
+     * @param string $file
+     * @param string $currentWorkingDirectory
+     *
+     * @return string
+     */
+    protected function fixWorkingDirectory($file, $currentWorkingDirectory)
+    {
+        /** Check if the "master" working directory is set and if yes, set it */
+        if (!empty($currentWorkingDirectory)) {
+            $this->setCwd($currentWorkingDirectory);
+        } else {
+            /** Set the "master" working directory from the filepath */
+            $this->setCwd(dirname($file));
+            /** Remove the path from the filename */
+            $file = str_replace(dirname($file) . DIRECTORY_SEPARATOR, '', $file);
+        }
+
+        /** Build up the filepath and filename */
+        $filename = $this->getCwd() . DIRECTORY_SEPARATOR . $file;
+
+        return $filename;
     }
 }

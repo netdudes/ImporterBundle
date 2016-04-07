@@ -4,12 +4,18 @@ namespace Netdudes\ImporterBundle\Importer\Configuration\Field;
 
 class LookupFieldConfiguration extends AbstractFieldConfiguration implements FieldConfigurationInterface
 {
+    /**
+     * @var string
+     */
     protected $class;
 
+    /**
+     * @var string 
+     */
     protected $lookupField;
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getClass()
     {
@@ -17,7 +23,7 @@ class LookupFieldConfiguration extends AbstractFieldConfiguration implements Fie
     }
 
     /**
-     * @param mixed $class
+     * @param string $class
      */
     public function setClass($class)
     {
@@ -25,7 +31,7 @@ class LookupFieldConfiguration extends AbstractFieldConfiguration implements Fie
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getLookupField()
     {
@@ -33,7 +39,7 @@ class LookupFieldConfiguration extends AbstractFieldConfiguration implements Fie
     }
 
     /**
-     * @param mixed $lookupField
+     * @param string $lookupField
      */
     public function setLookupField($lookupField)
     {

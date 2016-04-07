@@ -21,6 +21,13 @@ class GenerateImportConfigCommand extends ContainerAwareCommand
             ->addOption('entity', 'en', InputOption::VALUE_REQUIRED, 'Enter the name of the entity');
     }
 
+    /**
+     * @param InputInterface  $input
+     * @param OutputInterface $output
+     * 
+     * @return int|null
+     * @throws \Exception
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         /** @var DialogHelper $dialog */
@@ -131,6 +138,11 @@ class GenerateImportConfigCommand extends ContainerAwareCommand
         $output->writeln('<info>Configuration created.</info>');
     }
 
+    /**
+     * @param string $shortcut
+     * 
+     * @return array
+     */
     protected function parseShortcutNotation($shortcut)
     {
         $entity = str_replace('/', '\\', $shortcut);

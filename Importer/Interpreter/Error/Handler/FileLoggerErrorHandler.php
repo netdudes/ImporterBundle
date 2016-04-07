@@ -9,18 +9,26 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Exception\LookupFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownColumnException;
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * This is a basic error handler that will log all errors to a file (or stdout by default).
  */
 class FileLoggerErrorHandler implements InterpreterErrorHandlerInterface
 {
+    /**
+     * @var string
+     */
     protected $file;
 
+    /**
+     * @var array
+     */
     private $csv;
 
     /**
-     * @var
+     * @var string
      */
     private $output;
 
@@ -29,12 +37,21 @@ class FileLoggerErrorHandler implements InterpreterErrorHandlerInterface
      */
     private $lineNumberOffset;
 
+    /**
+     * @param string|null $output
+     * @param int         $lineNumberOffset
+     */
     public function __construct($output = null, $lineNumberOffset = 2)
     {
         $this->output = is_null($output) ? fopen("php://stdout", "a") : $output;
         $this->lineNumberOffset = $lineNumberOffset;
     }
 
+    /**
+     * @param InterpreterException $exception
+     * @param int                  $index
+     * @param array                $rowData
+     */
     public function handle(InterpreterException $exception, $index, $rowData)
     {
         $line = is_null($this->csv) ? implode(', ', $rowData) : $this->csv[$index];
@@ -70,18 +87,38 @@ class FileLoggerErrorHandler implements InterpreterErrorHandlerInterface
         }
     }
 
+    /**
+     * @param string $file
+     */
+    public function setCurrentFile($file)
+    {
+        $this->file = $file;
+    }
+
+    /**
+     * @param array $csv
+     */
+    public function setCsv($csv)
+    {
+        $this->csv = array_slice(explode("\n", $csv), 1);
+    }
+
+    /**
+     * @param string $message
+     * @param int    $indentation
+     */
     protected function log($message, $indentation = 0)
     {
         $indentation = str_repeat("\t", $indentation);
         fwrite($this->output, $indentation . $message . PHP_EOL);
     }
 
-    public function setCurrentFile($file)
-    {
-        $this->file = $file;
-    }
-
-    protected function buildInvalidEntityViolationsMessages($exception)
+    /**
+     * @param ExecutionContextInterface $exception
+     * 
+     * @return mixed
+     */
+    protected function buildInvalidEntityViolationsMessages(ExecutionContextInterface $exception)
     {
         $violationsArray = [];
         $violations = $exception->getViolations();
@@ -102,13 +139,5 @@ class FileLoggerErrorHandler implements InterpreterErrorHandlerInterface
             },
             []
         );
-    }
-
-    /**
-     * @param mixed $csv
-     */
-    public function setCsv($csv)
-    {
-        $this->csv = array_slice(explode("\n", $csv), 1);
     }
 }

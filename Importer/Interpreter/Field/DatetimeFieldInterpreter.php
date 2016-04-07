@@ -8,6 +8,13 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Exception\DateTimeFormatExcepti
 
 class DatetimeFieldInterpreter implements FieldInterpreterInterface
 {
+    /**
+     * @param FieldConfigurationInterface $configuration
+     * @param mixed                       $value
+     * 
+     * @return \DateTime|null
+     * @throws DateTimeFormatException
+     */
     public function interpret(FieldConfigurationInterface $configuration, $value)
     {
         if (!($configuration instanceof DateTimeFieldConfiguration)) {

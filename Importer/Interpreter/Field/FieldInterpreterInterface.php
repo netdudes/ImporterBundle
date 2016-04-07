@@ -6,5 +6,11 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInter
 
 interface FieldInterpreterInterface
 {
+    /**
+     * @param FieldConfigurationInterface $configuration
+     * @param mixed                       $value
+     * 
+     * @return mixed|null
+     */
     public function interpret(FieldConfigurationInterface $configuration, $value);
 }

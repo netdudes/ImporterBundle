@@ -5,10 +5,13 @@ namespace Netdudes\ImporterBundle\Importer\Configuration\Exception;
 
 class UnknownFieldException extends \Exception
 {
+    /**
+     * @var string
+     */
     private $field;
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getField()
     {
@@ -16,7 +19,7 @@ class UnknownFieldException extends \Exception
     }
 
     /**
-     * @param mixed $field
+     * @param string $field
      */
     public function setField($field)
     {

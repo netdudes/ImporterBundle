@@ -4,10 +4,13 @@ namespace Netdudes\ImporterBundle\Importer\Configuration\Field;
 
 class DateTimeFieldConfiguration extends AbstractFieldConfiguration
 {
+    /**
+     * @var string
+     */
     protected $format = 'Y-m-d H:i:s';
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getFormat()
     {
@@ -15,7 +18,7 @@ class DateTimeFieldConfiguration extends AbstractFieldConfiguration
     }
 
     /**
-     * @param mixed $format
+     * @param string $format
      */
     public function setFormat($format)
     {
