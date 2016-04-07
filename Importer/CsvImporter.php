@@ -3,14 +3,12 @@
 namespace Netdudes\ImporterBundle\Importer;
 
 use Doctrine\ORM\EntityManager;
-use Mockery\Exception;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Error\CsvHeadersError;
 use Netdudes\ImporterBundle\Importer\Exception\DatabaseException;
 use Netdudes\ImporterBundle\Importer\Exception\ImporterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\InterpreterInterface;
 use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class CsvImporter extends AbstractImporter
 {
@@ -29,7 +27,6 @@ class CsvImporter extends AbstractImporter
      * @param InterpreterInterface     $interpreter
      * @param EntityManager            $entityManager
      * @param CsvParser                $parser
-     * @param EventDispatcherInterface $eventDispatcher
      * @param string                   $delimiter
      */
     public function __construct(
@@ -37,12 +34,11 @@ class CsvImporter extends AbstractImporter
         InterpreterInterface $interpreter,
         EntityManager $entityManager,
         CsvParser $parser,
-        EventDispatcherInterface $eventDispatcher,
         $delimiter = ','
     )
     {
         $this->parser = $parser;
-        parent::__construct($configuration, $interpreter, $entityManager, $eventDispatcher);
+        parent::__construct($configuration, $interpreter, $entityManager);
         $this->delimiter = $delimiter;
     }
 

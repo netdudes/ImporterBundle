@@ -15,14 +15,14 @@ class ImportEventSubscribersCompilerPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        if (!$container->hasDefinition('netdudes_importer.csv_importer_factory')) {
+        if (!$container->hasDefinition('netdudes_importer.event_dispatcher')) {
             return;
         }
 
-        $importerFactory = $container->getDefinition('netdudes_importer.csv_importer_factory');
+        $eventDispatcher = $container->getDefinition('netdudes_importer.event_dispatcher');
 
         foreach ($container->findTaggedServiceIds('u2.importer.event_subscriber') as $id => $attributes) {
-            $importerFactory->addMethodCall('registerEventSubscriber', [new Reference($id)]);
+            $eventDispatcher->addMethodCall('addSubscriber', [new Reference($id)]);
         }
     }
 }

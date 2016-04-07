@@ -5,8 +5,6 @@ namespace Netdudes\ImporterBundle\Importer;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Error\Handler\ImporterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
-use Symfony\Component\EventDispatcher\Event;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 interface ImporterInterface
 {
@@ -35,23 +33,7 @@ interface ImporterInterface
     public function registerImporterErrorHandler(ImporterErrorHandlerInterface $fileErrorHandler);
 
     /**
-     * @param callable $callable
-     */
-    public function registerPostProcess(callable $callable);
-
-    /**
      * @return ConfigurationInterface
      */
     public function getConfiguration();
-
-    /**
-     * @param string   $event
-     * @param callable $eventListener
-     */
-    public function addEventListener($event, callable $eventListener);
-
-    /**
-     * @param EventSubscriberInterface $eventSubscriber
-     */
-    public function addEventSubscriber(EventSubscriberInterface $eventSubscriber);
 }

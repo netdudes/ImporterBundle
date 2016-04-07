@@ -1,6 +1,11 @@
 parameters:
 
 services:
+  netdudes_importer.event_dispatcher:
+    class: Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher
+    arguments:
+        - '@service_container'
+
   netdudes_importer.yaml_parser_factory:
     class: Netdudes\ImporterBundle\Yaml\YamlParserFactory
 
@@ -27,14 +32,14 @@ services:
     arguments:
         - "@doctrine.orm.entity_manager"
         - "@validator"
-        - "@event_dispatcher"
+        - '@netdudes_importer.event_dispatcher'
 
   netdudes_importer.interpreter.updating_entity_data_factory:
       class: Netdudes\ImporterBundle\Importer\Interpreter\UpdatingEntityDataInterpreterFactory
       arguments:
         - "@doctrine.orm.entity_manager"
         - "@validator"
-        - "@event_dispatcher"
+        - '@netdudes_importer.event_dispatcher'
 
   netdudes_importer.interpreter.relationship_data_factory:
     class: Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreterFactory

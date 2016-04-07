@@ -18,9 +18,4 @@ interface InterpreterInterface
      * @param InterpreterErrorHandlerInterface $errorHandler
      */
     public function registerErrorHandler(InterpreterErrorHandlerInterface $errorHandler);
-
-    /**
-     * @param callable $callable
-     */
-    public function registerPostProcess(callable $callable);
 }

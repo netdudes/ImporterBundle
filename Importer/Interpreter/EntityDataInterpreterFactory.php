@@ -5,6 +5,7 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter;
 use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class EntityDataInterpreterFactory

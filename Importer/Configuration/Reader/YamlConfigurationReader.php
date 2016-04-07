@@ -285,7 +285,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
                 if (!($ownerCallback = $this->getChild($this->getChild($fields, $fieldName), 'ownerCallback'))) {
                     throw new MissingParameterException("The related class column must describe the ownerCallback");
                 }
-                $joinedImportConfiguration->setAssignementMethod($ownerCallback);
+                $joinedImportConfiguration->setAssignmentMethod($ownerCallback);
             }
         }
 

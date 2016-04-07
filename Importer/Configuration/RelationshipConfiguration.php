@@ -29,14 +29,14 @@ class RelationshipConfiguration implements RelationshipConfigurationInterface
     /**
      * @var string
      */
-    protected $assignementMethod;
+    protected $assignmentMethod;
 
     /**
-     * @param string $assignementMethod
+     * @param string $assignmentMethod
      */
-    public function setAssignementMethod($assignementMethod)
+    public function setAssignmentMethod($assignmentMethod)
     {
-        $this->assignementMethod = $assignementMethod;
+        $this->assignmentMethod = $assignmentMethod;
     }
 
     /**
@@ -44,7 +44,7 @@ class RelationshipConfiguration implements RelationshipConfigurationInterface
      */
     public function getAssignmentMethod()
     {
-        return $this->assignementMethod;
+        return $this->assignmentMethod;
     }
 
     /**

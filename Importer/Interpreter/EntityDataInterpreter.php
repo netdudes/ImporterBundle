@@ -11,6 +11,7 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Event\ImportEvents;
 use Netdudes\ImporterBundle\Importer\Event\PostFieldInterpretImportEvent;
+use Netdudes\ImporterBundle\Importer\Event\PostInterpretImportEvent;
 use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
@@ -62,11 +63,6 @@ class EntityDataInterpreter implements InterpreterInterface
      * @var InterpreterErrorHandlerInterface[]
      */
     protected $errorHandlers = [];
-
-    /**
-     * @var callable[]
-     */
-    protected $postProcessCallables = [];
 
     /**
      * @var EntityManager
@@ -138,14 +134,6 @@ class EntityDataInterpreter implements InterpreterInterface
     }
 
     /**
-     * @param callable $callable
-     */
-    public function registerPostProcess(callable $callable)
-    {
-        $this->postProcessCallables[] = $callable;
-    }
-
-    /**
      * @param array $row
      * @param bool  $associative
      *
@@ -161,7 +149,9 @@ class EntityDataInterpreter implements InterpreterInterface
         $interpretedData = $associative ? $this->interpretAssociativeRow($row) : $this->interpretOrderedRow($row);
         $entity = $this->getEntity($interpretedData);
         $this->injectInterpretedDataIntoEntity($entity, $interpretedData);
-        $this->postProcess($entity);
+        
+        $this->eventDispatcher->dispatch(ImportEvents::POST_INTERPRET, new PostInterpretImportEvent($entity, $this));
+
         $validationViolations = $this->validator->validate($entity);
         if ($validationViolations->count() > 0) {
             throw new InvalidEntityException($validationViolations);
@@ -258,16 +248,6 @@ class EntityDataInterpreter implements InterpreterInterface
 
         foreach ($this->errorHandlers as $errorHandler) {
             $errorHandler->handle($exception, $index, $row);
-        }
-    }
-
-    /**
-     * @param object $entity
-     */
-    protected function postProcess($entity)
-    {
-        foreach ($this->postProcessCallables as $callable) {
-            $callable($entity);
         }
     }
 

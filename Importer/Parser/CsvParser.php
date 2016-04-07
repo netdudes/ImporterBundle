@@ -8,7 +8,7 @@ class CsvParser implements ParserInterface
      * @param string $data
      * @param bool   $hasHeaders
      * @param string $delimiter
-     * 
+     *
      * @return array
      */
     public function parse($data, $hasHeaders = true, $delimiter = ',')
@@ -38,7 +38,7 @@ class CsvParser implements ParserInterface
     /**
      * @param string $row
      * @param string $delimiter
-     * 
+     *
      * @return array
      */
     public function parseLine($row, $delimiter = ',')

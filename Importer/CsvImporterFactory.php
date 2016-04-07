@@ -6,17 +6,9 @@ use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\DataInterpreterFactory;
 use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
-use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class CsvImporterFactory
 {
-    /**
-     * @var EventDispatcherInterface
-     */
-    protected $eventDispatcher;
-
     /**
      * @var EntityManager
      */
@@ -42,7 +34,6 @@ class CsvImporterFactory
         $this->entityManager = $entityManager;
         $this->csvParser = $csvParser;
         $this->dataInterpreterFactory = $dataInterpreterFactory;
-        $this->eventDispatcher = new EventDispatcher();
     }
 
     /**
@@ -55,14 +46,6 @@ class CsvImporterFactory
     {
         $interpreter = $this->dataInterpreterFactory->create($configuration);
 
-        return new CsvImporter($configuration, $interpreter, $this->entityManager, $this->csvParser, clone $this->eventDispatcher, $delimiter);
-    }
-
-    /**
-     * @param EventSubscriberInterface $eventSubscriber
-     */
-    public function registerEventSubscriber(EventSubscriberInterface $eventSubscriber)
-    {
-        $this->eventDispatcher->addSubscriber($eventSubscriber);
+        return new CsvImporter($configuration, $interpreter, $this->entityManager, $this->csvParser, $delimiter);
     }
 }

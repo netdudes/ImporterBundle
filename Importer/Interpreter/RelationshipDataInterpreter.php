@@ -129,12 +129,4 @@ class RelationshipDataInterpreter implements InterpreterInterface
     {
         // TODO: Implement error handler functionality in relationship interpreters
     }
-
-    /**
-     * @param callable $callable
-     */
-    public function registerPostProcess(callable $callable)
-    {
-        // TODO: Implement registerPostProcess() method.
-    }
 }

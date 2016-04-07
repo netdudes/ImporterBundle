@@ -40,7 +40,7 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
     /**
      * @param FieldConfigurationInterface $fieldConfiguration
      * @param mixed                       $value
-     * 
+     *
      * @return mixed
      * @throws LookupFieldException
      */
@@ -83,6 +83,21 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
     }
 
     /**
+     * @param FieldConfigurationInterface $fieldConfiguration
+     * @param mixed                       $value
+     * @param \Exception                  $exception
+     * @return LookupFieldException
+     */
+    protected function buildLookupFieldException(FieldConfigurationInterface $fieldConfiguration, $value, $exception)
+    {
+        $exception = new LookupFieldException("Error when trying to find entity of class \"{$fieldConfiguration->getClass()}\" for property \"{$fieldConfiguration->getLookupField()}\" with value \"{$value}\"", 0, $exception);
+        $exception->setValue($value);
+        $exception->setFieldConfiguration($fieldConfiguration);
+
+        return $exception;
+    }
+
+    /**
      * @param string $class
      *
      * @return EntityRepository
@@ -100,7 +115,7 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
      * @param string $class
      * @param string $lookupField
      * @param mixed  $value
-     * 
+     *
      * @return null|object
      */
     private function internalLookup($class, $lookupField, $value)
@@ -122,20 +137,5 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
         }
 
         return null;
-    }
-
-    /**
-     * @param FieldConfigurationInterface $fieldConfiguration
-     * @param mixed                            $value
-     * @param \Exception                            $exception
-     * @return LookupFieldException
-     */
-    protected function buildLookupFieldException(FieldConfigurationInterface $fieldConfiguration, $value, $exception)
-    {
-        $exception = new LookupFieldException("Error when trying to find entity of class \"{$fieldConfiguration->getClass()}\" for property \"{$fieldConfiguration->getLookupField()}\" with value \"{$value}\"", 0, $exception);
-        $exception->setValue($value);
-        $exception->setFieldConfiguration($fieldConfiguration);
-
-        return $exception;
     }
 }
