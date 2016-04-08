@@ -1,7 +1,6 @@
 <?php
 namespace Netdudes\ImporterBundle\Importer\Event;
 
-use Netdudes\ImporterBundle\Importer\ImporterInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\InterpreterInterface;
 use Symfony\Component\EventDispatcher\Event;
 

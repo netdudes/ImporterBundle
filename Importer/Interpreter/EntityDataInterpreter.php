@@ -11,7 +11,8 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Event\ImportEvents;
 use Netdudes\ImporterBundle\Importer\Event\PostFieldInterpretImportEvent;
-use Netdudes\ImporterBundle\Importer\Event\PostInterpretImportEvent;
+use Netdudes\ImporterBundle\Importer\Event\PostBindDataImportEvent;
+use Netdudes\ImporterBundle\Importer\Event\PreBindDataImportEvent;
 use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
@@ -19,6 +20,7 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchExcept
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownColumnException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownOrInaccessibleFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\DatetimeFieldInterpreter;
+use Netdudes\ImporterBundle\Importer\Interpreter\Field\FieldInterpreterInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\FileFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LiteralFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LookupFieldInterpreter;
@@ -148,9 +150,10 @@ class EntityDataInterpreter implements InterpreterInterface
     {
         $interpretedData = $associative ? $this->interpretAssociativeRow($row) : $this->interpretOrderedRow($row);
         $entity = $this->getEntity($interpretedData);
-        $this->injectInterpretedDataIntoEntity($entity, $interpretedData);
         
-        $this->eventDispatcher->dispatch(ImportEvents::POST_INTERPRET, new PostInterpretImportEvent($entity, $this));
+        $this->eventDispatcher->dispatch(ImportEvents::PRE_BIND_DATA, new PreBindDataImportEvent($entity, $this));
+        $this->injectInterpretedDataIntoEntity($entity, $interpretedData);
+        $this->eventDispatcher->dispatch(ImportEvents::POST_BIND_DATA, new PostBindDataImportEvent($entity, $this));
 
         $validationViolations = $this->validator->validate($entity);
         if ($validationViolations->count() > 0) {
@@ -189,7 +192,7 @@ class EntityDataInterpreter implements InterpreterInterface
     /**
      * @param FieldConfigurationInterface $fieldConfiguration
      *
-     * @return FieldConfigurationInterface
+     * @return FieldInterpreterInterface
      */
     protected function getInterpreter(FieldConfigurationInterface $fieldConfiguration)
     {
