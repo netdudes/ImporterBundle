@@ -58,7 +58,7 @@ class YamlConfigurationReaderTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(1, $configurationCollection, 'One configuration node should be available');
         $this->assertNotNull($configurationCollection->get('test_joint'), 'A configuration node with key test_entity should exist');
 
-        /** @var $joinedImportConfiguration \Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfiguration */
+        /** @var RelationshipConfiguration $joinedImportConfiguration */
         $joinedImportConfiguration = $configurationCollection->get('test_joint');
         $this->assertInstanceOf('Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface', $joinedImportConfiguration);
 
