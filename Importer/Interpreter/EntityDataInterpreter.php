@@ -183,9 +183,10 @@ class EntityDataInterpreter implements InterpreterInterface
                 $exception->setColumn($column);
                 throw $exception;
             }
-
-            is_array($fieldConfiguration->getField()) ? $fields = $fieldConfiguration->getField() : $fields[] = $fieldConfiguration->getField();
-            foreach($fields as $field){
+            
+            $fields = $fieldConfiguration->getField();
+            $fieldsToInterpret = is_array($fields) ? $fields : [$fields];
+            foreach($fieldsToInterpret as $field){
                 $interpretedRow[$field] = $this->interpretField($fieldConfiguration, $value);
             }
         }
