@@ -134,20 +134,8 @@ abstract class AbstractImporter implements ImporterInterface
         }
         if ($flush) {
             $this->flush();
-        } else {
-            $this->detachEntitiesFromEntityManager($entitiesToPersist);
         }
 
         return $entitiesToPersist;
-    }
-
-    /**
-     * @param object[] $entitiesToPersist
-     */
-    private function detachEntitiesFromEntityManager(array $entitiesToPersist)
-    {
-        foreach ($entitiesToPersist as $entity) {
-            $this->entityManager->detach($entity);
-        }
     }
 }
