@@ -36,16 +36,15 @@ abstract class AbstractImporter implements ImporterInterface
     private $interpreter;
 
     /**
-     * @param ConfigurationInterface   $configuration
-     * @param InterpreterInterface     $interpreter
-     * @param EntityManager            $entityManager
+     * @param ConfigurationInterface $configuration
+     * @param InterpreterInterface   $interpreter
+     * @param EntityManager          $entityManager
      */
     public function __construct(
         ConfigurationInterface $configuration,
         InterpreterInterface $interpreter,
         EntityManager $entityManager
-    )
-    {
+    ) {
         $this->configuration = $configuration;
         $this->entityManager = $entityManager;
         $this->interpreter = $interpreter;
@@ -135,8 +134,20 @@ abstract class AbstractImporter implements ImporterInterface
         }
         if ($flush) {
             $this->flush();
+        } else {
+            $this->detachEntitiesFromEntityManager($entitiesToPersist);
         }
 
         return $entitiesToPersist;
+    }
+
+    /**
+     * @param object[] $entitiesToPersist
+     */
+    private function detachEntitiesFromEntityManager(array $entitiesToPersist)
+    {
+        foreach ($entitiesToPersist as $entity) {
+            $this->entityManager->detach($entity);
+        }
     }
 }
