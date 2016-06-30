@@ -10,6 +10,7 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInter
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Event\ImportEvents;
+use Netdudes\ImporterBundle\Importer\Event\PostImportValidationEvent;
 use Netdudes\ImporterBundle\Importer\Event\PostFieldInterpretImportEvent;
 use Netdudes\ImporterBundle\Importer\Event\PostBindDataImportEvent;
 use Netdudes\ImporterBundle\Importer\Event\PreBindDataImportEvent;
@@ -28,6 +29,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 class EntityDataInterpreter implements InterpreterInterface
 {
@@ -155,7 +157,7 @@ class EntityDataInterpreter implements InterpreterInterface
         $this->injectInterpretedDataIntoEntity($entity, $interpretedData);
         $this->eventDispatcher->dispatch(ImportEvents::POST_BIND_DATA, new PostBindDataImportEvent($entity, $this));
 
-        $validationViolations = $this->validator->validate($entity);
+        $validationViolations = $this->validate($entity);
         if ($validationViolations->count() > 0) {
             throw new InvalidEntityException($validationViolations);
         }
@@ -270,6 +272,21 @@ class EntityDataInterpreter implements InterpreterInterface
         $entity = new $class();
 
         return $entity;
+    }
+
+    /**
+     * @param object $entity
+     *
+     * @return ConstraintViolationListInterface
+     */
+    private function validate($entity)
+    {
+        $violationList = $this->validator->validate($entity);
+
+        $event = new PostImportValidationEvent($violationList, $entity);
+        $this->eventDispatcher->dispatch(ImportEvents::POST_VALIDATION, $event);
+
+        return $event->getValidationViolations();
     }
 
     /**
