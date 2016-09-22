@@ -20,7 +20,7 @@ class CsvImporter extends AbstractImporter
     /**
      * @var string
      */
-    private $delimiter;
+    protected $delimiter;
 
     /**
      * @param ConfigurationInterface   $configuration

@@ -33,7 +33,7 @@ abstract class AbstractImporter implements ImporterInterface
     /**
      * @var InterpreterInterface
      */
-    private $interpreter;
+    protected $interpreter;
 
     /**
      * @param ConfigurationInterface $configuration
