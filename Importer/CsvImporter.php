@@ -45,16 +45,16 @@ class CsvImporter extends AbstractImporter
     /**
      * @param string $filename
      * @param bool   $hasHeaders
-     * @param bool   $flush
+     * @param bool   $dryRun
      *
      * @return array|null|object[]
      * @throws DatabaseException
      */
-    public function importFile($filename, $hasHeaders = true, $flush = true)
+    public function importFile($filename, $hasHeaders = true, $dryRun = false)
     {
         $csv = file_get_contents($filename);
         try {
-            return $this->import($csv, $hasHeaders, $flush);
+            return $this->import($csv, $hasHeaders, $dryRun);
         } catch (DatabaseException $exception) {
             $exception->setDataFile($filename);
             throw $exception;
@@ -64,12 +64,12 @@ class CsvImporter extends AbstractImporter
     /**
      * @param array $csv
      * @param bool  $hasHeaders
-     * @param bool  $flush
+     * @param bool  $dryRun
      *
      * @return array|null
      * @throws DatabaseException
      */
-    public function import($csv, $hasHeaders = true, $flush = true)
+    public function import($csv, $hasHeaders = true, $dryRun = false)
     {
         if (!$this->checkHeadersAreValid($csv)) {
             return [];
@@ -77,7 +77,7 @@ class CsvImporter extends AbstractImporter
 
         $parsedData = $this->parser->parse($csv, $hasHeaders, $this->delimiter);
 
-        return $this->importData($parsedData, $hasHeaders, $flush);
+        return $this->importData($parsedData, $hasHeaders, !$dryRun);
     }
 
     /**
