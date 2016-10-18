@@ -50,7 +50,7 @@ class CsvImporter extends AbstractImporter
      * @return array|null|object[]
      * @throws DatabaseException
      */
-    public function importFile($filename, $hasHeaders = true, $dryRun = true)
+    public function importFile($filename, $hasHeaders = true, $dryRun = false)
     {
         $csv = file_get_contents($filename);
         try {
@@ -69,7 +69,7 @@ class CsvImporter extends AbstractImporter
      * @return array|null
      * @throws DatabaseException
      */
-    public function import($csv, $hasHeaders = true, $dryRun = true)
+    public function import($csv, $hasHeaders = true, $dryRun = false)
     {
         if (!$this->checkHeadersAreValid($csv)) {
             return [];
@@ -77,7 +77,7 @@ class CsvImporter extends AbstractImporter
 
         $parsedData = $this->parser->parse($csv, $hasHeaders, $this->delimiter);
 
-        return $this->importData($parsedData, $hasHeaders, $dryRun);
+        return $this->importData($parsedData, $hasHeaders, !$dryRun);
     }
 
     /**
