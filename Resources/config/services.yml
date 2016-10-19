@@ -59,3 +59,7 @@ services:
       - "@doctrine.orm.entity_manager"
       - "@netdudes_importer.csv_parser"
       - "@netdudes_importer.interpreter.data_factory"
+      - "@netdudes_importer.csv_log_factory"
+
+  netdudes_importer.csv_log_factory:
+    class: Netdudes\ImporterBundle\Importer\Log\LogFactory

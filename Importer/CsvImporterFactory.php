@@ -5,6 +5,7 @@ namespace Netdudes\ImporterBundle\Importer;
 use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\DataInterpreterFactory;
+use Netdudes\ImporterBundle\Importer\Log\CsvLogFactory;
 use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
 
 class CsvImporterFactory
@@ -25,15 +26,26 @@ class CsvImporterFactory
     private $dataInterpreterFactory;
 
     /**
+     * @var CsvLogFactory
+     */
+    private $logFactory;
+
+    /**
      * @param EntityManager          $entityManager
      * @param CsvParser              $csvParser
      * @param DataInterpreterFactory $dataInterpreterFactory
+     * @param CsvLogFactory          $logFactory
      */
-    public function __construct(EntityManager $entityManager, CsvParser $csvParser, DataInterpreterFactory $dataInterpreterFactory)
-    {
+    public function __construct(
+        EntityManager $entityManager,
+        CsvParser $csvParser,
+        DataInterpreterFactory $dataInterpreterFactory,
+        CsvLogFactory $logFactory
+    ) {
         $this->entityManager = $entityManager;
         $this->csvParser = $csvParser;
         $this->dataInterpreterFactory = $dataInterpreterFactory;
+        $this->logFactory = $logFactory;
     }
 
     /**
@@ -45,7 +57,8 @@ class CsvImporterFactory
     public function create(ConfigurationInterface $configuration, $delimiter = ',')
     {
         $interpreter = $this->dataInterpreterFactory->create($configuration);
+        $log = $this->logFactory->create();
 
-        return new CsvImporter($configuration, $interpreter, $this->entityManager, $this->csvParser, $delimiter);
+        return new CsvImporter($configuration, $interpreter, $this->entityManager, $this->csvParser, $log, $delimiter);
     }
 }
