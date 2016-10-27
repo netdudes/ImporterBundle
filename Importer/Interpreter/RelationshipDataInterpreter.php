@@ -4,12 +4,15 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter;
 
 use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
-use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
-use Netdudes\ImporterBundle\Importer\Interpreter\Exception\LookupFieldException;
+use Netdudes\ImporterBundle\Importer\Event\Error\InterpreterExceptionEventFactory;
+use Netdudes\ImporterBundle\Importer\Event\ImportEvents;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\MissingAssignementMethodException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\MissingColumnException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LookupFieldInterpreter;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class RelationshipDataInterpreter implements InterpreterInterface
 {
@@ -29,26 +32,53 @@ class RelationshipDataInterpreter implements InterpreterInterface
     private $lookupFieldInterpreter;
 
     /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    /**
+     * @var InterpreterExceptionEventFactory
+     */
+    private $eventFactory;
+
+    /**
      * @param RelationshipConfigurationInterface $configuration
      * @param EntityManager                      $entityManager
+     * @param EventDispatcherInterface           $eventDispatcher
+     * @param InterpreterExceptionEventFactory   $eventFactory
      */
-    public function __construct(RelationshipConfigurationInterface $configuration, EntityManager $entityManager)
-    {
+    public function __construct(
+        RelationshipConfigurationInterface $configuration,
+        EntityManager $entityManager,
+        EventDispatcherInterface $eventDispatcher,
+        InterpreterExceptionEventFactory $eventFactory
+    ) {
         $this->configuration = $configuration;
         $this->lookupFieldInterpreter = new LookupFieldInterpreter($entityManager);
         $this->entityManager = $entityManager;
+        $this->eventDispatcher = $eventDispatcher;
+        $this->eventFactory = $eventFactory;
     }
 
     /**
      * @param array $data
      * @param bool  $associative
      *
-     * @return null
+     * @return void
      */
     public function interpret(array $data, $associative = true)
     {
-        foreach ($data as $row) {
-            $this->interpretRow($row, $associative);
+        foreach ($data as $index => $row) {
+            try {
+                $this->interpretRow($row, $associative);
+            } catch (InterpreterException $exception) {
+                $exceptionEvent = $this->eventFactory->create($exception, $index);
+                $this->eventDispatcher->dispatch(ImportEvents::INTERPRETER_EXCEPTION, $exceptionEvent);
+
+                if ($exceptionEvent->isStopped()) {
+                    break;
+                }
+            }
         }
     }
 
@@ -56,8 +86,7 @@ class RelationshipDataInterpreter implements InterpreterInterface
      * @param array $row
      * @param bool  $associative
      *
-     * @throws MissingColumnException
-     * @throws RowSizeMismatchException
+     * @throws InvalidEntityException
      */
     private function interpretRow(array $row, $associative)
     {
@@ -67,16 +96,17 @@ class RelationshipDataInterpreter implements InterpreterInterface
     /**
      * @param array $row
      *
-     * @throws MissingAssignementMethodException
      * @throws MissingColumnException
      */
     private function interpretAssociativeRow($row)
     {
         $ownerLookupFieldName = $this->configuration->getOwnerLookupFieldName();
         $relatedLookupFieldName = $this->configuration->getRelatedLookupFieldName();
+
         if (!array_key_exists($ownerLookupFieldName, $row)) {
             throw new MissingColumnException("Missing column \"$ownerLookupFieldName\" correspondent to the owner side of the relationship");
         }
+
         if (!array_key_exists($relatedLookupFieldName, $row)) {
             throw new MissingColumnException("Missing column \"$relatedLookupFieldName\" correspondent to the related side of the relationship");
         }
@@ -88,7 +118,6 @@ class RelationshipDataInterpreter implements InterpreterInterface
      * @param mixed $ownerLookupFieldValue
      * @param mixed $relatedLookupFieldValue
      *
-     * @throws LookupFieldException
      * @throws MissingAssignementMethodException
      */
     private function interpretValues($ownerLookupFieldValue, $relatedLookupFieldValue)
@@ -110,7 +139,6 @@ class RelationshipDataInterpreter implements InterpreterInterface
     /**
      * @param array $row
      *
-     * @throws MissingAssignementMethodException
      * @throws RowSizeMismatchException
      */
     private function interpretOrderedRow(array $row)
@@ -120,13 +148,5 @@ class RelationshipDataInterpreter implements InterpreterInterface
         }
 
         $this->interpretValues($row[0], $row[1]);
-    }
-
-    /**
-     * @param InterpreterErrorHandlerInterface $errorHandler
-     */
-    public function registerErrorHandler(InterpreterErrorHandlerInterface $errorHandler)
-    {
-        // TODO: Implement error handler functionality in relationship interpreters
     }
 }

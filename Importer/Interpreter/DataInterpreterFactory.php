@@ -6,6 +6,7 @@ use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\UpdatingEntityConfigurationInterface;
+use Netdudes\ImporterBundle\Importer\Log\LogInterface;
 
 class DataInterpreterFactory
 {
@@ -32,8 +33,8 @@ class DataInterpreterFactory
     public function __construct(
         EntityDataInterpreterFactory $entityDataInterpreterFactory,
         UpdatingEntityDataInterpreterFactory $updatingEntityDataInterpreterFactory,
-        RelationshipDataInterpreterFactory $relationshipDataInterpreterFactory)
-    {
+        RelationshipDataInterpreterFactory $relationshipDataInterpreterFactory
+    ) {
         $this->entityDataInterpreterFactory = $entityDataInterpreterFactory;
         $this->relationshipDataInterpreterFactory = $relationshipDataInterpreterFactory;
         $this->updatingEntityDataInterpreterFactory = $updatingEntityDataInterpreterFactory;
@@ -41,33 +42,34 @@ class DataInterpreterFactory
 
     /**
      * @param ConfigurationInterface $configuration
+     * @param LogInterface           $log
+     *
      * @return EntityDataInterpreter|RelationshipDataInterpreter
-     * 
-     * @throws \Exception
      */
-    public function create(ConfigurationInterface $configuration)
+    public function create(ConfigurationInterface $configuration, LogInterface $log)
     {
-        return $this->getInterpreterFromConfiguration($configuration);
+        return $this->getInterpreterFromConfiguration($configuration, $log);
     }
 
     /**
      * @param ConfigurationInterface $configuration
+     * @param LogInterface           $log
+     *
      * @return EntityDataInterpreter|RelationshipDataInterpreter|UpdatingEntityDataInterpreter
-     * 
      * @throws \Exception
      */
-    protected function getInterpreterFromConfiguration(ConfigurationInterface $configuration)
+    protected function getInterpreterFromConfiguration(ConfigurationInterface $configuration, LogInterface $log)
     {
         if ($configuration instanceof UpdatingEntityConfigurationInterface) {
-            return $this->updatingEntityDataInterpreterFactory->create($configuration);
+            return $this->updatingEntityDataInterpreterFactory->create($configuration, $log);
         }
 
         if ($configuration instanceof EntityConfigurationInterface) {
-            return $this->entityDataInterpreterFactory->create($configuration);
+            return $this->entityDataInterpreterFactory->create($configuration, $log);
         }
 
         if ($configuration instanceof RelationshipConfigurationInterface) {
-            return $this->relationshipDataInterpreterFactory->create($configuration);
+            return $this->relationshipDataInterpreterFactory->create($configuration, $log);
         }
 
         $configurationClass = get_class($configuration);

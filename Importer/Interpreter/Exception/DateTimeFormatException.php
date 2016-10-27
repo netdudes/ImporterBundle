@@ -2,7 +2,6 @@
 
 namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
-
 class DateTimeFormatException extends InterpreterException
 {
     /**

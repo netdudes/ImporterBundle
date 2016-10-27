@@ -4,8 +4,9 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter;
 
 use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
+use Netdudes\ImporterBundle\Importer\Event\Error\InterpreterExceptionEventFactory;
+use Netdudes\ImporterBundle\Importer\Log\LogInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Validator\Validator;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UpdatingEntityDataInterpreterFactory
@@ -16,7 +17,7 @@ class UpdatingEntityDataInterpreterFactory
     private $entityManager;
 
     /**
-     * @var Validator
+     * @var ValidatorInterface
      */
     private $validator;
 
@@ -39,11 +40,14 @@ class UpdatingEntityDataInterpreterFactory
 
     /**
      * @param EntityConfigurationInterface $configuration
+     * @param LogInterface                 $log
      *
      * @return UpdatingEntityDataInterpreter
      */
-    public function create(EntityConfigurationInterface $configuration)
+    public function create(EntityConfigurationInterface $configuration, LogInterface $log)
     {
-        return new UpdatingEntityDataInterpreter($configuration, $this->entityManager, $this->validator, $this->eventDispatcher);
+        $interpreterExceptionEventFactory = new InterpreterExceptionEventFactory($log);
+
+        return new UpdatingEntityDataInterpreter($configuration, $this->entityManager, $this->validator, $this->eventDispatcher, $interpreterExceptionEventFactory);
     }
 }

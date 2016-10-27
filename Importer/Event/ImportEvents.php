@@ -8,4 +8,6 @@ final class ImportEvents
     const PRE_BIND_DATA = 'EVENT_PRE_BIND_DATA';
 
     const POST_BIND_DATA = 'EVENT_POST_BIND_DATA';
+
+    const INTERPRETER_EXCEPTION = 'EVENT_INTERPRETER_EXCEPTION';
 }

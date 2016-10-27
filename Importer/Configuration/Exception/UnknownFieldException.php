@@ -2,7 +2,6 @@
 
 namespace Netdudes\ImporterBundle\Importer\Configuration\Exception;
 
-
 class UnknownFieldException extends \Exception
 {
     /**

@@ -9,11 +9,11 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfigurat
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
+use Netdudes\ImporterBundle\Importer\Event\Error\InterpreterExceptionEventFactory;
 use Netdudes\ImporterBundle\Importer\Event\ImportEvents;
 use Netdudes\ImporterBundle\Importer\Event\PostFieldInterpretImportEvent;
 use Netdudes\ImporterBundle\Importer\Event\PostBindDataImportEvent;
 use Netdudes\ImporterBundle\Importer\Event\PreBindDataImportEvent;
-use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
@@ -62,11 +62,6 @@ class EntityDataInterpreter implements InterpreterInterface
     protected $internalLookupCache = [];
 
     /**
-     * @var InterpreterErrorHandlerInterface[]
-     */
-    protected $errorHandlers = [];
-
-    /**
      * @var EntityManager
      */
     protected $entityManager;
@@ -82,18 +77,24 @@ class EntityDataInterpreter implements InterpreterInterface
     private $eventDispatcher;
 
     /**
-     * @param EntityConfigurationInterface $configuration
-     * @param EntityManager                $entityManager
-     * @param ValidatorInterface           $validator
-     * @param EventDispatcherInterface     $eventDispatcher
+     * @var InterpreterExceptionEventFactory
+     */
+    private $eventFactory;
+
+    /**
+     * @param EntityConfigurationInterface     $configuration
+     * @param EntityManager                    $entityManager
+     * @param ValidatorInterface               $validator
+     * @param EventDispatcherInterface         $eventDispatcher
+     * @param InterpreterExceptionEventFactory $factory
      */
     public function __construct(
         EntityConfigurationInterface $configuration,
         EntityManager $entityManager,
         ValidatorInterface $validator,
-        EventDispatcherInterface $eventDispatcher
-    )
-    {
+        EventDispatcherInterface $eventDispatcher,
+        InterpreterExceptionEventFactory $factory
+    ) {
         $this->configuration = $configuration;
         $this->literalFieldInterpreter = new LiteralFieldInterpreter();
         $this->lookupFieldInterpreter = new LookupFieldInterpreter($entityManager, $this->internalLookupCache);
@@ -102,14 +103,14 @@ class EntityDataInterpreter implements InterpreterInterface
         $this->validator = $validator;
         $this->entityManager = $entityManager;
         $this->eventDispatcher = $eventDispatcher;
+        $this->eventFactory = $factory;
     }
 
     /**
      * @param array $data
      * @param bool  $associative
      *
-     * @return object[]
-     * @throws InterpreterException
+     * @return array
      */
     public function interpret(array $data, $associative = true)
     {
@@ -120,19 +121,16 @@ class EntityDataInterpreter implements InterpreterInterface
                 $entities[$index] = $entity;
                 $this->internalLookupCache[] = $entity;
             } catch (InterpreterException $exception) {
-                $this->handleInterpreterError($exception, $index, $row);
+                $exceptionEvent = $this->eventFactory->create($exception, $index);
+                $this->eventDispatcher->dispatch(ImportEvents::INTERPRETER_EXCEPTION, $exceptionEvent);
+
+                if ($exceptionEvent->isStopped()) {
+                    break;
+                }
             }
         }
 
         return $entities;
-    }
-
-    /**
-     * @param InterpreterErrorHandlerInterface $errorHandler
-     */
-    public function registerErrorHandler(InterpreterErrorHandlerInterface $errorHandler)
-    {
-        $this->errorHandlers[] = $errorHandler;
     }
 
     /**
@@ -150,7 +148,7 @@ class EntityDataInterpreter implements InterpreterInterface
     {
         $interpretedData = $associative ? $this->interpretAssociativeRow($row) : $this->interpretOrderedRow($row);
         $entity = $this->getEntity($interpretedData);
-        
+
         $this->eventDispatcher->dispatch(ImportEvents::PRE_BIND_DATA, new PreBindDataImportEvent($entity, $this));
         $this->injectInterpretedDataIntoEntity($entity, $interpretedData);
         $this->eventDispatcher->dispatch(ImportEvents::POST_BIND_DATA, new PostBindDataImportEvent($entity, $this));
@@ -167,8 +165,6 @@ class EntityDataInterpreter implements InterpreterInterface
      * @param array $columns
      *
      * @return array
-     *
-     * @throws InterpreterException
      * @throws UnknownColumnException
      */
     protected function interpretAssociativeRow(array $columns)
@@ -183,10 +179,10 @@ class EntityDataInterpreter implements InterpreterInterface
                 $exception->setColumn($column);
                 throw $exception;
             }
-            
+
             $fields = $fieldConfiguration->getField();
             $fieldsToInterpret = is_array($fields) ? $fields : [$fields];
-            foreach($fieldsToInterpret as $field){
+            foreach ($fieldsToInterpret as $field) {
                 $interpretedRow[$field] = $this->interpretField($fieldConfiguration, $value);
             }
         }
@@ -239,24 +235,6 @@ class EntityDataInterpreter implements InterpreterInterface
         }
 
         return $interpretedRow;
-    }
-
-    /**
-     * @param \Exception $exception
-     * @param integer    $index
-     * @param array      $row
-     * 
-     * @throws
-     */
-    protected function handleInterpreterError($exception, $index, $row)
-    {
-        if (count($this->errorHandlers) == 0) {
-            throw $exception;
-        }
-
-        foreach ($this->errorHandlers as $errorHandler) {
-            $errorHandler->handle($exception, $index, $row);
-        }
     }
 
     /**

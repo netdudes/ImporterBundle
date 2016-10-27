@@ -20,9 +20,24 @@ interface LogInterface
     public function addCriticalError($errorErrorMessage);
 
     /**
+     * @return \string[]
+     */
+    public function getDataErrors();
+
+    /**
+     * @return string[]
+     */
+    public function getConfigurationErrors();
+
+    /**
+     * @return \string[]
+     */
+    public function getCriticalErrors();
+
+    /**
      * @return bool
      */
-    public function containErrors();
+    public function hasErrors();
 
     /**
      * @param array|null $entities

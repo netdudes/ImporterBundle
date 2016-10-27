@@ -1,11 +1,6 @@
 parameters:
 
 services:
-  netdudes_importer.event_dispatcher:
-    class: Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher
-    arguments:
-        - '@service_container'
-
   netdudes_importer.yaml_parser_factory:
     class: Netdudes\ImporterBundle\Yaml\YamlParserFactory
 
@@ -32,19 +27,20 @@ services:
     arguments:
         - "@doctrine.orm.entity_manager"
         - "@validator"
-        - '@netdudes_importer.event_dispatcher'
+        - '@event_dispatcher'
 
   netdudes_importer.interpreter.updating_entity_data_factory:
       class: Netdudes\ImporterBundle\Importer\Interpreter\UpdatingEntityDataInterpreterFactory
       arguments:
         - "@doctrine.orm.entity_manager"
         - "@validator"
-        - '@netdudes_importer.event_dispatcher'
+        - '@event_dispatcher'
 
   netdudes_importer.interpreter.relationship_data_factory:
     class: Netdudes\ImporterBundle\Importer\Interpreter\RelationshipDataInterpreterFactory
     arguments:
         - "@doctrine.orm.entity_manager"
+        - "@event_dispatcher"
 
   netdudes_importer.interpreter.data_factory:
     class: Netdudes\ImporterBundle\Importer\Interpreter\DataInterpreterFactory
@@ -60,6 +56,12 @@ services:
       - "@netdudes_importer.csv_parser"
       - "@netdudes_importer.interpreter.data_factory"
       - "@netdudes_importer.csv_log_factory"
+      - "@event_dispatcher"
 
   netdudes_importer.csv_log_factory:
-    class: Netdudes\ImporterBundle\Importer\Log\LogFactory
+    class: Netdudes\ImporterBundle\Importer\Log\CsvLogFactory
+
+  netdudes_importer.interpreter.exception_subscriber:
+    class: Netdudes\ImporterBundle\Importer\EventListener\InterpreterExceptionSubscriber
+    tags:
+        - { name: kernel.event_subscriber }

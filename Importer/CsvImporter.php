@@ -2,17 +2,13 @@
 
 namespace Netdudes\ImporterBundle\Importer;
 
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMException;
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
-use Netdudes\ImporterBundle\Importer\Error\CsvHeadersError;
-use Netdudes\ImporterBundle\Importer\Error\Error;
-use Netdudes\ImporterBundle\Importer\Error\Handler\ImporterErrorHandlerInterface;
-use Netdudes\ImporterBundle\Importer\Error\ImporterErrorInterface;
-use Netdudes\ImporterBundle\Importer\Interpreter\Error\Handler\InterpreterErrorHandlerInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\InterpreterInterface;
 use Netdudes\ImporterBundle\Importer\Log\CsvLog;
 use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class CsvImporter implements ImporterInterface
 {
@@ -37,11 +33,6 @@ class CsvImporter implements ImporterInterface
     protected $entityManager;
 
     /**
-     * @var ImporterErrorHandlerInterface[]
-     */
-    protected $importerErrorHandlers = [];
-
-    /**
      * @var InterpreterInterface
      */
     protected $interpreter;
@@ -57,12 +48,18 @@ class CsvImporter implements ImporterInterface
     protected $csvHasHeaders = true;
 
     /**
-     * @param ConfigurationInterface $configuration
-     * @param InterpreterInterface   $interpreter
-     * @param EntityManager          $entityManager
-     * @param CsvParser              $parser
-     * @param CsvLog                 $log
-     * @param string                 $delimiter
+     * @var EventDispatcherInterface
+     */
+    protected $eventDispatcher;
+
+    /**
+     * @param ConfigurationInterface   $configuration
+     * @param InterpreterInterface     $interpreter
+     * @param EntityManager            $entityManager
+     * @param CsvParser                $parser
+     * @param CsvLog                   $log
+     * @param EventDispatcherInterface $eventDispatcher
+     * @param string                   $delimiter
      */
     public function __construct(
         ConfigurationInterface $configuration,
@@ -70,6 +67,7 @@ class CsvImporter implements ImporterInterface
         EntityManager $entityManager,
         CsvParser $parser,
         CsvLog $log,
+        EventDispatcherInterface $eventDispatcher,
         $delimiter = ','
     ) {
         $this->parser = $parser;
@@ -78,6 +76,7 @@ class CsvImporter implements ImporterInterface
         $this->entityManager = $entityManager;
         $this->interpreter = $interpreter;
         $this->log = $log;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -102,22 +101,6 @@ class CsvImporter implements ImporterInterface
     public function setDelimiter($delimiter)
     {
         $this->delimiter = $delimiter;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function registerInterpreterErrorHandler(InterpreterErrorHandlerInterface $lineErrorHandler)
-    {
-        $this->interpreter->registerErrorHandler($lineErrorHandler);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function registerImporterErrorHandler(ImporterErrorHandlerInterface $fileErrorHandler)
-    {
-        $this->importerErrorHandlers[] = $fileErrorHandler;
     }
 
     /**
@@ -183,7 +166,7 @@ class CsvImporter implements ImporterInterface
             return;
         }
 
-        if (!$flush || $this->log->containErrors()) {
+        if (!$flush || $this->log->hasErrors()) {
             $this->detachEntities($entities);
 
             return;
@@ -193,9 +176,12 @@ class CsvImporter implements ImporterInterface
 
         try {
             $this->entityManager->flush();
-        } catch (ORMException $exception) {
-            $message = 'Error when flushing for entity.';
-            $this->handleImporterError(new Error($message, $exception));
+        } catch (DBALException $exception) {
+            $errorMessage = $this->resolveDBALException($exception);
+            $this->log->addConfigurationError($errorMessage);
+        } catch (\Exception $exception) {
+            $errorMessage = 'Error when flushing for entity.';
+            $this->log->addConfigurationError($errorMessage);
         }
     }
 
@@ -208,9 +194,12 @@ class CsvImporter implements ImporterInterface
             foreach ($entitiesToPersist as $entity) {
                 $this->entityManager->persist($entity);
             }
+        } catch (DBALException $exception) {
+            $errorMessage = $this->resolveDBALException($exception);
+            $this->log->addConfigurationError($errorMessage);
         } catch (\Exception $exception) {
-            $message = 'Error when persisting for entity.';
-            $this->handleImporterError(new Error($message, $exception));
+            $errorMessage = 'Error when persisting for entity.';
+            $this->log->addConfigurationError($errorMessage);
         }
     }
 
@@ -238,8 +227,8 @@ class CsvImporter implements ImporterInterface
         $headers = $this->parser->parseLine(explode("\n", $csv)[0], $this->delimiter);
 
         if (count($invalidHeaders = array_diff($headers, $fieldNames))) {
-            $error = new CsvHeadersError($invalidHeaders);
-            $this->log->addConfigurationError($error->getMessage());
+            $errorMessage = "One or more headers in the imported file are not valid: " . implode(", ", $invalidHeaders);
+            $this->log->addConfigurationError($errorMessage);
 
             return false;
         }
@@ -248,16 +237,18 @@ class CsvImporter implements ImporterInterface
     }
 
     /**
-     * @param ImporterErrorInterface $error
+     * @param DBALException $exception
+     *
+     * @return string
      */
-    protected function handleImporterError(ImporterErrorInterface $error)
+    private function resolveDBALException(DBALException $exception)
     {
-        if (count($this->importerErrorHandlers) == 0) {
-            $this->log->addConfigurationError($error->getMessage());
-        }
-
-        foreach ($this->importerErrorHandlers as $errorHandler) {
-            $errorHandler->handle($error);
+        $sqlServerCode = isset($exception->getPrevious()->errorInfo[1]) ? $exception->getPrevious()->errorInfo[1] : -1;
+        switch ($sqlServerCode) {
+            case 1062:
+                return 'Duplicate entry found. It is not possible to import two or more entries with the same values on unique fields.';
+            default:
+                return "An unknown error has occurred when inserting the imported values into the database. Please contact your administrator. Error code: $sqlServerCode";
         }
     }
 }

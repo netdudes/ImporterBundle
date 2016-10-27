@@ -82,7 +82,7 @@ class CsvLog implements LogInterface
     /**
      * {@inheritdoc}
      */
-    public function containErrors()
+    public function hasErrors()
     {
         return count($this->getConfigurationErrors()) + count($this->getDataErrors()) + count($this->getCriticalErrors()) > 0;
     }
