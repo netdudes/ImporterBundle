@@ -11,7 +11,7 @@ class DatetimeFieldInterpreter implements FieldInterpreterInterface
     /**
      * @param FieldConfigurationInterface $configuration
      * @param mixed                       $value
-     * 
+     *
      * @return \DateTime|null
      * @throws DateTimeFormatException
      */
@@ -27,15 +27,22 @@ class DatetimeFieldInterpreter implements FieldInterpreterInterface
 
         $dateTime = \DateTime::createFromFormat($configuration->getFormat(), $value);
 
-        if ($dateTime === false) {
-            $errors = \DateTime::getLastErrors();
-            $exception = new DateTimeFormatException();
-            $exception->setValue($value);
-            $exception->setFormat($configuration->getFormat());
-            $exception->setDateTimeErrors($errors);
-            throw $exception;
+        if ($dateTime !== false) {
+            return $dateTime;
         }
 
-        return $dateTime;
+        $dateTime = \DateTime::createFromFormat('Y-m-d', $value);
+        if ($dateTime !== false) {
+            $dateTime->setTime(0, 0, 0);
+
+            return $dateTime;
+        }
+
+        $errors = \DateTime::getLastErrors();
+        $exception = new DateTimeFormatException();
+        $exception->setValue($value);
+        $exception->setFormat($configuration->getFormat());
+        $exception->setDateTimeErrors($errors);
+        throw $exception;
     }
 }

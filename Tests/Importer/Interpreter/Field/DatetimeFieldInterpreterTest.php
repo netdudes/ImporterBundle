@@ -41,4 +41,20 @@ class DatetimeFieldInterpreterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('22', $dateTime->format('i'));
         $this->assertEquals('33', $dateTime->format('s'));
     }
+
+    public function testInterpretDatetimeFieldWithoutTimeData()
+    {
+        $configuration = new DateTimeFieldConfiguration();
+        $value = '2015-10-12';
+
+        $interpreter = new DatetimeFieldInterpreter();
+        $dateTime = $interpreter->interpret($configuration, $value);
+
+        $this->assertEquals('2015', $dateTime->format('Y'));
+        $this->assertEquals('10', $dateTime->format('m'));
+        $this->assertEquals('12', $dateTime->format('d'));
+        $this->assertEquals('00', $dateTime->format('H'));
+        $this->assertEquals('00', $dateTime->format('i'));
+        $this->assertEquals('00', $dateTime->format('s'));
+    }
 }
