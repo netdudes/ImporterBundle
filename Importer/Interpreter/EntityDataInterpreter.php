@@ -124,7 +124,7 @@ class EntityDataInterpreter implements InterpreterInterface
                 $exceptionEvent = $this->eventFactory->create($exception, $index);
                 $this->eventDispatcher->dispatch(ImportEvents::INTERPRETER_EXCEPTION, $exceptionEvent);
 
-                if ($exceptionEvent->isStopped()) {
+                if ($exceptionEvent->hasFlagToAbort()) {
                     break;
                 }
             }

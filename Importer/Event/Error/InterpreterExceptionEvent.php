@@ -21,7 +21,7 @@ class InterpreterExceptionEvent extends Event
     /**
      * @var bool
      */
-    private $stopped = false;
+    private $flagToAbort = false;
 
     /**
      * @var int
@@ -70,16 +70,16 @@ class InterpreterExceptionEvent extends Event
     /**
      * @return bool
      */
-    public function isStopped()
+    public function hasFlagToAbort()
     {
-        return $this->stopped;
+        return $this->flagToAbort;
     }
 
     /**
-     * @param bool $stopped
+     * @param bool $flagToAbort
      */
-    public function setStopped($stopped)
+    public function setFlagToAbort($flagToAbort)
     {
-        $this->stopped = $stopped;
+        $this->flagToAbort = $flagToAbort;
     }
 }
