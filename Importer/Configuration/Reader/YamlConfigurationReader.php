@@ -208,6 +208,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         if (is_null($type)) {
             $fieldConfiguration = new LiteralFieldConfiguration();
             $fieldConfiguration->setField($property);
+            $fieldConfiguration->setHelp($this->getChild($fieldConfigurationNode,'help'));
 
             return $fieldConfiguration;
         }
