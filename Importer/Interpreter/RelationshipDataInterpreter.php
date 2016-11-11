@@ -7,7 +7,6 @@ use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInte
 use Netdudes\ImporterBundle\Importer\Event\Error\InterpreterExceptionEventFactory;
 use Netdudes\ImporterBundle\Importer\Event\ImportEvents;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
-use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\MissingAssignementMethodException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\MissingColumnException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
@@ -85,8 +84,6 @@ class RelationshipDataInterpreter implements InterpreterInterface
     /**
      * @param array $row
      * @param bool  $associative
-     *
-     * @throws InvalidEntityException
      */
     private function interpretRow(array $row, $associative)
     {

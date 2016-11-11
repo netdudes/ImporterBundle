@@ -15,11 +15,12 @@ use Netdudes\ImporterBundle\Importer\Event\PostFieldInterpretImportEvent;
 use Netdudes\ImporterBundle\Importer\Event\PostBindDataImportEvent;
 use Netdudes\ImporterBundle\Importer\Event\PreBindDataImportEvent;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
-use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidEntityException;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidRowException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownColumnException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownOrInaccessibleFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\DatetimeFieldInterpreter;
+use Netdudes\ImporterBundle\Importer\Interpreter\Field\FieldError;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\FieldInterpreterInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\FileFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\LiteralFieldInterpreter;
@@ -139,7 +140,7 @@ class EntityDataInterpreter implements InterpreterInterface
      *
      * @return object
      *
-     * @throws InvalidEntityException
+     * @throws InvalidRowException
      * @throws RowSizeMismatchException
      * @throws UnknownColumnException
      * @throws UnknownOrInaccessibleFieldException
@@ -155,7 +156,12 @@ class EntityDataInterpreter implements InterpreterInterface
 
         $validationViolations = $this->validator->validate($entity);
         if ($validationViolations->count() > 0) {
-            throw new InvalidEntityException($validationViolations);
+            $errors = [];
+            foreach ($validationViolations as $violation) {
+                $exception = new InterpreterException($violation->getMessage());
+                $errors[] = new FieldError($exception, $this->extractFieldNameFromPropertyPath($violation->getPropertyPath()));
+            }
+            throw new InvalidRowException($errors);
         }
 
         return $entity;
@@ -166,10 +172,12 @@ class EntityDataInterpreter implements InterpreterInterface
      *
      * @return array
      * @throws UnknownColumnException
+     * @throws InterpreterException
      */
     protected function interpretAssociativeRow(array $columns)
     {
         $interpretedRow = [];
+        $errors = [];
         foreach ($columns as $fieldName => $value) {
             try {
                 $fieldConfiguration = $this->configuration->getField($fieldName);
@@ -180,11 +188,16 @@ class EntityDataInterpreter implements InterpreterInterface
                 throw $exception;
             }
 
-            $fields = $fieldConfiguration->getField();
-            $fieldsToInterpret = is_array($fields) ? $fields : [$fields];
-            foreach ($fieldsToInterpret as $field) {
+            $field = $fieldConfiguration->getField();
+            try {
                 $interpretedRow[$field] = $this->interpretField($fieldConfiguration, $value);
+            } catch (InterpreterException $exception) {
+                $errors[] = new FieldError($exception, $fieldName);
             }
+        }
+
+        if (count($errors) > 0) {
+            throw new InvalidRowException($errors);
         }
 
         return $interpretedRow;
@@ -297,5 +310,22 @@ class EntityDataInterpreter implements InterpreterInterface
                 throw new UnknownOrInaccessibleFieldException("Could not find or it is not accessible field \"$field\" for class \"{$class}\"", 0, $exception);
             }
         }
+    }
+
+    /**
+     * @param string $propertyPath
+     *
+     * @throws \Exception
+     * @return string
+     */
+    private function extractFieldNameFromPropertyPath($propertyPath)
+    {
+        foreach ($this->configuration->getFields() as $key => $field) {
+            if ($field->getField() === $propertyPath) {
+                return $key;
+            }
+        }
+
+        throw new \Exception('Field for property path “' . $propertyPath . '” was not found');
     }
 }

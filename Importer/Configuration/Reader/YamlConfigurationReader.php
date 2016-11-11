@@ -51,7 +51,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
 
     /**
      * @param string $yaml
-     * 
+     *
      * @return ConfigurationCollection|null
      */
     public function read($yaml)
@@ -92,7 +92,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     {
         $type = $this->getChild($rootConfigurationNode, 'type');
         if (!is_null($type)) {
-            switch ($type){
+            switch ($type) {
                 case ('update'):
                     return $this->readUpdateNode($rootConfigurationNode);
                 case ('joinedImport'):
@@ -115,6 +115,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         if ($this->hasChild($node, $childName)) {
             return $node[$childName];
         }
+
         return null;
     }
 
@@ -179,7 +180,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      * @param string $child
      *
      * @throws MissingParameterException
-     * @return mixed
+     * @return string|null
      */
     private function getChildOrThrowMissingParameterException(array $node, $child)
     {
@@ -208,12 +209,12 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         if (is_null($type)) {
             $fieldConfiguration = new LiteralFieldConfiguration();
             $fieldConfiguration->setField($property);
-            $fieldConfiguration->setHelp($this->getChild($fieldConfigurationNode,'help'));
+            $fieldConfiguration->setHelp($this->getChild($fieldConfigurationNode, 'help'));
 
             return $fieldConfiguration;
         }
 
-        switch ($type){
+        switch ($type) {
             case ('datetime'):
                 return $this->readDatetimeFieldConfigurationNode($fieldConfigurationNode);
             case ('date'):
