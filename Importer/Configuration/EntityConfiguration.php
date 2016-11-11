@@ -2,8 +2,6 @@
 
 namespace Netdudes\ImporterBundle\Importer\Configuration;
 
-use Netdudes\ImporterBundle\Importer\Configuration\Exception\UnknownFieldException;
-
 class EntityConfiguration implements EntityConfigurationInterface
 {
     /**
@@ -57,7 +55,7 @@ class EntityConfiguration implements EntityConfigurationInterface
      * @param string $name
      *
      * @return string
-     * @throws UnknownFieldException
+     * @throws \Exception
      */
     public function getField($name)
     {
@@ -65,9 +63,7 @@ class EntityConfiguration implements EntityConfigurationInterface
             return $this->fields[$name];
         }
 
-        $exception = new UnknownFieldException("Unknown field \"$name\"");
-        $exception->setField($name);
-        throw $exception;
+        throw new \Exception("Unknown column $name found in the imported data.");
     }
 
     /**

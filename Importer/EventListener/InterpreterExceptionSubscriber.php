@@ -8,7 +8,6 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\LookupFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidRowException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
-use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownColumnException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class InterpreterExceptionSubscriber implements EventSubscriberInterface
@@ -49,8 +48,6 @@ class InterpreterExceptionSubscriber implements EventSubscriberInterface
             return $this->buildLookupFieldExceptionMessage($exception);
         } elseif ($exception instanceof RowSizeMismatchException) {
             return "Row is expected to contain {$exception->getExpectedSize()}, found to have {$exception->getFoundSize()} fields instead.";
-        } elseif ($exception instanceof UnknownColumnException) {
-            return "Unknown column <kbd>{$exception->getColumn()}</kbd> found in the imported data.";
         } elseif ($exception instanceof InvalidRowException) {
             return $this->buildInvalidRowExceptionMessage($exception);
         } else {

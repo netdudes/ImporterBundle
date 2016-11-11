@@ -4,7 +4,6 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter;
 
 use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
-use Netdudes\ImporterBundle\Importer\Configuration\Exception\UnknownFieldException;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
@@ -17,7 +16,6 @@ use Netdudes\ImporterBundle\Importer\Event\PreBindDataImportEvent;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidRowException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
-use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownColumnException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownOrInaccessibleFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\DatetimeFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\FieldError;
@@ -141,8 +139,8 @@ class EntityDataInterpreter implements InterpreterInterface
      * @return object
      *
      * @throws InvalidRowException
+     * @throws \Exception
      * @throws RowSizeMismatchException
-     * @throws UnknownColumnException
      * @throws UnknownOrInaccessibleFieldException
      */
     protected function interpretRow(array $row, $associative)
@@ -171,23 +169,15 @@ class EntityDataInterpreter implements InterpreterInterface
      * @param array $columns
      *
      * @return array
-     * @throws UnknownColumnException
      * @throws InterpreterException
+     * @throws \Exception
      */
     protected function interpretAssociativeRow(array $columns)
     {
         $interpretedRow = [];
         $errors = [];
         foreach ($columns as $fieldName => $value) {
-            try {
-                $fieldConfiguration = $this->configuration->getField($fieldName);
-            } catch (UnknownFieldException $exception) {
-                $column = $exception->getField();
-                $exception = new UnknownColumnException("Unknown column $column", 0, $exception);
-                $exception->setColumn($column);
-                throw $exception;
-            }
-
+            $fieldConfiguration = $this->configuration->getField($fieldName);
             $field = $fieldConfiguration->getField();
             try {
                 $interpretedRow[$field] = $this->interpretField($fieldConfiguration, $value);
