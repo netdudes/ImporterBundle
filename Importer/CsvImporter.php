@@ -177,11 +177,7 @@ class CsvImporter implements ImporterInterface
         try {
             $this->entityManager->flush();
         } catch (DBALException $exception) {
-            $errorMessage = $this->resolveDBALException($exception);
-            $this->log->addConfigurationError($errorMessage);
-        } catch (\Exception $exception) {
-            $errorMessage = 'Error when flushing for entity.';
-            $this->log->addConfigurationError($errorMessage);
+            $errorMessage = $this->handleDBALException($exception);
         }
     }
 
@@ -241,14 +237,15 @@ class CsvImporter implements ImporterInterface
      *
      * @return string
      */
-    private function resolveDBALException(DBALException $exception)
+    private function handleDBALException(DBALException $exception)
     {
         $sqlServerCode = isset($exception->getPrevious()->errorInfo[1]) ? $exception->getPrevious()->errorInfo[1] : -1;
         switch ($sqlServerCode) {
             case 1062:
-                return 'Duplicate entry found. It is not possible to import two or more entries with the same values on unique fields.';
+                $errorMessage = 'Duplicate entry found. It is not possible to import two or more entries with the same values on unique fields.';
+                $this->log->addConfigurationError($errorMessage);
             default:
-                return "An unknown error has occurred when inserting the imported values into the database. Please contact your administrator. Error code: $sqlServerCode";
+                throw $exception;
         }
     }
 }
