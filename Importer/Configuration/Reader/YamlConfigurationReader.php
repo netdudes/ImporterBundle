@@ -3,6 +3,7 @@ namespace Netdudes\ImporterBundle\Importer\Configuration\Reader;
 
 use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollection;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfiguration;
+use Netdudes\ImporterBundle\Importer\Configuration\Field\BooleanFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationFactory;
@@ -226,6 +227,8 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
                 return $this->readDateFieldConfigurationNode($fieldConfigurationNode);
             case ('file'):
                 return $this->readFileFieldConfigurationNode($fieldConfigurationNode);
+            case ('boolean'):
+                return $this->readBooleanFieldConfigurationNode($fieldConfigurationNode);
         }
 
         // Pick up fields with type not matching any method, but with lookupProperty, as old-style lookup field configs.
@@ -372,6 +375,19 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     private function readFileFieldConfigurationNode(array $node)
     {
         $fieldConfiguration = new FileFieldConfiguration();
+        $fieldConfiguration->setField($this->getChild($node, 'property'));
+
+        return $fieldConfiguration;
+    }
+
+    /**
+     * @param array $node
+     *
+     * @return BooleanFieldConfiguration
+     */
+    private function readBooleanFieldConfigurationNode(array $node)
+    {
+        $fieldConfiguration = new BooleanFieldConfiguration();
         $fieldConfiguration->setField($this->getChild($node, 'property'));
 
         return $fieldConfiguration;

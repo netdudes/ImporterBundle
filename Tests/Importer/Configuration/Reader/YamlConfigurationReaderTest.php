@@ -30,19 +30,23 @@ class YamlConfigurationReaderTest extends \PHPUnit_Framework_TestCase
         $entityConfiguration = $configurationCollection->get('test_entity');
         $this->assertInstanceOf('Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface', $entityConfiguration);
         $fields = $entityConfiguration->getFields();
-        $this->assertCount(3, $fields, 'Three fields should be defined');
+        $this->assertCount(4, $fields, 'Four fields should be defined');
 
         $testLookupField = $fields['Test Lookup Column'];
         $testLiteralField = $fields['Test Literal Column'];
         $testDateTimeField = $fields['Test DateTime Column'];
+        $testBooleanField = $fields['Test Boolean Column'];
         $this->assertInstanceOf('Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration', $testLookupField);
         $this->assertInstanceOf('Netdudes\ImporterBundle\Importer\Configuration\Field\LiteralFieldConfiguration', $testLiteralField);
         $this->assertInstanceOf('Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfiguration', $testDateTimeField);
+        $this->assertInstanceOf('Netdudes\ImporterBundle\Importer\Configuration\Field\BooleanFieldConfiguration', $testBooleanField);
 
         $this->assertEquals('\Path\To\Another\TestEntity', $testLookupField->getClass());
         $this->assertEquals('name', $testLookupField->getLookupField());
 
         $this->assertEquals('literalColumn', $testLiteralField->getField());
+
+        $this->assertEquals('booleanColumn', $testBooleanField->getField());
 
         $this->assertEquals('datetimeColumn', $testDateTimeField->getField());
         $this->assertEquals('d.m.Y H:i:s', $testDateTimeField->getFormat());

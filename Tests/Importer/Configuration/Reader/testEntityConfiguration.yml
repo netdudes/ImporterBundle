@@ -11,3 +11,6 @@ test_entity:
       property: datetimeColumn
       type: datetime
       format: 'd.m.Y H:i:s'
+    Test Boolean Column:
+      property: booleanColumn
+      type: "boolean"

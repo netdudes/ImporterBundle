@@ -3,6 +3,7 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter;
 
 use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfigurationInterface;
+use Netdudes\ImporterBundle\Importer\Configuration\Field\BooleanFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
@@ -16,6 +17,7 @@ use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidRowException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\UnknownOrInaccessibleFieldException;
+use Netdudes\ImporterBundle\Importer\Interpreter\Field\BooleanFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\DatetimeFieldInterpreter;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\FieldError;
 use Netdudes\ImporterBundle\Importer\Interpreter\Field\FieldInterpreterInterface;
@@ -98,6 +100,7 @@ class EntityDataInterpreter implements InterpreterInterface
         $this->lookupFieldInterpreter = new LookupFieldInterpreter($entityManager, $this->internalLookupCache);
         $this->datetimeFieldInterpreter = new DatetimeFieldInterpreter();
         $this->fileFieldInterpreter = new FileFieldInterpreter();
+        $this->booleanFieldInterpreter = new BooleanFieldInterpreter();
         $this->validator = $validator;
         $this->entityManager = $entityManager;
         $this->eventDispatcher = $eventDispatcher;
@@ -200,17 +203,18 @@ class EntityDataInterpreter implements InterpreterInterface
      */
     protected function getInterpreter(FieldConfigurationInterface $fieldConfiguration)
     {
-        if ($fieldConfiguration instanceof LookupFieldConfiguration) {
-            return $this->lookupFieldInterpreter;
+        switch ($fieldConfiguration) {
+            case ($fieldConfiguration instanceof LookupFieldConfiguration):
+                return $this->lookupFieldInterpreter;
+            case ($fieldConfiguration instanceof DateTimeFieldConfiguration):
+                return $this->datetimeFieldInterpreter;
+            case ($fieldConfiguration instanceof FileFieldConfiguration):
+                return $this->fileFieldInterpreter;
+            case ($fieldConfiguration instanceof BooleanFieldConfiguration):
+                return $this->booleanFieldInterpreter;
+            default:
+                return $this->literalFieldInterpreter;
         }
-        if ($fieldConfiguration instanceof DateTimeFieldConfiguration) {
-            return $this->datetimeFieldInterpreter;
-        }
-        if ($fieldConfiguration instanceof FileFieldConfiguration) {
-            return $this->fileFieldInterpreter;
-        }
-
-        return $this->literalFieldInterpreter;
     }
 
     /**
