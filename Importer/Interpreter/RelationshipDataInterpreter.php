@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Interpreter;
 
 use Doctrine\ORM\EntityManager;
@@ -141,7 +140,7 @@ class RelationshipDataInterpreter implements InterpreterInterface
     private function interpretOrderedRow(array $row)
     {
         if (count($row) !== 2) {
-            throw new RowSizeMismatchException("Relationship association data must have two rows");
+            throw new RowSizeMismatchException('Relationship association data must have two rows');
         }
 
         $this->interpretValues($row[0], $row[1]);

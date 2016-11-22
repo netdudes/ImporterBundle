@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\DependencyInjection\CompilerPass;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;

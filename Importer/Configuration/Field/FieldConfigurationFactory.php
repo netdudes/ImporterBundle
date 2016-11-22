@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Configuration\Field;
 
 use Netdudes\ImporterBundle\Importer\Configuration\Exception\InvalidFieldConfigurationClassException;

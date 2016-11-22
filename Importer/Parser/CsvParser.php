@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Parser;
 
 class CsvParser implements ParserInterface

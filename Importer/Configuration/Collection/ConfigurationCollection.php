@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Configuration\Collection;
 
 use Netdudes\ImporterBundle\Importer\Configuration\Collection\Exception\UndefinedIndexException;
@@ -15,9 +14,10 @@ class ConfigurationCollection implements ConfigurationCollectionInterface
 
     /**
      * @param string $configurationId
-     * @return ConfigurationInterface
      *
      * @throws UndefinedIndexException
+     *
+     * @return ConfigurationInterface
      */
     public function get($configurationId)
     {
@@ -56,7 +56,9 @@ class ConfigurationCollection implements ConfigurationCollectionInterface
     /**
      * (PHP 5 &gt;= 5.0.0)<br/>
      * Retrieve an external iterator
+     *
      * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
+     *
      * @return Traversable An instance of an object implementing <b>Iterator</b> or
      *                     <b>Traversable</b>
      */
@@ -68,7 +70,9 @@ class ConfigurationCollection implements ConfigurationCollectionInterface
     /**
      * (PHP 5 &gt;= 5.1.0)<br/>
      * Count elements of an object
+     *
      * @link http://php.net/manual/en/countable.count.php
+     *
      * @return int The custom count as an integer.
      *             </p>
      *             <p>

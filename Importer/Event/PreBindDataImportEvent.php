@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Event;
 
 use Netdudes\ImporterBundle\Importer\Interpreter\InterpreterInterface;

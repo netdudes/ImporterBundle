@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer;
 
 use Doctrine\ORM\EntityManager;

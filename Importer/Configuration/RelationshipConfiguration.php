@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Configuration;
 
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
@@ -86,7 +85,7 @@ class RelationshipConfiguration implements RelationshipConfigurationInterface
     {
         return [
             $this->getOwnerLookupFieldName(),
-            $this->getRelatedLookupFieldName()
+            $this->getRelatedLookupFieldName(),
         ];
     }
 

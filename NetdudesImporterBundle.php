@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle;
 
 use Netdudes\ImporterBundle\DependencyInjection\CompilerPass\ImportEventSubscribersCompilerPass;

@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Interpreter\Field;
 
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfiguration;
@@ -12,8 +11,9 @@ class DatetimeFieldInterpreter implements FieldInterpreterInterface
      * @param FieldConfigurationInterface $configuration
      * @param mixed                       $value
      *
-     * @return \DateTime|null
      * @throws DateTimeFormatException
+     *
+     * @return \DateTime|null
      */
     public function interpret(FieldConfigurationInterface $configuration, $value)
     {

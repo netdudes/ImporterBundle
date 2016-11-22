@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Interpreter;
 
 use Doctrine\ORM\EntityManager;
@@ -10,8 +9,8 @@ use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Event\Error\InterpreterExceptionEventFactory;
 use Netdudes\ImporterBundle\Importer\Event\ImportEvents;
-use Netdudes\ImporterBundle\Importer\Event\PostFieldInterpretImportEvent;
 use Netdudes\ImporterBundle\Importer\Event\PostBindDataImportEvent;
+use Netdudes\ImporterBundle\Importer\Event\PostFieldInterpretImportEvent;
 use Netdudes\ImporterBundle\Importer\Event\PreBindDataImportEvent;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidRowException;
@@ -136,12 +135,12 @@ class EntityDataInterpreter implements InterpreterInterface
      * @param array $row
      * @param bool  $associative
      *
-     * @return object
-     *
      * @throws InvalidRowException
      * @throws \Exception
      * @throws RowSizeMismatchException
      * @throws UnknownOrInaccessibleFieldException
+     *
+     * @return object
      */
     protected function interpretRow(array $row, $associative)
     {
@@ -168,9 +167,10 @@ class EntityDataInterpreter implements InterpreterInterface
     /**
      * @param array $columns
      *
-     * @return array
      * @throws InterpreterException
      * @throws \Exception
+     *
+     * @return array
      */
     protected function interpretAssociativeRow(array $columns)
     {
@@ -216,9 +216,10 @@ class EntityDataInterpreter implements InterpreterInterface
     /**
      * @param array $row
      *
-     * @return array
      * @throws InterpreterException
      * @throws RowSizeMismatchException
+     *
+     * @return array
      */
     protected function interpretOrderedRow(array $row)
     {
@@ -257,8 +258,9 @@ class EntityDataInterpreter implements InterpreterInterface
      * @param FieldConfigurationInterface $fieldConfiguration
      * @param mixed                       $value
      *
-     * @return mixed
      * @throws InterpreterException
+     *
+     * @return mixed
      */
     private function interpretField(FieldConfigurationInterface $fieldConfiguration, $value)
     {
@@ -306,6 +308,7 @@ class EntityDataInterpreter implements InterpreterInterface
      * @param string $propertyPath
      *
      * @throws \Exception
+     *
      * @return string
      */
     private function extractFieldNameFromPropertyPath($propertyPath)

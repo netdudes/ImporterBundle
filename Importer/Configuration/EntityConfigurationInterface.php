@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Configuration;
 
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;

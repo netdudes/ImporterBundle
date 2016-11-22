@@ -5,8 +5,8 @@ use Netdudes\ImporterBundle\Importer\Event\Error\InterpreterExceptionEvent;
 use Netdudes\ImporterBundle\Importer\Event\ImportEvents;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\DateTimeFormatException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
-use Netdudes\ImporterBundle\Importer\Interpreter\Exception\LookupFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidRowException;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\LookupFieldException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\RowSizeMismatchException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 

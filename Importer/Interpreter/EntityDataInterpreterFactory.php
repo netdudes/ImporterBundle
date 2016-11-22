@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Interpreter;
 
 use Doctrine\ORM\EntityManager;
@@ -35,8 +34,7 @@ class EntityDataInterpreterFactory
         EntityManager $entityManager,
         ValidatorInterface $validator,
         EventDispatcherInterface $eventDispatcher
-    )
-    {
+    ) {
         $this->entityManager = $entityManager;
         $this->validator = $validator;
         $this->eventDispatcher = $eventDispatcher;

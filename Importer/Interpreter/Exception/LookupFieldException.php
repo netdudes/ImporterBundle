@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Interpreter\Exception;
 
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;

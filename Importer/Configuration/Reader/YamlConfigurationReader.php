@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Configuration\Reader;
 
 use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollection;
@@ -74,8 +73,9 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     /**
      * @param array $parsedYamlArray
      *
-     * @return EntityConfiguration
      * @throws UndefinedConfigurationNodeTypeException
+     *
+     * @return EntityConfiguration
      */
     public function readParsedYamlArray(array $parsedYamlArray)
     {
@@ -85,8 +85,9 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     /**
      * @param array $rootConfigurationNode
      *
-     * @return EntityConfiguration
      * @throws UndefinedConfigurationNodeTypeException
+     *
+     * @return EntityConfiguration
      */
     private function readConfigurationNode(array $rootConfigurationNode)
     {
@@ -133,8 +134,9 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     /**
      * @param array $node
      *
-     * @return EntityConfiguration
      * @throws Exception\MissingParameterException
+     *
+     * @return EntityConfiguration
      */
     private function readEntityNode(array $node)
     {
@@ -162,6 +164,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      * @param array $node
      *
      * @throws MissingParameterException
+     *
      * @return UpdatingEntityConfiguration
      */
     protected function readUpdateNode(array $node)
@@ -180,6 +183,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      * @param string $child
      *
      * @throws MissingParameterException
+     *
      * @return string|null
      */
     private function getChildOrThrowMissingParameterException(array $node, $child)
@@ -197,9 +201,10 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     /**
      * @param array $fieldConfigurationNode
      *
-     * @return LiteralFieldConfiguration|LookupFieldConfiguration
      * @throws FieldConfigurationParseException
      * @throws MissingParameterException
+     *
+     * @return LiteralFieldConfiguration|LookupFieldConfiguration
      */
     private function readFieldConfigurationNode(array $fieldConfigurationNode)
     {
@@ -237,8 +242,9 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     /**
      * @param array $node
      *
-     * @return LookupFieldConfiguration
      * @throws MissingParameterException
+     *
+     * @return LookupFieldConfiguration
      *
      * @deprecated
      */
@@ -257,10 +263,11 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     /**
      * @param array $node
      *
-     * @return RelationshipConfiguration
      * @throws FieldConfigurationParseException
      * @throws MissingParameterException
      * @throws \Exception
+     *
+     * @return RelationshipConfiguration
      */
     private function readJoinedImportNode(array $node)
     {
@@ -268,7 +275,7 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         $fields = $this->getChildOrThrowMissingParameterException($node, 'columns');
 
         if (count($fields) !== 2) {
-            throw new FieldConfigurationParseException("A joinedImport configuration node must have two columns");
+            throw new FieldConfigurationParseException('A joinedImport configuration node must have two columns');
         }
 
         $joinedImportConfiguration = new RelationshipConfiguration();
@@ -291,14 +298,14 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
                 $joinedImportConfiguration->setRelatedLookupConfigurationField($lookupFieldConfiguration);
                 $joinedImportConfiguration->setRelatedLookupFieldName($fieldName);
                 if (!($ownerCallback = $this->getChild($this->getChild($fields, $fieldName), 'ownerCallback'))) {
-                    throw new MissingParameterException("The related class column must describe the ownerCallback");
+                    throw new MissingParameterException('The related class column must describe the ownerCallback');
                 }
                 $joinedImportConfiguration->setAssignmentMethod($ownerCallback);
             }
         }
 
         if (is_null($joinedImportConfiguration->getOwnerLookupConfigurationField())) {
-            throw new MissingParameterException("Missing column that matches the owner class in joined import");
+            throw new MissingParameterException('Missing column that matches the owner class in joined import');
         }
 
         return $joinedImportConfiguration;
@@ -307,8 +314,9 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
     /**
      * @param array $node
      *
-     * @return LookupFieldConfiguration
      * @throws MissingParameterException
+     *
+     * @return LookupFieldConfiguration
      */
     private function readLookupConfigurationNode(array $node)
     {

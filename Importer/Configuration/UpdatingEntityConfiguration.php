@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Configuration;
 
 class UpdatingEntityConfiguration extends EntityConfiguration implements UpdatingEntityConfigurationInterface

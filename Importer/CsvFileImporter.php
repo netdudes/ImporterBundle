@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer;
 
 class CsvFileImporter extends CsvImporter

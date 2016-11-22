@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer;
 
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;

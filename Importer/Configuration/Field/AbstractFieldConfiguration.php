@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Configuration\Field;
 
 abstract class AbstractFieldConfiguration implements FieldConfigurationInterface

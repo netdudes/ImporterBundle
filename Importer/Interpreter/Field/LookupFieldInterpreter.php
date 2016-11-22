@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Interpreter\Field;
 
 use Doctrine\ORM\EntityManager;
@@ -41,8 +40,9 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
      * @param FieldConfigurationInterface $fieldConfiguration
      * @param mixed                       $value
      *
-     * @return mixed
      * @throws LookupFieldException
+     *
+     * @return mixed
      */
     public function interpret(FieldConfigurationInterface $fieldConfiguration, $value)
     {
@@ -62,7 +62,7 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
                 ->createQueryBuilder('e')
                 ->select('e.id id')
                 ->where("e.$queryLookupField = :value")
-                ->setParameter("value", $value)
+                ->setParameter('value', $value)
                 ->getQuery()
                 ->getScalarResult();
             if (count($entityId) == 0) {
@@ -86,6 +86,7 @@ class LookupFieldInterpreter implements FieldInterpreterInterface
      * @param FieldConfigurationInterface $fieldConfiguration
      * @param mixed                       $value
      * @param \Exception                  $exception
+     *
      * @return LookupFieldException
      */
     protected function buildLookupFieldException(FieldConfigurationInterface $fieldConfiguration, $value, $exception)

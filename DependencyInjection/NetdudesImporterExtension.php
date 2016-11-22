@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
@@ -15,7 +14,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 class NetdudesImporterExtension extends Extension
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function load(array $configs, ContainerBuilder $container)
     {

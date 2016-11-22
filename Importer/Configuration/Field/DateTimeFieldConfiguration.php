@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Configuration\Field;
 
 class DateTimeFieldConfiguration extends AbstractFieldConfiguration

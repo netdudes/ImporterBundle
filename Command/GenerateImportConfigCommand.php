@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Command;
 
 use Sensio\Bundle\GeneratorBundle\Command\Validators;
@@ -25,8 +24,9 @@ class GenerateImportConfigCommand extends ContainerAwareCommand
      * @param InputInterface  $input
      * @param OutputInterface $output
      * 
-     * @return int|null
      * @throws \Exception
+     *
+     * @return int|null
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -82,7 +82,6 @@ class GenerateImportConfigCommand extends ContainerAwareCommand
         /**
          * Generate the default configuration structure
          */
-
         $newConfigName = $input->getOption('name');
         $configuration = [
             $newConfigName => [
@@ -115,7 +114,7 @@ class GenerateImportConfigCommand extends ContainerAwareCommand
 
         $newConfiguration = array_merge($currentConfiguration, $configuration);
 
-        /** Sort entries via name ASC */
+        /* Sort entries via name ASC */
         ksort($newConfiguration);
 
         $newConfigurationYaml = Yaml::dump($newConfiguration, 4, 2);

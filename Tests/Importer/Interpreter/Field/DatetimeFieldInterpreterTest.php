@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Tests\Importer\Interpreter\Field;
 
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfiguration;

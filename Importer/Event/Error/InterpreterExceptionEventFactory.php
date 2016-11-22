@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Event\Error;
 
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;

@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Configuration;
 
 class EntityConfiguration implements EntityConfigurationInterface
@@ -54,8 +53,9 @@ class EntityConfiguration implements EntityConfigurationInterface
     /**
      * @param string $name
      *
-     * @return string
      * @throws \Exception
+     *
+     * @return string
      */
     public function getField($name)
     {

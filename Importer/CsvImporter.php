@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer;
 
 use Doctrine\DBAL\DBALException;
@@ -80,7 +79,7 @@ class CsvImporter implements ImporterInterface
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function csvHasHeaders()
     {
@@ -88,7 +87,7 @@ class CsvImporter implements ImporterInterface
     }
 
     /**
-     * @param boolean $csvHasHeaders
+     * @param bool $csvHasHeaders
      */
     public function setCsvHasHeaders($csvHasHeaders)
     {
@@ -223,7 +222,7 @@ class CsvImporter implements ImporterInterface
         $headers = $this->parser->parseLine(explode("\n", $csv)[0], $this->delimiter);
 
         if (count($invalidHeaders = array_diff($headers, $fieldNames))) {
-            $errorMessage = "One or more headers in the imported file are not valid: " . implode(", ", $invalidHeaders);
+            $errorMessage = 'One or more headers in the imported file are not valid: ' . implode(', ', $invalidHeaders);
             $this->log->addConfigurationError($errorMessage);
 
             return false;

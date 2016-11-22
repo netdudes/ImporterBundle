@@ -9,7 +9,7 @@ class CsvLogFactory
     public function create()
     {
         $log = new CsvLog();
-        
+
         return $log;
     }
 }

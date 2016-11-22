@@ -1,5 +1,4 @@
 <?php
-
 namespace Netdudes\ImporterBundle\Importer\Interpreter;
 
 use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
@@ -55,8 +54,9 @@ class DataInterpreterFactory
      * @param ConfigurationInterface $configuration
      * @param LogInterface           $log
      *
-     * @return EntityDataInterpreter|RelationshipDataInterpreter|UpdatingEntityDataInterpreter
      * @throws \Exception
+     *
+     * @return EntityDataInterpreter|RelationshipDataInterpreter|UpdatingEntityDataInterpreter
      */
     protected function getInterpreterFromConfiguration(ConfigurationInterface $configuration, LogInterface $log)
     {
