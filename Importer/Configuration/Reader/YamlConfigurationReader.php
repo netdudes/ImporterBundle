@@ -3,12 +3,8 @@ namespace Netdudes\ImporterBundle\Importer\Configuration\Reader;
 
 use Netdudes\ImporterBundle\Importer\Configuration\Collection\ConfigurationCollection;
 use Netdudes\ImporterBundle\Importer\Configuration\EntityConfiguration;
-use Netdudes\ImporterBundle\Importer\Configuration\Field\BooleanFieldConfiguration;
-use Netdudes\ImporterBundle\Importer\Configuration\Field\DateFieldConfiguration;
-use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationFactory;
-use Netdudes\ImporterBundle\Importer\Configuration\Field\FileFieldConfiguration;
-use Netdudes\ImporterBundle\Importer\Configuration\Field\LiteralFieldConfiguration;
+use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\LookupFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\Exception\FieldConfigurationParseException;
 use Netdudes\ImporterBundle\Importer\Configuration\Reader\Exception\MissingParameterException;
@@ -205,32 +201,10 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
      * @throws FieldConfigurationParseException
      * @throws MissingParameterException
      *
-     * @return LiteralFieldConfiguration|LookupFieldConfiguration
+     * @return FieldConfigurationInterface
      */
     private function readFieldConfigurationNode(array $fieldConfigurationNode)
     {
-        $property = $this->getChildOrThrowMissingParameterException($fieldConfigurationNode, 'property');
-
-        $type = $this->getChild($fieldConfigurationNode, 'type');
-        if (is_null($type)) {
-            $fieldConfiguration = new LiteralFieldConfiguration();
-            $fieldConfiguration->setField($property);
-            $fieldConfiguration->setHelp($this->getChild($fieldConfigurationNode, 'help'));
-
-            return $fieldConfiguration;
-        }
-
-        switch ($type) {
-            case ('datetime'):
-                return $this->readDatetimeFieldConfigurationNode($fieldConfigurationNode);
-            case ('date'):
-                return $this->readDateFieldConfigurationNode($fieldConfigurationNode);
-            case ('file'):
-                return $this->readFileFieldConfigurationNode($fieldConfigurationNode);
-            case ('boolean'):
-                return $this->readBooleanFieldConfigurationNode($fieldConfigurationNode);
-        }
-
         // Pick up fields with type not matching any method, but with lookupProperty, as old-style lookup field configs.
         // TODO: Remove this functionality when no longer necessary
         if ($this->hasChild($fieldConfigurationNode, 'lookupProperty')) {
@@ -328,66 +302,6 @@ class YamlConfigurationReader implements ConfigurationReaderInterface
         $fieldConfiguration->setLookupField($lookupProperty);
         $entity = $this->getChildOrThrowMissingParameterException($node, 'entity');
         $fieldConfiguration->setClass($entity);
-        $fieldConfiguration->setField($this->getChild($node, 'property'));
-
-        return $fieldConfiguration;
-    }
-
-    /**
-     * @param array $node
-     *
-     * @return DateTimeFieldConfiguration
-     */
-    private function readDatetimeFieldConfigurationNode(array $node)
-    {
-        $fieldConfiguration = new DateTimeFieldConfiguration();
-        $format = $this->getChild($node, 'format');
-        if (!is_null($format)) {
-            $fieldConfiguration->setFormat($format);
-        }
-        $fieldConfiguration->setField($this->getChild($node, 'property'));
-
-        return $fieldConfiguration;
-    }
-
-    /**
-     * @param array $node
-     *
-     * @return DateFieldConfiguration
-     */
-    private function readDateFieldConfigurationNode(array $node)
-    {
-        $fieldConfiguration = new DateFieldConfiguration();
-        $format = $this->getChild($node, 'format');
-        if (!is_null($format)) {
-            $fieldConfiguration->setFormat($format);
-        }
-        $fieldConfiguration->setField($this->getChild($node, 'property'));
-
-        return $fieldConfiguration;
-    }
-
-    /**
-     * @param array $node
-     *
-     * @return FileFieldConfiguration
-     */
-    private function readFileFieldConfigurationNode(array $node)
-    {
-        $fieldConfiguration = new FileFieldConfiguration();
-        $fieldConfiguration->setField($this->getChild($node, 'property'));
-
-        return $fieldConfiguration;
-    }
-
-    /**
-     * @param array $node
-     *
-     * @return BooleanFieldConfiguration
-     */
-    private function readBooleanFieldConfigurationNode(array $node)
-    {
-        $fieldConfiguration = new BooleanFieldConfiguration();
         $fieldConfiguration->setField($this->getChild($node, 'property'));
 
         return $fieldConfiguration;

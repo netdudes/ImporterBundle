@@ -12,4 +12,14 @@ interface FieldConfigurationInterface
      * @param string $field
      */
     public function setField($field);
+
+    /**
+     * @return string
+     */
+    public function getHelp();
+
+    /**
+     * @param string $help
+     */
+    public function setHelp($help);
 }

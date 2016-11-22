@@ -16,23 +16,48 @@ class FieldConfigurationFactory
      */
     public function create(array $fieldConfigurationNode)
     {
-        $type = $this->getNodeData($fieldConfigurationNode, 'type');
-        if (null !== $type) {
-            $fieldConfiguration = $this->createFieldConfigurationOfClass($type);
-        } else {
-            $fieldConfiguration = $this->createLiteralFieldConfiguration();
-        }
+        $fieldConfiguration = $this->getFieldConfiguration($fieldConfigurationNode);
 
-        $property = $this->getNodeData($fieldConfigurationNode, 'property');
-        if (null === $property) {
-            $exception = new MissingParameterException('Missing property parameter in field configuration');
-            $exception->setParameter('property');
-            throw $exception;
-        }
+        $property = $this->getProperty($fieldConfigurationNode);
 
         $fieldConfiguration->setField($property);
+        $fieldConfiguration->setHelp($this->getNodeData($fieldConfigurationNode, 'help'));
 
         return $fieldConfiguration;
+    }
+
+    /**
+     * @param array $fieldConfigurationNode
+     *
+     * @throws \Exception
+     *
+     * @return FieldConfigurationInterface
+     */
+    private function getFieldConfiguration(array $fieldConfigurationNode)
+    {
+        $type = $this->getNodeData($fieldConfigurationNode, 'type');
+        switch ($type) {
+            case ('datetime'):
+                $fieldConfiguration = new DateTimeFieldConfiguration();
+                $this->setFormatIfDefined($fieldConfigurationNode, $fieldConfiguration);
+
+                return $fieldConfiguration;
+            case ('date'):
+                $fieldConfiguration = new DateFieldConfiguration();
+                $this->setFormatIfDefined($fieldConfigurationNode, $fieldConfiguration);
+
+                return $fieldConfiguration;
+            case ('file'):
+                return new FileFieldConfiguration();
+            case ('boolean'):
+                return new BooleanFieldConfiguration();
+            case (null):
+                return new LiteralFieldConfiguration();
+            case class_exists($type):
+                return $this->createFieldConfigurationOfClass($type);
+            default:
+                throw new \Exception("$type is not supported.");
+        }
     }
 
     /**
@@ -57,17 +82,7 @@ class FieldConfigurationFactory
     }
 
     /**
-     * @return LiteralFieldConfiguration
-     */
-    private function createLiteralFieldConfiguration()
-    {
-        $fieldConfiguration = new LiteralFieldConfiguration();
-
-        return $fieldConfiguration;
-    }
-
-    /**
-     * @param array $node
+     * @param array  $node
      * @param string $key
      *
      * @return mixed|null
@@ -79,5 +94,34 @@ class FieldConfigurationFactory
         }
 
         return null;
+    }
+
+    /**
+     * @param array $fieldConfigurationNode
+     *
+     * @throws MissingParameterException
+     *
+     * @return mixed
+     */
+    private function getProperty(array $fieldConfigurationNode)
+    {
+        $property = $this->getNodeData($fieldConfigurationNode, 'property');
+        if (null === $property) {
+            $exception = new MissingParameterException('Missing property parameter in field configuration');
+            $exception->setParameter('property');
+            throw $exception;
+        }
+
+        return $property;
+    }
+
+    /**
+     * @param array                      $fieldConfigurationNode
+     * @param DateTimeFieldConfiguration $fieldConfiguration
+     */
+    private function setFormatIfDefined(array $fieldConfigurationNode, DateTimeFieldConfiguration $fieldConfiguration)
+    {
+        $format = $this->getNodeData($fieldConfigurationNode, 'format');
+        is_null($format) ?: $fieldConfiguration->setFormat($format);
     }
 }
