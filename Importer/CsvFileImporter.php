@@ -15,8 +15,18 @@ class CsvFileImporter extends CsvImporter
             return;
         }
 
-        $csv = file_get_contents($filename);
+        $csv = $this->getFileContents($filename);
 
         parent::import($csv, $dryRun);
+    }
+
+    /**
+     * @param string $filename
+     *
+     * @return string
+     */
+    protected function getFileContents($filename)
+    {
+        return file_get_contents($filename);
     }
 }
