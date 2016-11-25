@@ -16,6 +16,7 @@ class BooleanFieldInterpreterTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse($interpreter->interpret($configuration, false));
         $this->assertFalse($interpreter->interpret($configuration, 'false'));
+        $this->assertFalse($interpreter->interpret($configuration, 'no'));
         $this->assertFalse($interpreter->interpret($configuration, '0'));
         $this->assertFalse($interpreter->interpret($configuration, 0));
     }

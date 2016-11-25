@@ -13,7 +13,8 @@ class BooleanFieldInterpreter implements FieldInterpreterInterface
         'false',
         false,
         '0',
-        0
+        0,
+        'no'
     ];
 
     /**
