@@ -176,7 +176,7 @@ class CsvImporter implements ImporterInterface
         try {
             $this->entityManager->flush();
         } catch (DBALException $exception) {
-            $errorMessage = $this->handleDBALException($exception);
+            $this->handleDBALException($exception);
         }
     }
 
@@ -190,11 +190,7 @@ class CsvImporter implements ImporterInterface
                 $this->entityManager->persist($entity);
             }
         } catch (DBALException $exception) {
-            $errorMessage = $this->resolveDBALException($exception);
-            $this->log->addConfigurationError($errorMessage);
-        } catch (\Exception $exception) {
-            $errorMessage = 'Error when persisting for entity.';
-            $this->log->addConfigurationError($errorMessage);
+            $this->handleDBALException($exception);
         }
     }
 
@@ -234,6 +230,7 @@ class CsvImporter implements ImporterInterface
     /**
      * @param DBALException $exception
      *
+     * @throws DBALException
      * @return string
      */
     private function handleDBALException(DBALException $exception)
@@ -243,6 +240,7 @@ class CsvImporter implements ImporterInterface
             case 1062:
                 $errorMessage = 'Duplicate entry found. It is not possible to import two or more entries with the same values on unique fields.';
                 $this->log->addConfigurationError($errorMessage);
+                break;
             default:
                 throw $exception;
         }
