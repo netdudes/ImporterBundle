@@ -80,7 +80,12 @@ class InterpreterExceptionSubscriber implements EventSubscriberInterface
     {
         $message = '';
         foreach ($exception->getErrors() as $error) {
-            $message .= '<li><kbd>' . $error->getFieldName() . '</kbd>: ' . $this->resolveInterpreterExceptionMessage($error->getException()) . '</li>';
+            $fieldName = $error->getFieldName();
+            if ($fieldName !== '') {
+                $fieldName = '<kbd>' . $fieldName . '</kbd>: ';
+            }
+
+            $message .= '<li>' . $fieldName . $this->resolveInterpreterExceptionMessage($error->getException()) . '</li>';
         }
 
         return '<ul>' . $message . '</ul>';

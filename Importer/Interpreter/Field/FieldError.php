@@ -8,7 +8,7 @@ class FieldError
     /**
      * @var string
      */
-    private $fieldName;
+    private $fieldName = '';
 
     /**
      * @var InterpreterException
@@ -17,12 +17,10 @@ class FieldError
 
     /**
      * @param InterpreterException $exception
-     * @param string               $fieldName
      */
-    public function __construct(InterpreterException $exception, $fieldName)
+    public function __construct(InterpreterException $exception)
     {
         $this->exception = $exception;
-        $this->fieldName = $fieldName;
     }
 
     /**
@@ -39,5 +37,13 @@ class FieldError
     public function getException()
     {
         return $this->exception;
+    }
+
+    /**
+     * @param string $fieldName
+     */
+    public function setFieldName(string $fieldName)
+    {
+        $this->fieldName = $fieldName;
     }
 }

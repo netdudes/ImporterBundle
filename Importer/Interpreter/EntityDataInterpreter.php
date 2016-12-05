@@ -164,7 +164,13 @@ class EntityDataInterpreter implements InterpreterInterface
             $errors = [];
             foreach ($validationViolations as $violation) {
                 $exception = new InterpreterException($violation->getMessage());
-                $errors[] = new FieldError($exception, $this->extractFieldNameFromPropertyPath($violation->getPropertyPath()));
+                $error = new FieldError($exception);
+
+                if ($violation->getPropertyPath() !== '') {
+                    $error->setFieldName($this->extractFieldNameFromPropertyPath($violation->getPropertyPath()));
+                }
+
+                $errors[] = $error;
             }
             throw new InvalidRowException($errors);
         }
@@ -194,7 +200,9 @@ class EntityDataInterpreter implements InterpreterInterface
                 try {
                     $interpretedRow[$field] = $this->interpretField($fieldConfiguration, $value);
                 } catch (InterpreterException $exception) {
-                    $errors[] = new FieldError($exception, $fieldName);
+                    $error = new FieldError($exception);
+                    $error->setFieldName($fieldName);
+                    $errors[] = $error;
                 }
             }
         }
