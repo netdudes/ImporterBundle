@@ -57,6 +57,11 @@ class EntityDataInterpreter implements InterpreterInterface
     protected $lookupFieldInterpreter;
 
     /**
+     * @var BooleanFieldInterpreter
+     */
+    protected $booleanFieldInterpreter;
+
+    /**
      * @var array
      */
     protected $internalLookupCache = [];
@@ -181,11 +186,16 @@ class EntityDataInterpreter implements InterpreterInterface
         $errors = [];
         foreach ($columns as $fieldName => $value) {
             $fieldConfiguration = $this->configuration->getField($fieldName);
-            $field = $fieldConfiguration->getField();
-            try {
-                $interpretedRow[$field] = $this->interpretField($fieldConfiguration, $value);
-            } catch (InterpreterException $exception) {
-                $errors[] = new FieldError($exception, $fieldName);
+
+            $fields = $fieldConfiguration->getField();
+            $fieldsToInterpret = is_array($fields) ? $fields : [$fields];
+
+            foreach ($fieldsToInterpret as $field) {
+                try {
+                    $interpretedRow[$field] = $this->interpretField($fieldConfiguration, $value);
+                } catch (InterpreterException $exception) {
+                    $errors[] = new FieldError($exception, $fieldName);
+                }
             }
         }
 
