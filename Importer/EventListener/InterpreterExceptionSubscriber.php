@@ -3,7 +3,7 @@ namespace Netdudes\ImporterBundle\Importer\EventListener;
 
 use Netdudes\ImporterBundle\Importer\Event\Error\InterpreterExceptionEvent;
 use Netdudes\ImporterBundle\Importer\Event\ImportEvents;
-use Netdudes\ImporterBundle\Importer\Interpreter\Exception\DateTimeFormatException;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidValueException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidRowException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\LookupFieldException;
@@ -42,8 +42,19 @@ class InterpreterExceptionSubscriber implements EventSubscriberInterface
      */
     private function resolveInterpreterExceptionMessage(InterpreterException $exception)
     {
-        if ($exception instanceof DateTimeFormatException) {
-            return "Error matching date “{$exception->getValue()}” to format “{$exception->getFormat()}”.";
+        if ($exception instanceof InvalidValueException) {
+            $message = "The value “{$exception->getActualValue()}” is invalid.";
+
+            if (null !== $exception->getAllowedValues()) {
+                $allowedValues = implode(', ', $exception->getAllowedValues());
+                $message .= " The following values are valid: “{$allowedValues}”.";
+            }
+
+            if (null !== $exception->getExpectedFormat()) {
+                $message .= " It does not match to format “{$exception->getExpectedFormat()}”.";
+            }
+
+            return $message;
         } elseif ($exception instanceof LookupFieldException) {
             return $this->buildLookupFieldExceptionMessage($exception);
         } elseif ($exception instanceof RowSizeMismatchException) {

@@ -3,7 +3,7 @@ namespace Netdudes\ImporterBundle\Importer\Interpreter\Field;
 
 use Netdudes\ImporterBundle\Importer\Configuration\Field\DateTimeFieldConfiguration;
 use Netdudes\ImporterBundle\Importer\Configuration\Field\FieldConfigurationInterface;
-use Netdudes\ImporterBundle\Importer\Interpreter\Exception\DateTimeFormatException;
+use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidValueException;
 
 class DatetimeFieldInterpreter implements FieldInterpreterInterface
 {
@@ -11,7 +11,7 @@ class DatetimeFieldInterpreter implements FieldInterpreterInterface
      * @param FieldConfigurationInterface $configuration
      * @param mixed                       $value
      *
-     * @throws DateTimeFormatException
+     * @throws InvalidValueException
      *
      * @return \DateTime|null
      */
@@ -38,11 +38,8 @@ class DatetimeFieldInterpreter implements FieldInterpreterInterface
             return $dateTime;
         }
 
-        $errors = \DateTime::getLastErrors();
-        $exception = new DateTimeFormatException();
-        $exception->setValue($value);
-        $exception->setFormat($configuration->getFormat());
-        $exception->setDateTimeErrors($errors);
+        $exception = new InvalidValueException($value);
+        $exception->setExpectedFormat($configuration->getFormat());
         throw $exception;
     }
 }
