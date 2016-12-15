@@ -341,6 +341,6 @@ class EntityDataInterpreter implements InterpreterInterface
             }
         }
 
-        throw new \Exception('Field for property path “' . $propertyPath . '” was not found');
+        return '';
     }
 }
