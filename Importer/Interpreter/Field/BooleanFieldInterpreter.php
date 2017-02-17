@@ -43,7 +43,7 @@ class BooleanFieldInterpreter implements FieldInterpreterInterface
             throw new \InvalidArgumentException();
         }
 
-        if (null === $value) {
+        if (null === $value || $value === '') {
             return null;
         }
 

@@ -18,7 +18,7 @@ class BooleanFieldInterpreterTest extends \PHPUnit_Framework_TestCase
         $configuration = $this->prophesize(BooleanFieldConfiguration::class)->reveal();
         $interpreter = new BooleanFieldInterpreter();
 
-        $this->assertEquals($result, $interpreter->interpret($configuration, $value));
+        $this->assertSame($result, $interpreter->interpret($configuration, $value));
     }
 
     /**
@@ -85,5 +85,13 @@ class BooleanFieldInterpreterTest extends \PHPUnit_Framework_TestCase
         $interpreter = new BooleanFieldInterpreter();
 
         $this->assertNull($interpreter->interpret($configuration, null));
+    }
+
+    public function testInterpretReturnsNullForAnEmptyString()
+    {
+        $configuration = $this->prophesize(BooleanFieldConfiguration::class)->reveal();
+        $interpreter = new BooleanFieldInterpreter();
+
+        $this->assertNull($interpreter->interpret($configuration, ''));
     }
 }
