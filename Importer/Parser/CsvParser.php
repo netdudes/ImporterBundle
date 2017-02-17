@@ -1,6 +1,8 @@
 <?php
 namespace Netdudes\ImporterBundle\Importer\Parser;
 
+use Netdudes\ImporterBundle\Importer\Parser\Exception\ParserException;
+
 class CsvParser implements ParserInterface
 {
     /**
@@ -14,21 +16,27 @@ class CsvParser implements ParserInterface
     {
         $rows = explode("\n", $data);
         if ($hasHeaders) {
-            $headers = $this->parseLine(array_shift($rows), $delimiter);
+            $headerRow = $this->parseLine(array_shift($rows), $delimiter);
         } else {
-            $headers = range(0, count($this->parseLine($rows[0], $delimiter)));
+            $headerRow = range(0, count($this->parseLine($rows[0], $delimiter)));
         }
         $data = [];
-        foreach ($rows as $lineNumber => $row) {
+        foreach ($rows as $rowIndex => $row) {
             if (!($row = trim($row))) {
                 continue;
             }
-            $row = $this->parseLine($row, $delimiter);
-            $dataRow = [];
-            foreach ($row as $index => $cell) {
-                $dataRow[$headers[$index]] = $cell;
+
+            $rowParsed = $this->parseLine($row, $delimiter);
+            if ($hasHeaders) {
+                $this->compareRowLengths($rowParsed, $headerRow, $rowIndex);
             }
-            $data[$lineNumber] = $dataRow;
+
+            $dataRow = [];
+            foreach ($rowParsed as $cellIndex => $cell) {
+                $header = $headerRow[$cellIndex];
+                $dataRow[$header] = $cell;
+            }
+            $data[$rowIndex] = $dataRow;
         }
 
         return $data;
@@ -45,5 +53,22 @@ class CsvParser implements ParserInterface
         $enclosure = '"';
 
         return str_getcsv($row, $delimiter, $enclosure);
+    }
+
+    /**
+     * @param int $rowIndex
+     *
+     * @throws ParserException
+     */
+    private function compareRowLengths(array $parsedRow, array $headers, $rowIndex)
+    {
+        $headerColumnsCount = count($headers);
+        $rowColumnsCount = count($parsedRow);
+
+        if ($rowColumnsCount !== $headerColumnsCount) {
+            $lineNumber = (int) $rowIndex + 2;
+
+            throw new ParserException($lineNumber, "Unable to parse csv at line '$lineNumber'. Column count ($rowColumnsCount) is not the same as the header count ($headerColumnsCount).");
+        }
     }
 }

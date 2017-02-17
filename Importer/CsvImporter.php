@@ -7,6 +7,7 @@ use Netdudes\ImporterBundle\Importer\Configuration\ConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Interpreter\InterpreterInterface;
 use Netdudes\ImporterBundle\Importer\Log\CsvLog;
 use Netdudes\ImporterBundle\Importer\Parser\CsvParser;
+use Netdudes\ImporterBundle\Importer\Parser\Exception\ParserException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class CsvImporter implements ImporterInterface
@@ -138,6 +139,8 @@ class CsvImporter implements ImporterInterface
             $parsedData = $this->parser->parse($csv, $this->csvHasHeaders(), $this->delimiter);
 
             $this->importData($parsedData, $this->csvHasHeaders(), !$dryRun);
+        } catch (ParserException $exception) {
+            $this->log->addConfigurationError($exception->getMessage());
         } catch (\Throwable $throwable) {
             $message = sprintf(
                 '%s: %s (uncaught exception) at %s line %d while running import.',
