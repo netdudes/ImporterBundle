@@ -12,6 +12,7 @@ use Netdudes\ImporterBundle\Importer\Event\Error\InterpreterExceptionEventFactor
 use Netdudes\ImporterBundle\Importer\Event\ImportEvents;
 use Netdudes\ImporterBundle\Importer\Event\PostBindDataImportEvent;
 use Netdudes\ImporterBundle\Importer\Event\PostFieldInterpretImportEvent;
+use Netdudes\ImporterBundle\Importer\Event\PostRowInterpretImportEvent;
 use Netdudes\ImporterBundle\Importer\Event\PreBindDataImportEvent;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InvalidRowException;
@@ -120,10 +121,16 @@ class EntityDataInterpreter implements InterpreterInterface
      */
     public function interpret(array $data, $associative = true)
     {
+        $rowCount = count($data);
+
         $entities = [];
         foreach ($data as $index => $row) {
             try {
                 $entity = $this->interpretRow($row, $associative);
+
+                $event = new PostRowInterpretImportEvent($index, $rowCount);
+                $this->eventDispatcher->dispatch(ImportEvents::POST_ROW_INTERPRET, $event);
+
                 $entities[$index] = $entity;
                 $this->internalLookupCache[] = $entity;
             } catch (InterpreterException $exception) {

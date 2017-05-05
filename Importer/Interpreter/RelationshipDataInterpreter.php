@@ -5,6 +5,7 @@ use Doctrine\ORM\EntityManager;
 use Netdudes\ImporterBundle\Importer\Configuration\RelationshipConfigurationInterface;
 use Netdudes\ImporterBundle\Importer\Event\Error\InterpreterExceptionEventFactory;
 use Netdudes\ImporterBundle\Importer\Event\ImportEvents;
+use Netdudes\ImporterBundle\Importer\Event\PostRowInterpretImportEvent;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\InterpreterException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\MissingAssignementMethodException;
 use Netdudes\ImporterBundle\Importer\Interpreter\Exception\MissingColumnException;
@@ -61,14 +62,16 @@ class RelationshipDataInterpreter implements InterpreterInterface
     /**
      * @param array $data
      * @param bool  $associative
-     *
-     * @return void
      */
     public function interpret(array $data, $associative = true)
     {
+        $rowCount = count($data);
         foreach ($data as $index => $row) {
             try {
                 $this->interpretRow($row, $associative);
+
+                $event = new PostRowInterpretImportEvent($index, $rowCount);
+                $this->eventDispatcher->dispatch(ImportEvents::POST_ROW_INTERPRET, $event);
             } catch (InterpreterException $exception) {
                 $exceptionEvent = $this->eventFactory->create($exception, $index);
                 $this->eventDispatcher->dispatch(ImportEvents::INTERPRETER_EXCEPTION, $exceptionEvent);
